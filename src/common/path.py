@@ -26,9 +26,9 @@ def setup_python_path() -> None:
     Integrate the design of get_module and ensure the modules under the "src" can be imported.
     """
     root = get_root()
-    src_path = str(root / "src")
-    if src_path not in sys.path:
-        sys.path.append(src_path)
+    root_path = str(root)
+    if root_path not in sys.path:
+        sys.path.insert(0, root_path)
 
 def get_path_by_env(key: str) -> Path:
     """
