@@ -8,7 +8,6 @@
 bak/
 data/raw/*.npz
 docs/dev_ideas/
-tests/
 
 # ==========================================
 # For Python
