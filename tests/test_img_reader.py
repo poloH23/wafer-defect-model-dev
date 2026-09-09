@@ -20,7 +20,7 @@ def test_read_hdf5_success(mock_hdf5_file: Path):
     img, metadata = reader.read(file_path=mock_hdf5_file, dataset_name="images")
     assert isinstance(img, np.ndarray), "the images datatype should be NumPy array."
     assert img.shape == (3, 244, 244), "the shape of the image should be (3, 244, 244)"
-    assert metadata["format"] == "hdf5"
+    assert metadata["format"] == ".h5"
     assert metadata["original_shape"] == (3, 244, 244)
 
 def test_read_hdf5_missing_dataset(mock_hdf5_file: Path):

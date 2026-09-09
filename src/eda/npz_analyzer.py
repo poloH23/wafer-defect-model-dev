@@ -30,16 +30,6 @@ class NPZAnalyzer:
 
             # Determine the label type (1D singel-label or 2D multi-labels One-Hot)
             self._analyze_label_structure()
-
-            """"
-            # Define the colors for plotting
-            self.cmap = ListedColormap(['#1f77b4', '#2ca02c', '#ff7f0e'])
-            self.legend_patches = [
-                mpatches.Patch(color='#1f77b4', label='0: Background'),
-                mpatches.Patch(color='#2ca02c', label='1: Normal Die'),
-                mpatches.Patch(color='#ff7f0e', label='2: Defect Die')
-            ]
-            """
         except Exception as e:
             raise RuntimeError(f"An error occurred when rading the NPZ data: {e}")
 
@@ -68,14 +58,6 @@ class NPZAnalyzer:
     def get_label_type(self) -> str:
         """Returns the analyzed tag type to avoid redundant calculations and dimensionality errors."""
         return self.label_mode
-
-    # def analyze_label_type(self) -> str:
-    #     """Distinguish the label type is Single-label and Multi-label."""
-    #     labels_per_sample = np.sum(self.labels, axis=1)
-    #     max_label = np.max(labels_per_sample)
-    #     if max_label > 1:
-    #         return f"multi-label: {max_label}"
-    #     return "single-lable"
 
     def create_sample_plot(
             self,
