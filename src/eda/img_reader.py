@@ -1,8 +1,8 @@
 from pathlib import Path
-import numpy as np
 import cv2
 import torch
-from typing import Any, Dict, Literal, Tuple, Union, Optional
+import numpy as np
+from typing import Any, Dict, Literal, Tuple, Union
 
 class ImageReader:
     """
@@ -63,6 +63,9 @@ class ImageReader:
         if metadata.get("labels") is not None and isinstance(metadata["labels"], np.ndarray):
             metadata["labels"] = self._convert_type(metadata["labels"])
         return final_img, metadata
+
+    def supported_formats(self) -> Dict[str, List[str]]:
+        return self.SUPPORTED_FORMATS
 
     # ========== Proprietary format reading logic ==========
 
