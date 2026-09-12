@@ -1,6 +1,6 @@
 # 📌 Project Name
 
-A clean and extensible Python project starter kit for modern development.  
+A clean and extensible Python project starter kit for modern development.
 Includes automatic formatting, linting, Git hook automation, and project folder preservation.
 
 ---
@@ -28,7 +28,7 @@ Includes automatic formatting, linting, Git hook automation, and project folder 
 
 - Feature 1
 - Feature 2
-- Feature 3  
+- Feature 3
 
 *Example: RESTful API with FastAPI, Model training with PyTorch, Dockerized deployment.*
 

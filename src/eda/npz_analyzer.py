@@ -1,14 +1,16 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-from typing import Dict, List, Union, Optional
 from pathlib import Path
+
+import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 class NPZAnalyzer:
     """
     Data exploration and analysis module designed for the NPZ files.
     Supports CLI archiving and interactive display in Jupyter.
     """
+
     def __init__(self, npz_path: Path, image_key: str, label_key: str):
         self.npz_path = Path(npz_path).resolve()
 
@@ -18,7 +20,7 @@ class NPZAnalyzer:
         try:
             # Read the data
             data = np.load(self.npz_path)
-            if image_key not in data.keys() or label_key not in data.keys():
+            if image_key not in data or label_key not in data:
                 raise ValueError(f"Wrong keys. Available keys are: {data.files}")
             self.images = data[image_key]
             self.labels = data[label_key]
@@ -31,7 +33,7 @@ class NPZAnalyzer:
             # Determine the label type (1D singel-label or 2D multi-labels One-Hot)
             self._analyze_label_structure()
         except Exception as e:
-            raise RuntimeError(f"An error occurred when rading the NPZ data: {e}")
+            raise RuntimeError(f"An error occurred when rading the NPZ data: {e}") from e
 
     def _analyze_label_structure(self):
         """Determine whether the labels and class indices with shape (N,) or multi-labels with shape (N, C)."""
@@ -46,27 +48,27 @@ class NPZAnalyzer:
         else:
             raise ValueError(f"Unsupported label dimension: {self.labels.shape}")
 
-    def get_distribution(self) -> Dict[str, int]:
+    def get_distribution(self) -> dict[str, int]:
         """Calculate the label distribution."""
         if self.labels.ndim == 1:
             unique, counts = np.unique(self.labels, return_counts=True)
-            return {f"class_{u}": int(c) for u, c in zip(unique, counts)}
+            return {f"class_{u}": int(c) for u, c in zip(unique, counts, strict=False)}
         else:
             counts = np.sum(self.labels, axis=0)
             return {f"class_{i}": c for i, c in enumerate(counts)}
-    
+
     def get_label_type(self) -> str:
         """Returns the analyzed tag type to avoid redundant calculations and dimensionality errors."""
         return self.label_mode
 
     def create_sample_plot(
-            self,
-            index: int,
-            cmap: Optional[str] = "gray",
-            vmin: Optional[float] = None,
-            vmax: Optional[float] = None,
-            custom_patches: Optional[List[mpatches.Patch]] = None
-    ) -> plt.Figure: # type: ignore
+        self,
+        index: int,
+        cmap: str | None = "gray",
+        vmin: float | None = None,
+        vmax: float | None = None,
+        custom_patches: list[mpatches.Patch] | None = None,
+    ) -> plt.Figure:  # type: ignore
         """Core plotting logic: Parameterize color and legend settings."""
         if index < 0 or index >= self.num_samples:
             raise IndexError(f"Index out of range. Valid range: 0 to {self.num_samples - 1}")
@@ -75,27 +77,29 @@ class NPZAnalyzer:
         label = self.labels[index]
         fig, ax = plt.subplots(figsize=(9, 8))
 
-        # If the image is 3D and the channel dimension is at the beginning (C, H, W), 
+        # If the image is 3D and the channel dimension is at the beginning (C, H, W),
         # convert it to the (H, W, C) format supported by imshow.
         if img.ndim == 3 and img.shape[0] in [1, 3]:
             img = np.transpose(img, (1, 2, 0))
-            if img.shape[-1] == 1: # single-channel flattening
+            if img.shape[-1] == 1:  # single-channel flattening
                 img = img.squeeze(-1)
 
         # Plotting parameters
         im_kwargs = {}
-        if img.ndim == 2: # grayscale or single-channel
-            im_kwargs['cmap'] = cmap
-        if vmin is not None: im_kwargs['vmin'] = vmin
-        if vmax is not None: im_kwargs['vmax'] = vmax
+        if img.ndim == 2:  # grayscale or single-channel
+            im_kwargs["cmap"] = cmap
+        if vmin is not None:
+            im_kwargs["vmin"] = vmin
+        if vmax is not None:
+            im_kwargs["vmax"] = vmax
 
-        im = ax.imshow(img, **im_kwargs)
+        _ = ax.imshow(img, **im_kwargs)
         ax.set_title(f"Sample #{index} | Label: {label}")
-        ax.axis('off')
+        ax.axis("off")
 
         if custom_patches:
             ax.legend(handles=custom_patches, bbox_to_anchor=(1.05, 1), loc="upper left")
-            
+
         fig.tight_layout()
         return fig
 
@@ -105,7 +109,7 @@ class NPZAnalyzer:
         plt.show()
         plt.close(fig)
 
-    def save_sample(self, index: int, save_path: Union[str, Path]):
+    def save_sample(self, index: int, save_path: str | Path):
         """Save the figures when analyzing with CLI or Jupyter Notebook."""
         save_path = Path(save_path)
         if save_path is None:
@@ -116,6 +120,6 @@ class NPZAnalyzer:
             save_dir.mkdir(parents=True, exist_ok=True)
 
         fig = self.create_sample_plot(index)
-        fig.savefig(save_path, bbox_inches='tight')
+        fig.savefig(save_path, bbox_inches="tight")
         plt.close()
         return save_path

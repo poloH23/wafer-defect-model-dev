@@ -1,0 +1,36 @@
+[tool.ruff]
+line-length = 180
+target-version = "py312"
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "data"
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+# E/F: pycodestyle + pyflakes basic rules
+# I: isort, automatically sort and organize Python import
+# UP: pyupgrade, switch to more modern syntax
+# B: bugbear, catch bugs that common but not easy to find
+# SIM: simplified code style
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["."]
+omit = ["tests/*"]

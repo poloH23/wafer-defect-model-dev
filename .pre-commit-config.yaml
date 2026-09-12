@@ -1,0 +1,40 @@
+# Installation:
+#   pip install pre-commit
+#   pre-commit install          # it will be triggered automatically after every subsquent "git commit"
+#   pre-commit run --all-files  # First, examine all the code to identify existing issues (this needs to be done during the initialization)
+#
+# Version Upgrade:
+# pre-commit autoupdate         # it will automatically update the rev version of the repos below
+
+repos:
+  # Basic check: avoid the leakages of tiny mistakes
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+        args: ["--maxkb=1000"]
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: mixed-line-ending
+
+  # Ruff: replace flake8 + isort + pyupgrade (lint) and black (format)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.7
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  # Type Hints checking: Comment out if project type coverage is low; adopt incrementally
+  # Note: mypy runs in an isolated pre-commit environment.
+  # If importing typed third-party packages,
+  # add their stub libraries (e.g., types-requests) to `additional_dependencies`.
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v2.3.1
+  #   hooks:
+  #     - id: mypy
+  #       additional_dependencies: []
