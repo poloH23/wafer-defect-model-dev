@@ -1,31 +1,34 @@
-import os
-import h5py
-import pandas as pd
-import numpy as np
-from tqdm import tqdm
 from pathlib import Path
-from typing import List, Literal, Tuple, Optional, Union
+from typing import Literal
+
+import h5py
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+
 from src.eda.img_reader import ImageReader
+
 
 class ImagePacker:
     """
     Dataset packer.
     Package the images and CSV label mapping tables into efficient npz or hdf5 formats.
     """
-    def __init__(self, reader: Optional[ImageReader] = None):
+
+    def __init__(self, reader: ImageReader | None = None):
         """
         Allows passing an external reader; if none is provided, a reader that outputs a NumPy array is instantiated by default.
         """
         self.reader = reader or ImageReader(output_type="numpy")
 
     def pack(
-            self,
-            image_dir: Union[str, Path],
-            csv_path: Union[str, Path],
-            output_path: Union[str, Path],
-            image_col: str = "images",
-            output_format: Optional[Literal["npz", "h5"]] = None
-        ) -> None:
+        self,
+        image_dir: str | Path,
+        csv_path: str | Path,
+        output_path: str | Path,
+        image_col: str = "images",
+        output_format: Literal["npz", "h5"] | None = None,
+    ) -> None:
         """
         Encapsulates the core execution functions of the dataset.
         """
@@ -36,10 +39,10 @@ class ImagePacker:
         # Determine the output format or auto-determine depending on the extension
         if output_format is None:
             ext = output_path.suffix.lower()
-            if ext in ['.h5', '.hdf5']:
-                output_format = 'h5'
-            elif ext == '.npz':
-                output_format = 'npz'
+            if ext in [".h5", ".hdf5"]:
+                output_format = "h5"
+            elif ext == ".npz":
+                output_format = "npz"
             else:
                 raise ValueError("Cannot determine the output format by the extension, please specify the argument 'output_format' ('npz' 或 'h5')")
 
@@ -65,13 +68,13 @@ class ImagePacker:
 
         # Check the directory path and ouput results
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        if output_format == 'npz':
+        if output_format == "npz":
             self._save_as_npz(final_images, final_labels, output_path)
-        elif output_format == 'h5':
+        elif output_format == "h5":
             self._save_as_h5(final_images, final_labels, output_path)
         print(f"Packaging porcess is successfully done: {output_path}")
 
-    def _load_data(self, df: pd.DataFrame, image_dir: Path, image_col: str) -> Tuple[List[str], List[str], int]:
+    def _load_data(self, df: pd.DataFrame, image_dir: Path, image_col: str) -> tuple[list[str], list[str], int]:
         """Perform image and label reading operations."""
         image_list = list()
         label_list = list()
@@ -86,19 +89,19 @@ class ImagePacker:
                 img, _ = self.reader.read(img_path)
                 image_list.append(img)
                 label_list.append(labels)
-            except Exception as e:
+            except Exception:
                 error_count += 1
         return image_list, label_list, error_count
 
     def _save_as_npz(self, images: np.ndarray, labels: np.ndarray, output_path: Path) -> None:
-        """"Saved dataset into the NPZ format file."""
+        """ "Saved dataset into the NPZ format file."""
         print("Writing NPZ archive...")
         np.savez_compressed(output_path, images=images, labels=labels)
         return None
 
     def _save_as_h5(self, images: np.ndarray, labels: np.ndarray, output_path: Path) -> None:
-        """"Stored in HDF5 format (using GZIP compression)."""
+        """ "Stored in HDF5 format (using GZIP compression)."""
         print("Writing HDF5 archive...")
-        with h5py.File(output_path, 'w') as f:
+        with h5py.File(output_path, "w") as f:
             f.create_dataset("images", data=images, compression="gzip", compression_opts=4)
             f.create_dataset("labels", data=labels, compression="gzip", compression_opts=4)
