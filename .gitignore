@@ -5,9 +5,16 @@
 # ==========================================
 # Customized Options
 # ==========================================
-bak/
-data/raw/*.npz
+*Zone.Identifier*
+logs/*
+!logs/.gitkeep
+results/*
+!results/.gitkeep
+# bak/*.yaml
+data/raw/*
+!data/raw/.gitkeep
 docs/dev_ideas/
+
 
 # ==========================================
 # For Python
@@ -163,6 +170,8 @@ activemq-data/
 
 # Environments
 .env
+.env.*
+!.env.example
 .envrc
 .venv
 env/
