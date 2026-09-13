@@ -1,0 +1,12 @@
+# Development-stage tool dependencies (not deployed with the application code)
+# This is a declaration file; the version-locked requirements-dev.txt file is automatically generated via the following command:
+# pip-compile requirements-dev.in -o requirements-dev.txt
+# Or simply run: make requirements
+
+pre-commit
+ruff
+mypy
+pytest
+pytest-cov
+pip-tools
+pipreqs

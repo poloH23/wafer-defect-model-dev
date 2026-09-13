@@ -1,21 +1,22 @@
 .PHONY: help code-format lint git-init-hook test \
+        init requirements requirements-bootstrap \
         conda-dev export-conda \
         clean gitkeep-clean clean-zone \
         docker-build docker-run docker-run-fastapi docker-run-flask \
         demo-run gitkeep-add
 
 # === 🧹 Cleaning ===
-clean:  ## Clean cache and outputs
-	rm -rf __pycache__ logs/* results/* .pytest_cache .ruff_cache
+clean:  ## Clean the caches in the project
+	rm -rf __pycache__ logs/* .pytest_cache .ruff_cache
 
 clean-zone:  ## Remove Windows Zone.Identifier files
 	find . -type f -name "*Zone.Identifier" -delete
 	@echo "> Removed all .Zone.Identifier files."
 
 # === 🧼 Code Formatting & Hooks ===
-code-format:  ## Format code with black and ruff
-	black .
+code-format:  ## Format code with ruff (link fixes and formatting)
 	ruff check . --fix
+	ruff format .
 
 lint:  ## Run all pre-commit hooks (black, ruff, gitkeep, etc)
 	python -m pre_commit run --all-files --show-diff-on-failure
@@ -23,6 +24,27 @@ lint:  ## Run all pre-commit hooks (black, ruff, gitkeep, etc)
 git-init-hook:  ## Initialize pre-commit hooks to enable Git auto check
 	pre-commit install
 	@echo "> pre-commit hooks initialized"
+
+# === 🚀 Initialization ===
+init:  ## One-shot project initialization: install deps + pre-commit hook + baseline check
+	chmod +x shell/init_project.sh
+	bash shell/init_project.sh
+
+# === 📦 Dependencies ===
+requirements:  ## Recompile requirements.txt & requirements-dev.txt from .in files (pip-compile)
+	@command -v pip-compile >/dev/null 2>&1 || { echo "> pip-compile not found, bootstrapping dev tools from requirements-dev.in first"; pip install -r requirements-dev.in; }
+	pip-compile requirements.in -o requirements.txt
+	pip-compile requirements-dev.in -o requirements-dev.txt
+	@echo "> requirements.txt and requirements-dev.txt regenerated"
+
+requirements-bootstrap:  ## Rescan source code imports to refresh requirements.in (overwrites existing file)
+	@command -v pipreqs >/dev/null 2>&1 || { echo "> pipreqs not found, bootstrapping dev tools from requirements-dev.in first"; pip install -r requirements-dev.in; }
+	pipreqs . --savepath requirements.in --force
+	@echo "> requirements.in refreshed from current imports — review the diff before committing"
+
+requirements-refresh:  ## Full refresh: rescan imports AND recompile lock files in one step
+	$(MAKE) requirements-bootstrap
+	$(MAKE) requirements
 
 # === 📁 Gitkeep Files ===
 gitkeep-add:  ## Add .gitkeep files in to empty directories
@@ -35,7 +57,7 @@ gitkeep-clean:  ## Remove all .gitkeep files
 
 # === 🧪 Testing ===
 test:  ## Run pytest
-	pytest
+	pytest --cov=. --cov-report=term-missing
 
 # === 🚀 Run Demo ===
 demo-run: MODE=python  ## Run example runner (MODE=python|fastapi|flask, NGROK=1)
@@ -53,11 +75,11 @@ conda-dev:  ## Create conda env from environment.yml
 
 conda-custom: ENV=myenv  ## Create lite version environment (ENV=myenv)
 conda-custom:
-	conda create -y -n $(ENV) python=3.9
+	conda create -y -n $(ENV) python=3.12
 	conda run -n $(ENV) pip install -r requirements.txt
-	conda run -n $(ENV) pre-commit install
+	conda run -n $(ENV) pip install -r requirements-dev.txt
 	conda run -n $(ENV) make git-init-hook
-	@echo "> Conda environment $(ENV) created and pre-commit initialized"
+	@echo "> Conda environment $(ENV) created and pre-commit initialized
 
 # === 🐳 Docker ===
 IMAGE ?= py-base

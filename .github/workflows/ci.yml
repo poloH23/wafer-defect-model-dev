@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  # Job 1: Execute the defined checks oin ".pre-commit-config.yaml"
+  # Job 1: Execute the defined checks in ".pre-commit-config.yaml"
   # Use the same settings with pre-commit logic
   # Avoid skipping the local checking step with "git commit --no-verify"
   pre-commit:
@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - uses: pre-commit/action@3.0.1
+      - uses: pre-commit/action@v3.0.1
 
   # Job 2: Perform actual tests, it supports testing for various Python versions (matrix)
   test:
