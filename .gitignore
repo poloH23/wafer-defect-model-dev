@@ -10,10 +10,13 @@ logs/*
 !logs/.gitkeep
 results/*
 !results/.gitkeep
-# bak/*.yaml
+# bak/*.yml
 data/raw/*
+!data/raw/*.md
 !data/raw/.gitkeep
 docs/dev_ideas/
+docs/others/
+!docs/.gitkeep
 
 
 # ==========================================

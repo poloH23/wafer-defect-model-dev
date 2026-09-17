@@ -1,9 +1,9 @@
 .PHONY: help code-format lint git-init-hook test \
-        init requirements requirements-bootstrap \
-        conda-dev export-conda \
+        init requirements requirements-bootstrap requirements-refresh \
+        conda-dev conda-export conda-custom \
         clean gitkeep-clean clean-zone \
         docker-build docker-run docker-run-fastapi docker-run-flask \
-        demo-run gitkeep-add
+        demo-run gitkeep-add system-info
 
 # === 🧹 Cleaning ===
 clean:  ## Clean the caches in the project
@@ -11,15 +11,15 @@ clean:  ## Clean the caches in the project
 
 clean-zone:  ## Remove Windows Zone.Identifier files
 	find . -type f -name "*Zone.Identifier" -delete
-	@echo "> Removed all .Zone.Identifier files."
+	@echo "> Removed all .Zone.Identifier files in Linux."
 
 # === 🧼 Code Formatting & Hooks ===
-code-format:  ## Format code with ruff (link fixes and formatting)
+code-format:  ## Format code with ruff (lint fixes and formatting)
 	ruff check . --fix
 	ruff format .
 
-lint:  ## Run all pre-commit hooks (black, ruff, gitkeep, etc)
-	python -m pre_commit run --all-files --show-diff-on-failure
+lint:  ## Run all pre-commit hooks (ruff, gitkeep, etc)
+	pre-commit run --all-files --show-diff-on-failure
 
 git-init-hook:  ## Initialize pre-commit hooks to enable Git auto check
 	pre-commit install
@@ -27,32 +27,24 @@ git-init-hook:  ## Initialize pre-commit hooks to enable Git auto check
 
 # === 🚀 Initialization ===
 init:  ## One-shot project initialization: install deps + pre-commit hook + baseline check
-	chmod +x shell/init_project.sh
+	chmod +x shell/*.sh
 	bash shell/init_project.sh
 
 # === 📦 Dependencies ===
 requirements:  ## Recompile requirements.txt & requirements-dev.txt from .in files (pip-compile)
-	@command -v pip-compile >/dev/null 2>&1 || { echo "> pip-compile not found, bootstrapping dev tools from requirements-dev.in first"; pip install -r requirements-dev.in; }
-	pip-compile requirements.in -o requirements.txt
-	pip-compile requirements-dev.in -o requirements-dev.txt
-	@echo "> requirements.txt and requirements-dev.txt regenerated"
+	bash shell/manage_requirements.sh compile
 
 requirements-bootstrap:  ## Rescan source code imports to refresh requirements.in (overwrites existing file)
-	@command -v pipreqs >/dev/null 2>&1 || { echo "> pipreqs not found, bootstrapping dev tools from requirements-dev.in first"; pip install -r requirements-dev.in; }
-	pipreqs . --savepath requirements.in --force
-	@echo "> requirements.in refreshed from current imports — review the diff before committing"
+	bash shell/manage_requirements.sh bootstrap
 
 requirements-refresh:  ## Full refresh: rescan imports AND recompile lock files in one step
-	$(MAKE) requirements-bootstrap
-	$(MAKE) requirements
+	bash shell/manage_requirements.sh refresh
 
 # === 📁 Gitkeep Files ===
 gitkeep-add:  ## Add .gitkeep files in to empty directories
-	chmod +x shell/gitkeep.sh
 	bash shell/gitkeep.sh -v
 
 gitkeep-clean:  ## Remove all .gitkeep files
-	chmod +x shell/gitkeep.sh
 	bash shell/gitkeep.sh -c
 
 # === 🧪 Testing ===
@@ -66,20 +58,17 @@ demo-run:
 
 # === 🧬 Conda Environment ===
 conda-export:  ## Export conda env to file
-	conda env export | grep -v "^prefix: " > bak/environment.yml
-	@echo "> Conda environment has been exported to bak/environment.yml"
+	conda env export --from-history | grep -v "^prefix: " > bak/environment.yml
+	@echo "> Conda environment has been exported to ./bak/environment.yml (history-only, avoids pip/conda version clashes)"
 
 conda-dev:  ## Create conda env from environment.yml
-	chmod +x shell/setup_env.sh
 	bash shell/setup_env.sh
 
 conda-custom: ENV=myenv  ## Create lite version environment (ENV=myenv)
 conda-custom:
 	conda create -y -n $(ENV) python=3.12
-	conda run -n $(ENV) pip install -r requirements.txt
-	conda run -n $(ENV) pip install -r requirements-dev.txt
-	conda run -n $(ENV) make git-init-hook
-	@echo "> Conda environment $(ENV) created and pre-commit initialized
+	conda run -n $(ENV) bash shell/init_project.sh
+	@echo "> Conda environment $(ENV) created and initialized"
 
 # === 🐳 Docker ===
 IMAGE ?= py-base

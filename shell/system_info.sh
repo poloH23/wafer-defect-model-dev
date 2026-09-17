@@ -1,33 +1,33 @@
 #!/bin/bash
+echo ""
 echo "============================"
 
-echo "🖥  Hostname:"
+echo ">>> Hostname:"
 hostname
-echo "----------------------------"
+echo ""
 
-echo "📦 Disk Usage:"
+echo ">>> Disk Usage:"
 df -h /
-echo "----------------------------"
+echo ""
 
-echo "🧠 Memory Usage:"
+echo ">>> Memory Usage:"
 free -h
-echo "----------------------------"
+echo ""
 
-echo "🧮 CPU Info:"
+echo ">>> CPU Info:"
 lscpu | grep -E 'Model name|CPU\(s\)|Thread|Core'
-echo "----------------------------"
+echo ""
 
-echo "🛠 OS Info:"
+echo ">>> OS Info:"
 cat /etc/os-release | grep PRETTY_NAME
-echo "----------------------------"
+echo ""
 
 if command -v docker &> /dev/null; then
-  echo "🐳 Docker Info:"
+  echo ">>> Docker Info:"
   docker system df
-  echo "----------------------------"
 else
-  echo "🐳 Docker not installed."
-  echo "----------------------------"
+  echo ">>> Docker not installed."
 fi
 
+echo ""
 echo "============================"
