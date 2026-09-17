@@ -1,185 +1,86 @@
-# 📌 Project Name
+# <!-- TODO: Project Name -->
 
-A clean and extensible Python project starter kit for modern development.
-Includes automatic formatting, linting, Git hook automation, and project folder preservation.
+<!-- TODO: Briefly describe this project -->
 
----
+[![CI](https://github.com/poloH23/wefer-defect-model-dev/actions/workflows/ci.yml/badge.svg)](https://github.com/poloH23/wefer-defect-model-dev/actions/workflows/ci.yml)
 
-## 📝 Table of Contents
 
-- [Features](#-features)
-- [Requirements](#-requirements)
-- [Installation](#-installation)
-  - [Clone the Repository](#-clone-the-repository)
-  - [Conda Environment Setup](#-conda-environment-setup)
-  - [Docker Setup](#-docker-setup-directly)
-- [Usage](#-usage)
-  - [Built-in Demo Runner](#-built-in-demo-runner)
-  - [Tests](#-tests)
-- [CI/CD Pipeline with GitHub Actions](#-cicd-pipeline-with-gitHub-actions)
-- [Quick Start](#-quick-start)
-- [Folder Structure](#-folder-structure)
-- [Contributing](#-contributing)
-- [License](#-license)
+## Conda Environment Construction
 
----
+### Prerequisites
 
-## ✨ Features
+- Miniconda or Anaconda
+- Python 3.12 (Automatically set up by running `make conda-dev` (as shown below); no separate manual installation is required.)
 
-- Feature 1
-- Feature 2
-- Feature 3
-
-*Example: RESTful API with FastAPI, Model training with PyTorch, Dockerized deployment.*
-
----
-
-## 📋 Requirements
-
-- Python 3.9+
-- Conda (Anaconda or Miniconda)
-- GNU Make (default on Linux/macOS, optional on Windows)
-- Git (optional)
-- Docker (optional)
-
-*Python package dependencies are listed in [`requirements.txt`](./requirements.txt).*
-
----
-
-## 💻 Installation
-
-### 📥 Clone the Repository
+### Quick Start
 
 ```bash
-git clone https://github.com/poloH23/[your-repo].git
-cd [your-repo]
-```
-
-### 🐍 Conda Environment Setup
-
-* Create a conda environment using the development packages (Recommended):
-```bash
+git clone https://github.com/poloH23/wefer-defect-model-dev.git
+cd wefer-defect-model-dev
 make conda-dev
+conda activate torch
 ```
 
-* Create and activate a new conda environment:
-```bash
-# Create a new environment and install Git pre-commit hook
-make conda-custom ENV=myenv
-make init-hooks
-```
+`make conda-dev` executes the following steps in order, so there is no need to run them manually one by one:
 
----
+1. Create a clean conda environment based on `bak/environment.yml` (locking only the Python version).
+2. Install all runtime dependencies (`requirements.txt`) and development dependencies (`requirements-dev.txt`) in the new environment.
+3. Install pre-commit Git hook
+4. Perform a baseline check on the entire project.
 
-### 🐳 Docker Setup Directly
 
-1. Build the Docker image:
-```bash
-docker build -t your-project-name .
-```
-
-2. Run the container:
-```bash
-docker run -p 8000:8000 your-project-name
-```
-
-3. (Optional) Use Docker Compose:
-```bash
-docker-compose up --build
-```
-
----
-
-## 🚀 Usage
-
-### 🧪 Built-in Demo Runner
-
-* This project includes a demo script that can run in different modes:
-
-```bash
-make run-demo MODE=python
-make run-demo MODE=fastapi
-make run-demo MODE=fastapi NGROK=1
-make run-demo MODE=flask
-make run-demo MODE=flask NGROK=1
-```
-
-* Supported modes:
-  * **python**: Run a plain Python CLI demo
-  * **fastapi**: Run FastAPI app on port 8000
-  * **flask**: Run Flask app on port 5000
-  * Add **NGROK=1** to expose the app via ngrok
-
-*Source: `scripts/main_demo.py`*
-
-### 🧪 Tests
-
-* This template includes a basic test file `tests/test_demo.py`:
+### Verification
 
 ```bash
 make test
 ```
 
-*You can extend this file to add unit tests for your own modules.*
+Try running `git commit` and verify that the pre-commit hook automatically triggers formatting and linting checks.
 
-### ✅ CI/CD Pipeline with GitHub Actions
 
-* This project includes a minimal and efficient CI workflow using GitHub Actions:
-  * Python 3.9 setup
-  * Installs dependencies from `requirements.txt`
-  * Runs `make lint` to check code style using pre-commit hooks
-  * Runs `make test` to execute your test suite
-  * Runs `make help` to show the instructions
-  * To customize the workflow, edit `.github/workflows/python-ci.yml`
+## Commands
 
-*You can monitor the build status in the Actions tab on your GitHub repo.*
+Run `make help` to view the full list (grouped by category and with descriptions).
 
----
+|Command|Instruction|
+|---|---|
+|`make conda-dev`|Create conda environmnet and perform the initialization (**Recommended for initial setup**)|
+|`make conda-custom ENV=myenv`|Create a standalone conda environment with a specified name (functionally identical, but allows for a custom environment name)|
+|`make init`|Install dependencies and set up hooks in the **currently active** environment (without creating a new conda environment)|
+|`make test`|Execute the test suite and display coverage|
+|`make code-format`|Use Ruff to format code and automatically fix linting issues|
+|`make lint`|Run all pre-commit checks|
+|`make requirments`|Re-lock the versions in `requirements.txt` / `requirements-dev.txt` based on the `.in` files|
+|`make requirments-bootstrap`|Scan the source code for import statements and regenerate `requirements.in`|
+|`make requirments-refresh`|Combine the two steps above into a single operation (rescan + re-lock version)|
+|`make clean`|Delete cache files (such as `__pycache__`, `.pytest_cache`, etc.—files that are safe and reproducible)|
 
-## 🎥 Quick Start
 
-* 📘 **New here?** Check out our [Quickstart Guide](docs/quickstart.md) to get set up and run your first demo!
+## Dependency Package Management
 
----
+This project uses `pip-tools` to split dependency declarations into two levels:
+- **`requirements.in` / `requirements-dev.in`**: Manually maintained lists of "direct" dependencies, listing only the packages actually used by the code.
+- **`requirements.txt` / `requirements-dev.txt`**: Generated via `make requirements` after automatically resolving and locking versions; **do not edit manually**, and ensure both files are committed to version control.
 
-## 📁 Folder Structure
+When adding a new dependency:
 
-```text
-.
-├── bak/                        # Backup files (e.g. environment.yml)
-├── data/                       # Raw or processed data
-├── docs/                       # Project documentation (incl. quickstart)
-├── lib/                        # Utility functions and shared logic
-│   ├── config.py
-│   ├── path.py
-│   └── utils.py
-├── logs/, results/, reports/   # Output, logs, and generated reports
-├── main                        # Main application code
-├── models/                     # Saved models
-├── notebooks/                  # Jupyter notebooks (experiments / EDA)
-├── scripts/                    # Executable scripts or entry points
-│   └── demo/
-│       └── main_demo.py        # Demo for Python / FastAPI / Flask modes
-├── shell/                      # Bash scripts for setup and utilities
-│   ├── gitkeep.sh
-│   └── setup_env.sh
-├── tests/                      # Unit and integration tests
-│   └── test_demo.py
-├── Dockerfile
-├── Makefile
-├── .pre-commit-config.yaml
-├── requirements.txt
-├── .env, .env.example
-├── .gitignore, .dockerignore
-└── README.md
-```
+1. Modify the corresponding `.in` file (or run `make requirements-bootstrap` to rescan the source code).
+2. Run `make requirements` to re-lock the versions.
+3. Commit both the modified `.in` and `.txt` files.
 
-## 🤝 Contributing
+For some packages, the import name differs from the PyPI package name (e.g., `import cv2` corresponds to `opencv-python-headless`); since automated scanning tools may not always accurately identify these cases, it is recommended to verify the contents of `requirements.in` after adding them.
 
-Contributions are welcome! Please open an issue or submit a pull request for suggestions or bug fixes.
 
----
+## Continuous Integration
 
-## 📄 License
+Every push or pull request triggers GitHub Actions (defined in `.github/workflows/ci.yml`), which includes:
 
-This project is licensed under the GPL-3.0 License.
+- **pre-commit checks**: Uses the same configuration as the local `.pre-commit-config.yaml`, thereby avoiding discrepancies where local checks pass but CI fails.
+- **Test suite**: Executes pytest and generates a coverage report.
+
+
+## Project Structure
+
+<!-- TODO:  -->
+
+## License
