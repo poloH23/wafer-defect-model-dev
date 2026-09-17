@@ -1,8 +1,9 @@
-# <!-- TODO: Project Name -->
+# Wafer Defect Classification Model Development Project
 
 <!-- TODO: Briefly describe this project -->
 
 [![CI](https://github.com/poloH23/wefer-defect-model-dev/actions/workflows/ci.yml/badge.svg)](https://github.com/poloH23/wefer-defect-model-dev/actions/workflows/ci.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
 ## Conda Environment Construction
@@ -10,7 +11,7 @@
 ### Prerequisites
 
 - Miniconda or Anaconda
-- Python 3.12 (Automatically set up by running `make conda-dev` (as shown below); no separate manual installation is required.)
+- Python 3.12 (Automatically set up by running `make conda-dev`; no separate manual installation is required.)
 
 ### Quick Start
 
@@ -84,3 +85,5 @@ Every push or pull request triggers GitHub Actions (defined in `.github/workflow
 <!-- TODO:  -->
 
 ## License
+
+This project is licensed under the [Apache License 2.0](LICENSE)
