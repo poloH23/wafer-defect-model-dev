@@ -95,8 +95,8 @@ class DatasetAnalysisPipeline:
         report_content = self._generate_markdown(target_file.name, num_samples, img_shape, label_type, distribution, saved_samples)
 
         # Save into the report file
-        reprot_path = self.report_dir / "dataset_report.md"
-        with open(reprot_path, "w", encoding="utf-8") as f:
+        report_path = self.report_dir / "dataset_report.md"
+        with open(report_path, "w", encoding="utf-8") as f:
             f.write(report_content)
 
     def _generate_markdown(self, filename: str, num_samples: int, img_shape: Any, label_type: str, distribution: dict[str, int], saved_samples: list[Any]) -> str:

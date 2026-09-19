@@ -17,23 +17,20 @@ class NPZAnalyzer:
         if not self.npz_path.exists() or self.npz_path.suffix != ".npz":
             raise FileNotFoundError("Cannot find the NPZ data file.")
 
-        try:
-            # Read the data
-            data = np.load(self.npz_path)
-            if image_key not in data or label_key not in data:
-                raise ValueError(f"Wrong keys. Available keys are: {data.files}")
-            self.images = data[image_key]
-            self.labels = data[label_key]
+        # Read the data
+        data = np.load(self.npz_path)
+        if image_key not in data or label_key not in data:
+            raise ValueError(f"Wrong keys. Available keys are: {data.files}")
+        self.images = data[image_key]
+        self.labels = data[label_key]
 
-            # Determine the image number
-            # Determine the image chanel and dimenssions (2D grayscale or 3D RGB)
-            self.num_samples = self.images.shape[0]
-            self.image_shape = self.images.shape[1:]
+        # Determine the image number
+        # Determine the image chanel and dimenssions (2D grayscale or 3D RGB)
+        self.num_samples = self.images.shape[0]
+        self.image_shape = self.images.shape[1:]
 
-            # Determine the label type (1D singel-label or 2D multi-labels One-Hot)
-            self._analyze_label_structure()
-        except Exception as e:
-            raise RuntimeError(f"An error occurred when rading the NPZ data: {e}") from e
+        # Determine the label type (1D singel-label or 2D multi-labels One-Hot)
+        self._analyze_label_structure()
 
     def _analyze_label_structure(self):
         """Determine whether the labels and class indices with shape (N,) or multi-labels with shape (N, C)."""
@@ -55,7 +52,7 @@ class NPZAnalyzer:
             return {f"class_{u}": int(c) for u, c in zip(unique, counts, strict=False)}
         else:
             counts = np.sum(self.labels, axis=0)
-            return {f"class_{i}": c for i, c in enumerate(counts)}
+            return {f"class_{i}": int(c) for i, c in enumerate(counts)}
 
     def get_label_type(self) -> str:
         """Returns the analyzed tag type to avoid redundant calculations and dimensionality errors."""
@@ -111,9 +108,9 @@ class NPZAnalyzer:
 
     def save_sample(self, index: int, save_path: str | Path):
         """Save the figures when analyzing with CLI or Jupyter Notebook."""
-        save_path = Path(save_path)
         if save_path is None:
             raise ValueError("The argument 'save_path' cannot be empty.")
+        save_path = Path(save_path)
 
         save_dir = save_path.parent
         if not save_dir.exists():

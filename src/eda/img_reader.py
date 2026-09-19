@@ -25,13 +25,7 @@ class ImageReader:
         :param output_type: Specify the output type, either "numpy" for NumPy array or "torch" for PyTorch tensor.
         """
         self.output_type = output_type
-        self.metadata = {
-            "original_shape": None,
-            "format": None,
-            "dtype": None,
-            "labels": None,
-            "extra_info": dict(),
-        }
+        self._metadata = {"original_shape": None, "format": None, "dtype": None, "labels": None, "extra_info": dict()}
 
     def _convert_type(self, data: np.ndarray) -> np.ndarray | torch.Tensor:
         """
@@ -48,6 +42,7 @@ class ImageReader:
         :return: A tuple containing the image data and metadata (image data, metadata).
         """
         path = Path(file_path).resolve()
+
         if not path.exists():
             raise FileNotFoundError(f"File not found: {path}")
         suffix = path.suffix.lower()
@@ -74,15 +69,17 @@ class ImageReader:
 
     def _read_cv2(self, path: Path) -> tuple[np.ndarray, dict[str, Any]]:
         """CV2 defaults to reading in BGR; convert to RGB."""
+        metadata = self._metadata.copy()
         img = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+
         if img is None:
             raise ValueError(f"CV2 Unable to read the file: {path}")
         if len(img.shape) == 3 and img.shape[2] == 3:
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        self.metadata.update({"original_shape": img.shape, "format": path.suffix.lower(), "dtype": str(img.dtype)})
-        return img, self.metadata
+        metadata.update({"original_shape": img.shape, "format": path.suffix.lower(), "dtype": str(img.dtype)})
+        return img, metadata
 
-    def _read_numpy(self, path: Path, image_key: str = "arr_0", label_key: str = "arr_1") -> tuple[np.ndarray, dict[str, Any]]:
+    def _read_numpy(self, path: Path, image_key: str = "images", label_key: str = "labels") -> tuple[np.ndarray, dict[str, Any]]:
         if path.suffix == ".npy":
             img = np.load(path)
             labels = None
@@ -91,7 +88,9 @@ class ImageReader:
             data = np.load(path)
             img = data[image_key]
             labels = data[label_key] if label_key in data.files else None
-        self.metadata.update(
+
+        metadata = self._metadata.copy()
+        metadata.update(
             {
                 "original_shape": img.shape,
                 "format": path.suffix.lower(),
@@ -99,7 +98,7 @@ class ImageReader:
                 "labels": labels,
             }
         )
-        return img, self.metadata
+        return img, metadata
 
     def _read_hdf5(self, path: Path, dataset_name: str = "images") -> tuple[np.ndarray | Any, dict[str, Any]]:
         import h5py
@@ -108,8 +107,9 @@ class ImageReader:
             if dataset_name not in f:
                 raise ValueError(f"HDF5 files not found: {dataset_name}")
             img = f[dataset_name][:]  # type: ignore
+            metadata = self._metadata.copy()
             if isinstance(img, np.ndarray):
-                self.metadata.update(
+                metadata.update(
                     {
                         "original_shape": img.shape,
                         "format": path.suffix.lower(),
@@ -117,18 +117,19 @@ class ImageReader:
                         "extra_info": {"group_keys": list(f.keys())},
                     }
                 )
-        return img, self.metadata
+        return img, metadata
 
     def _read_raw(self, path: Path) -> tuple[np.ndarray, dict[str, Any]]:
         import rawpy
 
         with rawpy.imread(str(path)) as raw:
             img = raw.postprocess()
-            self.metadata.update(
+            metadata = self._metadata.copy()
+            metadata.update(
                 {
                     "original_shape": img.shape,
                     "format": path.suffix.lower(),
                     "dtype": str(img.dtype),
                 }
             )
-        return img, self.metadata
+        return img, metadata
