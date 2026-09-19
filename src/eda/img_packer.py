@@ -44,7 +44,7 @@ class ImagePacker:
             elif ext == ".npz":
                 output_format = "npz"
             else:
-                raise ValueError("Cannot determine the output format by the extension, please specify the argument 'output_format' ('npz' 或 'h5')")
+                raise ValueError("Cannot determine the output format by the extension, please specify the argument 'output_format' ('npz' or 'h5')")
 
         # Read the CSV file (image names and labels)
         if not csv_path.exists():
@@ -65,6 +65,7 @@ class ImagePacker:
         final_labels = np.stack(label_list)
         print(f"   - image dimension: {final_images.shape}")
         print(f"   - label dimension: {final_labels.shape}")
+        print(f"   - data loading error counts: {error_count}")
 
         # Check the directory path and ouput results
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -74,7 +75,7 @@ class ImagePacker:
             self._save_as_h5(final_images, final_labels, output_path)
         print(f"Packaging porcess is successfully done: {output_path}")
 
-    def _load_data(self, df: pd.DataFrame, image_dir: Path, image_col: str) -> tuple[list[str], list[str], int]:
+    def _load_data(self, df: pd.DataFrame, image_dir: Path, image_col: str) -> tuple[list[np.ndarray], list[np.ndarray], int]:
         """Perform image and label reading operations."""
         image_list = list()
         label_list = list()
@@ -89,18 +90,19 @@ class ImagePacker:
                 img, _ = self.reader.read(img_path)
                 image_list.append(img)
                 label_list.append(labels)
-            except Exception:
+            except Exception as e:
                 error_count += 1
+                print(f"Error occurred during data loading {img_path}: {e}")
         return image_list, label_list, error_count
 
     def _save_as_npz(self, images: np.ndarray, labels: np.ndarray, output_path: Path) -> None:
-        """ "Saved dataset into the NPZ format file."""
+        """Saved dataset into the NPZ format file."""
         print("Writing NPZ archive...")
         np.savez_compressed(output_path, images=images, labels=labels)
         return None
 
     def _save_as_h5(self, images: np.ndarray, labels: np.ndarray, output_path: Path) -> None:
-        """ "Stored in HDF5 format (using GZIP compression)."""
+        """Stored in HDF5 format (using GZIP compression)."""
         print("Writing HDF5 archive...")
         with h5py.File(output_path, "w") as f:
             f.create_dataset("images", data=images, compression="gzip", compression_opts=4)
