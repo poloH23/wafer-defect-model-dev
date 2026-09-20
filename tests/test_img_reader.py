@@ -18,6 +18,17 @@ def mock_hdf5_file(tmp_path: Path):
     return file_path
 
 
+@pytest.fixture
+def mock_cv2_file(tmp_path: Path):
+    import cv2
+
+    file_path = tmp_path / "mock.png"
+    bgr_color = (255, 100, 150)
+    fake_img_data = np.full((244, 244, 3), bgr_color, dtype=np.uint8)
+    cv2.imwrite(file_path, fake_img_data)
+    return file_path
+
+
 # ================= Test Cases =================
 
 
@@ -41,5 +52,16 @@ def test_read_hdf5_output_torch(mock_hdf5_file: Path):
 
     reader = ImageReader(output_type="torch")
     img, metadata = reader.read(file_path=mock_hdf5_file, dataset_name="images")
+    assert isinstance(metadata, dict)
     assert isinstance(img, torch.Tensor)
     assert img.shape == torch.Size([3, 244, 244])
+
+
+def test_read_cv2_success(mock_cv2_file: Path):
+    import torch
+
+    reader = ImageReader(output_type="torch")
+    img, metadata = reader.read(file_path=mock_cv2_file, dataset_name="images")
+    assert isinstance(metadata, dict)
+    assert isinstance(img, torch.Tensor)
+    assert img.shape == torch.Size([244, 244, 3])
