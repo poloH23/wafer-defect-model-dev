@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 import h5py
 import numpy as np
@@ -27,6 +27,7 @@ class ImagePacker:
         csv_path: str | Path,
         output_path: str | Path,
         image_col: str = "images",
+        label_key: str = "labels",
         output_format: Literal["npz", "h5"] | None = None,
     ) -> None:
         """
@@ -58,6 +59,8 @@ class ImagePacker:
 
         if len(image_list) == 0:
             raise RuntimeError("Cannot successfully read any images, failed to package the image dataset.")
+        if len(label_list) == 0:
+            raise RuntimeError(f"Cannot successfully read any labels, please check the CSV file: {csv_path}")
 
         # Stack into an array
         print("Stacking the images into an array")
@@ -70,9 +73,9 @@ class ImagePacker:
         # Check the directory path and ouput results
         output_path.parent.mkdir(parents=True, exist_ok=True)
         if output_format == "npz":
-            self._save_as_npz(final_images, final_labels, output_path)
+            self._save_as_npz(final_images, final_labels, output_path, image_col, label_key)
         elif output_format == "h5":
-            self._save_as_h5(final_images, final_labels, output_path)
+            self._save_as_h5(final_images, final_labels, output_path, image_col, label_key)
         print(f"Packaging porcess is successfully done: {output_path}")
 
     def _load_data(self, df: pd.DataFrame, image_dir: Path, image_col: str) -> tuple[list[np.ndarray], list[np.ndarray], int]:
@@ -95,15 +98,19 @@ class ImagePacker:
                 print(f"Error occurred during data loading {img_path}: {e}")
         return image_list, label_list, error_count
 
-    def _save_as_npz(self, images: np.ndarray, labels: np.ndarray, output_path: Path) -> None:
+    def _save_as_npz(self, images: np.ndarray, labels: np.ndarray, output_path: Path, image_key: str = "images", label_key: str = "labels") -> None:
         """Saved dataset into the NPZ format file."""
         print("Writing NPZ archive...")
-        np.savez_compressed(output_path, images=images, labels=labels)
+        if image_key == "allow_pickle" or label_key == "allow_pickle":
+            raise ValueError("Cannot use 'allow_pickle' as array name.")
+
+        saved_dict: dict[str, Any] = {image_key: images, label_key: labels}
+        np.savez_compressed(output_path, **saved_dict)
         return None
 
-    def _save_as_h5(self, images: np.ndarray, labels: np.ndarray, output_path: Path) -> None:
+    def _save_as_h5(self, images: np.ndarray, labels: np.ndarray, output_path: Path, image_key: str = "images", label_key: str = "labels") -> None:
         """Stored in HDF5 format (using GZIP compression)."""
         print("Writing HDF5 archive...")
         with h5py.File(output_path, "w") as f:
-            f.create_dataset("images", data=images, compression="gzip", compression_opts=4)
-            f.create_dataset("labels", data=labels, compression="gzip", compression_opts=4)
+            f.create_dataset(image_key, data=images, compression="gzip", compression_opts=4)
+            f.create_dataset(label_key, data=labels, compression="gzip", compression_opts=4)
