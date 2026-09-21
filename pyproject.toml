@@ -21,6 +21,9 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 # B: bugbear, catch bugs that common but not easy to find
 # SIM: simplified code style
 
+[tool.ruff.lint.per-file-ignores]
+"scripts/**/*.py" = ["E402"]
+
 [tool.ruff.format]
 quote-style = "double"
 
