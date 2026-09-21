@@ -42,7 +42,7 @@ class NPZAnalyzer:
         elif self.labels.ndim == 2:
             # Determine whether the annotation is multi-labels or not
             max_labels_per_sample = np.max(np.sum(self.labels > 0, axis=1))
-            self.label_mode = f"multi-label (max: {max_labels_per_sample})" if max_labels_per_sample > 1 else "one-hot-single-label"
+            self.label_mode = f"multi-label (max label per sample: {max_labels_per_sample})" if max_labels_per_sample > 1 else "one-hot-single-label"
             self.num_classes = self.labels.shape[1]
         else:
             raise ValueError(f"Unsupported label dimension: {self.labels.shape}")
@@ -55,6 +55,23 @@ class NPZAnalyzer:
         else:
             counts = np.sum(self.labels, axis=0)
             return {f"class_{i}": int(c) for i, c in enumerate(counts)}
+
+    def get_label_combination_distribution(self) -> dict[tuple[int, ...], int]:
+        """
+        Calculate the frequency of each "exact label combination".
+        This differs from the marginal counts for single categories calculated by 'get_distribution()'.
+        Only supports 2D labels (one-hot / multi-label).
+        For single-label data, each sample has only one label, so the result of 'get_distribution()' can be used directly.
+        """
+        if self.labels.ndim != 2:
+            raise ValueError("get_label_combination_distribution only supports 2D (muilti-label) labels.")
+
+        unique_row, counts = np.unique(self.labels, axis=0, return_counts=True)
+        combination_counts: dict[tuple[int, ...], int] = {}
+        for row, count in zip(unique_row, counts, strict=False):
+            combo = tuple(int(i) for i in np.where(row == 1)[0])
+            combination_counts[combo] = int(count)
+        return combination_counts
 
     def get_label_type(self) -> str:
         """Returns the analyzed tag type to avoid redundant calculations and dimensionality errors."""
