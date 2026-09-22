@@ -6,6 +6,7 @@
 - **Image Dimension**: `(52, 52)`
 - **Label Type**: `multi-label (max label per sample: 4)`
 
+
 ## Class Distribution
 | Class | Number |
 |---|---|
