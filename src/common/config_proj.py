@@ -5,15 +5,14 @@ from pathlib import Path
 from typing import Any, get_origin
 
 import yaml
-from dotenv import load_dotenv
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from src.common.path import get_project_root
+
 # --- Get the Absolute Path of the project and ".env" file ---
-CURRENT_FILE = Path(__file__).resolve()
-PROJECT_ROOT = CURRENT_FILE.parent.parent.parent
+PROJECT_ROOT = get_project_root()
 ENV_PATH = PROJECT_ROOT / ".env"
-load_dotenv(dotenv_path=ENV_PATH)
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -86,22 +85,16 @@ class AppSettings(BaseSettings):
 
 
 def init_settings(config_path: str = "configs/config.yaml") -> AppSettings:
-    try:
-        yaml_full_path = PROJECT_ROOT / config_path
-        if not yaml_full_path:
-            msg = f"Config file not found at: {yaml_full_path}"
-            logger.error(msg)
-            raise FileNotFoundError(msg)
-
-        with open(yaml_full_path, encoding="utf-8") as f:
-            yaml_data = yaml.safe_load(f)
-
-        settings = AppSettings(
-            directories={k: Path(v) for k, v in yaml_data.get("directories", {}).items()},
-            services=yaml_data.get("services", {}),
-        )  # type: ignore
-        return settings
-    except Exception as e:
-        msg = f"Exception while initializing settings: {e}"
+    yaml_full_path = PROJECT_ROOT / config_path
+    if not yaml_full_path:
+        msg = f"Config file not found at: {yaml_full_path}"
         logger.error(msg)
-        raise Exception(msg) from e
+        raise FileNotFoundError(msg)
+
+    with open(yaml_full_path, encoding="utf-8") as f:
+        yaml_data = yaml.safe_load(f) or {}
+
+    return AppSettings(
+        directories={k: Path(v) for k, v in yaml_data.get("directories", {}).items()},
+        services=yaml_data.get("services", {}),
+    )  # type: ignore
