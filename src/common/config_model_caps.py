@@ -52,7 +52,7 @@ class ModelCapsManager:
             logger.error(msg)
             return None
 
-    def get_supported_metrics(self, model_name: str) -> set[str | None]:
+    def get_supported_metrics(self, model_name: str) -> set[str]:
         """
         Get supported metrics of the specific model.
         """
