@@ -2,21 +2,17 @@ import os
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
 
-
-def get_project_root(anchor_file: str = ".env") -> Path:
+def get_project_root(anchor_file: str = "pyproject.toml") -> Path:
     """
     Automatically search upwards from the current file for directories with "anchor_file" as the root directory.
     """
-    load_dotenv()
     current_path = Path(__file__).resolve()
 
     # search upwards until '.env' file is found or till the root directory of the disk
     for parent in current_path.parents:
         if (parent / anchor_file).exists():
             os.environ["PROJECT_ROOT"] = str(parent)
-            load_dotenv(dotenv_path=parent / anchor_file)
             return parent
 
     # if can not find the "anchor_file", return the path upwards the parent of this file (assume the structure is fixed)

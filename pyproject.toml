@@ -1,4 +1,6 @@
 [project]
+name = "wafer-defect-model-dev"
+version = "0.1.0"
 requires-python = ">=3.12,<3.13"
 
 [tool.ruff]
@@ -40,3 +42,11 @@ testpaths = ["tests"]
 [tool.coverage.run]
 source = ["."]
 omit = ["tests/*"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]

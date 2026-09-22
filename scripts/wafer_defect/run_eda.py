@@ -1,11 +1,6 @@
-import sys
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(PROJECT_ROOT))
-
 from matplotlib.colors import BoundaryNorm, ListedColormap  # noqa: E402
 
+from src.common.path import get_project_root
 from src.pipelines.eda_pipeline import DatasetAnalysisPipeline  # noqa: E402
 
 # ================= Project-specific Settings =================
@@ -32,6 +27,7 @@ CLASS_NAMES = {
 WAFER_CMAP = ListedColormap(["#f5f5f5", "#8ecae6", "#023047"])
 WAFER_NORM = BoundaryNorm([0, 1, 2, 3], WAFER_CMAP.N)
 
+PROJECT_ROOT = get_project_root()
 DATA_SOURCE = PROJECT_ROOT / "data" / "raw" / "Wafer_Map_Datasets.npz"
 REPORT_DIR = PROJECT_ROOT / "reports" / "eda" / "wafer_defect"
 
