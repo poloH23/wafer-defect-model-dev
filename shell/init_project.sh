@@ -12,19 +12,16 @@
 
 set -euo pipefail
 
-echo ">>> [1/5] Install runtime dependencies (requirements.txt)"
-pip install -r requirements.txt
-
-echo ">>> [2/5] Install development dependencies (requirements-dev.txt)"
+echo ">>> [1/4] Install dependencies (requirements-dev.txt: a superset that already includes requirements.txt)"
 pip install -r requirements-dev.txt
 
-echo ">>> [3/5] Install the project in editable mode (makes 'src' importable anywhere)"
+echo ">>> [2/4] Install the project in editable mode (makes 'src' importable anywhere)"
 pip install -e .
 
-echo ">>> [4/5] Mount pre-commit git hook"
+echo ">>> [3/4] Mount pre-commit git hook"
 pre-commit install
 
-echo ">>> [5/5] Perform a baseline check for the entire project"
+echo ">>> [4/4] Perform a baseline check for the entire project"
 if ! pre-commit run --all-files --show-diff-on-failure; then
     echo ""
     echo "!! pre-commit: It is normal to encounter issues within the existing code during the initial integration phase"
