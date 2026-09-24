@@ -2,6 +2,7 @@
 # This is a declaration file; the version-locked requirements-dev.txt file is automatically generated via the following command:
 # pip-compile requirements-dev.in -o requirements-dev.txt
 # Or simply run: make requirements
+-c requirements.txt
 
 pre-commit
 ruff
