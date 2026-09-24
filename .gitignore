@@ -19,6 +19,13 @@ docs/wafer_defect_desc/
 docs/others/
 !docs/.gitkeep
 
+# MLflow
+mlruns/
+mlartifacts/
+
+# Hydra
+outputs/
+multirun/
 
 # ==========================================
 # For Python
