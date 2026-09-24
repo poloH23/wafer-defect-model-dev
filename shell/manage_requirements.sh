@@ -22,16 +22,16 @@ ensure_dev_tools() {
 bootstrap() {
     ensure_dev_tools
     echo ">>> Rescan the source code for imports and update requirements.in"
-    pipreqs . --savepath requirement.in --force
+    pipreqs . --savepath requirements.in --force
     echo ">>> 'requirements.in' has been updated; please check the diff before committing"
 }
 
 compile_lock() {
     ensure_dev_tools
-    echo ">>> Recompile requirements.txt"
-    pip-compile requirements.in -o requirements.txt
+    echo ">>> Recompile requirements.txt (requirements.in + requirements-dev.in, resolved together)"
+    pip-compile requirements.in requirements-dev.in -o requirements-dev.txt
     echo ">>> Recompile requirements-dev.txt"
-    pip-cimpile requirements-dev.in -o requirements-dev.txt
+    pip-compile -c requirements-dev.txt requirements.in -o requirements.txt
     echo ">>> requirments.txt / requirements.txt have been updated"
 }
 
