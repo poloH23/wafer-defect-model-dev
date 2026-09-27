@@ -13,3 +13,4 @@ test_ratio: 0.1
 
 # Label combination with fewer samples than this are merged into one "rare" stratum
 min_stratum_count: 10
+overwrite: true
