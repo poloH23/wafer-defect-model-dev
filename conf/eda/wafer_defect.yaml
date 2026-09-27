@@ -1,0 +1,11 @@
+# EDA run for the wafer_defect dataset
+
+dataset: wafer_defect
+report_dir: reports/eda/wafer_defect
+
+# Prefer samples with single defect type when piching one example images pre class.
+pure_class_example: true
+
+plot:
+  # Wafer map pixel values are discrete: 0 = empty; 1 = pass; 2 = defect
+  discrete_colors: ["#f5f5f5", "#8ecae6", "#023047"]
