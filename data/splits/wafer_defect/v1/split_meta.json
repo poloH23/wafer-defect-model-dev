@@ -1,0 +1,21 @@
+{
+  "split_digest": "fe3ec9e57a7f56935bf213edafd744fef9dcde2fe9d0fb42eca53bd120d52377",
+  "created_at": "2026-09-27T07:19:14+00:00",
+  "sizes": {
+    "train": 30411,
+    "val": 3802,
+    "test": 3802
+  },
+  "num_strata": 38,
+  "library_version": {
+    "numpy": "2.5.3",
+    "scikit-learn": "1.9.1"
+  },
+  "source_file": "Wafer_Map_Datasets.npz",
+  "source_sha256": "a19e791c85ccd5051c080169a3d2b17902a42545cf749e9869f6c96312bcdc69",
+  "label_key": "arr_1",
+  "seed": 42,
+  "val_ratio": 0.1,
+  "test_ratio": 0.1,
+  "min_stratum_count": 10
+}
