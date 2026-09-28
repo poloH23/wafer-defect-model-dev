@@ -57,7 +57,6 @@ class SplitConfig(StrictModel):
     test_ratio: float = Field(gt=0, lt=1)
     min_stratum_count: int = Field(default=10, ge=1)
     output_root: Path = Path("data/splits")
-    overwrite: bool
 
     @model_validator(mode="after")
     def check_ratio_sum(self) -> Self:

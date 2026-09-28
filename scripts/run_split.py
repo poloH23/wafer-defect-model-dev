@@ -2,6 +2,7 @@
 Create a fixed train/val/test split from a split config.
 
 All dataset- and split-specific values live in conf/.
+Add '--overwrite' for overwritting the existing split version.
 
 Usage:
     python scripts/run_split.py --config conf/split/wafer_defect_v1.yaml
@@ -29,6 +30,7 @@ def file_sha256(path: Path, chunk_size: int = 1 << 20) -> str:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Create a fixed, stratified train/val/test split.")
     parser.add_argument("--config", required=True, help="Split config path, relative to the project root.")
+    parser.add_argument("--overwrite", action="store_true", help="Allow overwriting an existing split with the same version.")
     return parser.parse_args()
 
 
@@ -55,6 +57,7 @@ def main() -> None:
     split_path = save_split(
         result=result,
         output_dir=split_cfg.output_dir,
+        overwrite=args.overwrite,
         metadata={
             "config_file": Path(args.config).as_posix(),
             "source_file": dataset_cfg.source.as_posix(),
@@ -62,7 +65,6 @@ def main() -> None:
             "label_key": dataset_cfg.label_key,
             **split_cfg.model_dump(mode="json"),
         },
-        overwrite=split_cfg.overwrite,
     )
     print(f"Split saved: {split_path}")
 
