@@ -47,6 +47,16 @@ gitkeep-add:  ## Add .gitkeep files in to empty directories
 gitkeep-clean:  ## Remove all .gitkeep files
 	bash shell/gitkeep.sh -c
 
+# === 📊 Data ===
+EDA_CONFIG ?= conf/eda/wafer_defect.yaml
+SPLIT_CONFIG ?= conf/split/wafer_defect_v1.yaml
+
+eda: ## Run dataset EDA (EDA_CONFIG=conf/eda/wafer_defect.yaml)
+	python scripts/run_eda.py --config $(EDA_CONFIG)
+
+split: ## Create a fixed train/val/test split (SPLIT_CONFIG=conf/split/wafer_defect_v1.yaml)
+	python scripts/run_split.py --config $(SPLIT_CONFIG)
+
 # === 🧪 Testing ===
 test:  ## Run pytest
 	pytest --cov=. --cov-report=term-missing

@@ -18,6 +18,7 @@ docs/dev_ideas/
 docs/wafer_defect_desc/
 docs/others/
 !docs/.gitkeep
+temp/
 
 # MLflow
 mlruns/
