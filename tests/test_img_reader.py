@@ -5,6 +5,8 @@ import pytest
 
 from src.eda.img_reader import ImageReader
 
+# ================= fixture: synthesised data =================
+
 
 @pytest.fixture
 def mock_hdf5_file(tmp_path: Path):
