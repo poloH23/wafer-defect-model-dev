@@ -13,52 +13,52 @@
 | Center | 13000 |
 | Donut | 12000 |
 | Edge_Loc | 13000 |
-| Loc | 12000 |
-| Near_Full | 18000 |
-| Scratch | 149 |
-| Random | 19000 |
-| class_7 | 866 |
+| Edge_Ring | 12000 |
+| Loc | 18000 |
+| Near_Full | 149 |
+| Scratch | 19000 |
+| Random | 866 |
 ## Label Combination Distribution
 | Combination | Number |
 |---|---|
-| Center+Edge_Loc+Random | 2000 |
+| Center+Edge_Loc+Scratch | 2000 |
 | Normal | 1000 |
-| Random | 1000 |
-| Near_Full | 1000 |
-| Near_Full+Random | 1000 |
+| Scratch | 1000 |
 | Loc | 1000 |
-| Loc+Random | 1000 |
-| Loc+Near_Full | 1000 |
-| Loc+Near_Full+Random | 1000 |
+| Loc+Scratch | 1000 |
+| Edge_Ring | 1000 |
+| Edge_Ring+Scratch | 1000 |
+| Edge_Ring+Loc | 1000 |
+| Edge_Ring+Loc+Scratch | 1000 |
 | Edge_Loc | 1000 |
-| Edge_Loc+Random | 1000 |
-| Edge_Loc+Near_Full | 1000 |
-| Edge_Loc+Near_Full+Random | 1000 |
+| Edge_Loc+Scratch | 1000 |
+| Edge_Loc+Loc | 1000 |
+| Edge_Loc+Loc+Scratch | 1000 |
 | Donut | 1000 |
-| Donut+Random | 1000 |
-| Donut+Near_Full | 1000 |
-| Donut+Near_Full+Random | 1000 |
+| Donut+Scratch | 1000 |
 | Donut+Loc | 1000 |
-| Donut+Loc+Random | 1000 |
-| Donut+Loc+Near_Full | 1000 |
-| Donut+Loc+Near_Full+Random | 1000 |
+| Donut+Loc+Scratch | 1000 |
+| Donut+Edge_Ring | 1000 |
+| Donut+Edge_Ring+Scratch | 1000 |
+| Donut+Edge_Ring+Loc | 1000 |
+| Donut+Edge_Ring+Loc+Scratch | 1000 |
 | Donut+Edge_Loc | 1000 |
-| Donut+Edge_Loc+Random | 1000 |
-| Donut+Edge_Loc+Near_Full | 1000 |
-| Donut+Edge_Loc+Near_Full+Random | 1000 |
+| Donut+Edge_Loc+Scratch | 1000 |
+| Donut+Edge_Loc+Loc | 1000 |
+| Donut+Edge_Loc+Loc+Scratch | 1000 |
 | Center | 1000 |
-| Center+Random | 1000 |
-| Center+Near_Full | 1000 |
-| Center+Near_Full+Random | 1000 |
+| Center+Scratch | 1000 |
 | Center+Loc | 1000 |
-| Center+Loc+Random | 1000 |
-| Center+Loc+Near_Full | 1000 |
-| Center+Loc+Near_Full+Random | 1000 |
+| Center+Loc+Scratch | 1000 |
+| Center+Edge_Ring | 1000 |
+| Center+Edge_Ring+Scratch | 1000 |
+| Center+Edge_Ring+Loc | 1000 |
+| Center+Edge_Ring+Loc+Scratch | 1000 |
 | Center+Edge_Loc | 1000 |
-| Center+Edge_Loc+Near_Full | 1000 |
-| Center+Edge_Loc+Near_Full+Random | 1000 |
-| class_7 | 866 |
-| Scratch | 149 |
+| Center+Edge_Loc+Loc | 1000 |
+| Center+Edge_Loc+Loc+Scratch | 1000 |
+| Random | 866 |
+| Near_Full | 149 |
 
 ## Sampling Inspection
 ### normal
@@ -73,6 +73,9 @@
 ### Edge_Loc
 ![Sample Image](samples/sample_Edge_Loc.png)
 
+### Edge_Ring
+![Sample Image](samples/sample_Edge_Ring.png)
+
 ### Loc
 ![Sample Image](samples/sample_Loc.png)
 
@@ -84,6 +87,3 @@
 
 ### Random
 ![Sample Image](samples/sample_Random.png)
-
-### class_7
-![Sample Image](samples/sample_class_7.png)

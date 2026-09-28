@@ -1,6 +1,6 @@
 {
   "split_digest": "fe3ec9e57a7f56935bf213edafd744fef9dcde2fe9d0fb42eca53bd120d52377",
-  "created_at": "2026-09-28T00:22:40+00:00",
+  "created_at": "2026-09-28T01:09:59+00:00",
   "sizes": {
     "train": 30411,
     "val": 3802,
@@ -21,6 +21,5 @@
   "val_ratio": 0.1,
   "test_ratio": 0.1,
   "min_stratum_count": 10,
-  "output_root": "data/splits",
-  "overwrite": true
+  "output_root": "data/splits"
 }
