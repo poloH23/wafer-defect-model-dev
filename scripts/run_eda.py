@@ -8,22 +8,10 @@ Usage:
 """
 
 import argparse
-from typing import Any
-
-from matplotlib.colors import BoundaryNorm, ListedColormap
 
 from src.common.config_schema import EdaConfig, load_config, load_dataset_config
+from src.eda.plotting import build_discrete_plot_kwargs
 from src.pipelines.eda_pipeline import DatasetAnalysisPipeline
-
-
-def build_discrete_plot_kwargs(colors: list[str]) -> dict[str, Any]:
-    """
-    Colormap for images whose pixel values are discrete categories 0..N-1.
-    Boundaries [0, 1, 2, ..., N] put each integer value in its own color bin.
-    """
-    cmap = ListedColormap(colors)
-    norm = BoundaryNorm(list(range(len(colors) + 1)), cmap.N)
-    return {"cmap": cmap, "norm": norm}
 
 
 def parse_args() -> argparse.Namespace:
