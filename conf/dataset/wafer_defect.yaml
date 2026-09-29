@@ -8,10 +8,14 @@ source: data/raw/Wafer_Map_Datasets.npz
 image_key: arr_0
 label_key: arr_1
 
+# Number of pixel categories: 0 = empty, 1 = pass, 2 = defect
+num_pixel_values: 3
+num_classes: 8
+
 # 8 basic defect types.
 # Order matters: the i-th is the i-th dimenstion of the label vactor.
 # An all-zero label vector means "Normal" (no defect)
-class_name:
+class_names:
   - Center
   - Donut
   - Edge_Loc
