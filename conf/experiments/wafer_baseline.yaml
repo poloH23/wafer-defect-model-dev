@@ -1,0 +1,22 @@
+# Baseline: the simplest standard setup. Its only jobs are to prove the pipeline works
+# end to end and to give a reference number. Ablations change ONE setting at a time from here.
+
+experiment_name: wafer_defect
+split: wafer_defect_v1
+model: resnet18
+
+encoding: onehot
+augment: false
+pos_weight:
+  mode: none
+
+epochs: 30
+batch_size: 128
+learning_rate: 1.0e-3
+weight_decay: 1.0e-4
+scheduler: cosine
+early_stopping_patience: 8
+monitor: val_macro_ap
+
+seed: 42
+num_workers: 4
