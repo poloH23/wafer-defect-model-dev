@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from src.data.transforms import RandomDihedral, apply_dihedral, encode_discrete
+from src.data.transforms import RandomDihedral, apply_dihedral, encode_discrete, encoded_channels
 
 # ================= fixture: synthesised data =================
 
@@ -48,6 +48,10 @@ class TestEncodeDiscrete:
     def test_unknown_mode_raises(self, asymmetric_map):
         with pytest.raises(ValueError, match="Unsupported"):
             encode_discrete(asymmetric_map, num_values=3, mode="bogus")  # type: ignore[arg-type]
+
+    @pytest.mark.parametrize("mode", ["onehot", "scaled"])
+    def test_encoded_channel_matches_encoding(self, asymmetric_map, mode):
+        assert encode_discrete(asymmetric_map, 3, mode).shape[0] == encoded_channels(3, mode)
 
 
 # ========== apply_dihedral ==========

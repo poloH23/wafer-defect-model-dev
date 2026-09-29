@@ -25,6 +25,15 @@ def encode_discrete(image: np.ndarray, num_values: int, mode: EncodingMode = "on
         return (image[np.newaxis] / (num_values - 1)).astype(np.float32)
     raise ValueError(f"Unsupported encoding mode: {mode}")
 
+def encoded_channels(num_values: int, mode: EncodingMode = "onehot") -> int:
+    """Number of channel encode_discrete produces, used to sized the model's first layer."""
+    if mode == "onehot":
+        return num_values
+    if mode == "scaled":
+        return 1
+    raise ValueError(f"Unsupported encoding mode: {mode}")
+
+
 def apply_dihedral(image: np.ndarray, k: int, flip: bool) -> np.ndarray:
     """
     Apply one of the 8 symmetries of a square (dihedral group D4) ot the last two axes.
