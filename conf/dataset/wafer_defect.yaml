@@ -10,8 +10,14 @@ label_key: arr_1
 
 # Number of pixel categories: 0 = empty, 1 = pass, 2 = defect
 num_pixel_values: 3
-num_classes: 8
 
+# Data quality note: contrary to the documentation, the official file contains 244 pixels with the value 3,
+# spread over 105 images (1 to 5 pixels each), all labeled Random (97) or Near_Full (8): the two classes whose
+# labels the dataset authors corrected after release. Each such pixel is replaced in memory by the most
+# common valid value among its 8 neighbors; the raw file and every split made form it stay unchanged.
+invalid_pixel_policy: neighbor_mode
+
+num_classes: 8
 # 8 basic defect types.
 # Order matters: the i-th is the i-th dimenstion of the label vactor.
 # An all-zero label vector means "Normal" (no defect)
