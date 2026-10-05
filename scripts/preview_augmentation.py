@@ -32,7 +32,7 @@ def main() -> None:
         image = data[dataset_cfg.image_key][args.index]
         label = data[dataset_cfg.label_key][args.index]
 
-    active = [name for name, flag in zip(dataset_cfg.class_name, np.atleast_1d(label), strict=False) if flag]
+    active = [name for name, flag in zip(dataset_cfg.class_names, np.atleast_1d(label), strict=False) if flag]
     label_text = "+".join(active) if active else "Normal"
     plot_kwargs = build_discrete_plot_kwargs(eda_cfg.plot.discrete_colors) if eda_cfg.plot.discrete_colors else {}
 
