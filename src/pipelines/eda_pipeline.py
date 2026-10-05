@@ -31,6 +31,7 @@ class DatasetAnalysisPipeline:
         plot_kwargs: dict[str, Any] | None = None,
         class_names: dict[str, str] | None = None,
         pure_class_examples: bool = True,
+        expected_pixel_values: int | None = None,
     ):
         """
         The main entry point for pipeline execution.
@@ -49,7 +50,13 @@ class DatasetAnalysisPipeline:
         # 2. execute data analysis and output reports
         print(f"\nStarting dataset analysis: {target_file.name}")
         self._analysis_and_report(
-            target_file=target_file, image_key=image_key, label_key=label_key, pure_class_examples=pure_class_examples, plot_kwargs=plot_kwargs, class_names=class_names
+            target_file=target_file,
+            image_key=image_key,
+            label_key=label_key,
+            pure_class_examples=pure_class_examples,
+            plot_kwargs=plot_kwargs,
+            class_names=class_names,
+            expected_pixel_values=expected_pixel_values,
         )
         print(f"\nDataset analysis finished, reports saved: {self.report_dir}")
 
@@ -83,6 +90,7 @@ class DatasetAnalysisPipeline:
         pure_class_examples: bool = True,
         plot_kwargs: dict[str, Any] | None = None,
         class_names: dict[str, str] | None = None,
+        expected_pixel_values: int | None = None,
     ) -> None:
         """Execute the analysis using NPZAnalyzer and output the Markdown report."""
         # Protection Mechanism: NPZ file supported only
@@ -131,8 +139,20 @@ class DatasetAnalysisPipeline:
             analyzer.save_sample(index=idx, save_path=save_path, **plot_kwargs)
             saved_samples[class_name] = save_path.name
 
+        pixel_distribution = analyzer.get_pixel_value_distribution()
+
         # Generate the Markdown report
-        report_content = self._generate_markdown(target_file.name, num_samples, img_shape, label_type, distribution, saved_samples, combination_distribution)
+        report_content = self._generate_markdown(
+            target_file.name,
+            num_samples,
+            img_shape,
+            label_type,
+            distribution,
+            saved_samples,
+            combination_distribution,
+            expected_pixel_values,
+            pixel_distribution,
+        )
 
         # Save into the report file
         report_path = self.report_dir / "dataset_report.md"
@@ -148,6 +168,8 @@ class DatasetAnalysisPipeline:
         distribution: dict[str, int],
         saved_samples: dict[str, str],
         combination_distribution: dict[str, int] | None = None,
+        expected_pixel_values: int | None = None,
+        pixel_distribution: dict[int, dict[str, int]] | None = None,
     ) -> str:
         """Pure string manipulation: assembling Markdown content"""
         md = "# Automated Dataset Analysis Report (EDA Report)\n\n"
@@ -156,6 +178,14 @@ class DatasetAnalysisPipeline:
         md += f"- **Total Samples**: `{num_samples}`\n"
         md += f"- **Image Dimension**: `{img_shape}`\n"
         md += f"- **Label Type**: `{label_type}`\n\n"
+
+        if pixel_distribution is not None:
+            md += "\n## Pixel Value Distribution\n"
+            md += "| Value | Pixels | Images |\n|---|---|---|\n"
+            for value, stats in pixel_distribution.items():
+                out_of_range = expected_pixel_values is not None and not 0 <= value < expected_pixel_values
+                flag = " ⚠ outside documented range" if out_of_range else ""
+                md += f"| {value}{flag} | {stats['pixels']} | {stats['images']} |\n"
 
         md += "\n## Class Distribution\n"
         md += "| Class | Number |\n|---|---|\n"
