@@ -35,6 +35,7 @@ def main() -> None:
         plot_kwargs=plot_kwargs,
         class_names=dataset_cfg.class_name_map,
         pure_class_examples=eda_cfg.pure_class_examples,
+        expected_pixel_values=dataset_cfg.num_pixel_values,
     )
 
 

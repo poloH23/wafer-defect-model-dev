@@ -171,3 +171,15 @@ class NPZAnalyzer:
                 chosen = active[0]
             representatives[f"class_{c}"] = int(chosen)
         return representatives
+
+    def get_pixel_value_distribution(self) -> dict[int, dict[str, int]] | None:
+        """
+        For integer-valued images: how many pixels take each value, and how many images contain it.
+        Comparing the observed values with the documented ones is a basic data quality check.
+        Return None for floating-point images, where enumerating every value is not meaningful.
+        """
+        if not np.issubdtype(self.images.dtype, np.integer):
+            return None
+        values, counts = np.unique(self.images, return_counts=True)
+        sample_axes = tuple(range(1, self.images.ndim))
+        return {int(v): {"pixels": int(c), "images": int((self.images == v).any(axis=sample_axes).sum())} for c, v in zip(values, counts, strict=True)}
