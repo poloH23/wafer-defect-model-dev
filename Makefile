@@ -57,6 +57,18 @@ eda: ## Run dataset EDA (EDA_CONFIG=conf/eda/wafer_defect.yaml)
 split: ## Create a fixed train/val/test split (SPLIT_CONFIG=conf/split/wafer_defect_v1.yaml)
 	python scripts/run_split.py --config $(SPLIT_CONFIG)
 
+# === 🤖 Training ===
+TRAIN_CONFIG ?= conf/experiments/wafer_baseline.yaml
+
+sanity-check: ## Overfit one batch to verify the training pipeline (TRAIN_CONFIG=...)
+	python scripts/train.py --config $(TRAIN_CONFIG) --sanity-check
+
+train: ## Train the model and record the run in MLflow (TRAIN_CONFIG=...)
+	python scripts/train.py --config $(TRAIN_CONFIG)
+
+mlflow-ui: ## Open the local MLflow UI at http://127.0.0.1:5000
+	mlflow ui --backend-store-uri sqlite:///mlflow.db
+
 # === 🧪 Testing ===
 test:  ## Run pytest
 	pytest --cov=. --cov-report=term-missing

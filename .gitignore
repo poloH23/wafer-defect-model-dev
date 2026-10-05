@@ -21,6 +21,7 @@ docs/others/
 temp/
 
 # MLflow
+mlflow.db
 mlruns/
 mlartifacts/
 

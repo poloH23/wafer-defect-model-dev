@@ -1,7 +1,7 @@
-import json
-from datetime import UTC, datetime
 import hashlib
+import json
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -156,3 +156,12 @@ def load_split(split_dir: str | Path) -> SplitResult:
 
     with np.load(split_path) as data:
         return SplitResult(train_idx=data["train"], val_idx=data["val"], test_idx=data["test"], strata=data["strata"])
+
+
+def load_split_meta(split_dir: str | Path) -> dict[str, Any]:
+    """Load the metadata saved next to the split indices (digest, source hash, parameters)."""
+    meta_path = Path(split_dir) / META_FILE
+    if not meta_path.exists():
+        raise FileNotFoundError(f"Split metadata not found: {meta_path}")
+    with open(meta_path, encoding="utf-8") as f:
+        return json.load(f)
