@@ -42,6 +42,7 @@ class DatasetConfig(StrictModel):
     num_classes: int = Field(gt=0)  # prevents the missing or extract entry in class_names
     class_names: list[str] = Field(min_length=1)  # order matters
     num_pixel_values: int | None = Field(default=None, ge=2)  # discrete pixel category number (None for continuous images)
+    invalid_pixel_policy: Literal["error", "neighbor_mode"] = "error"
 
     @model_validator(mode="after")
     def check_class_names(self) -> Self:
@@ -153,7 +154,7 @@ def load_named_config[ConfigT: BaseModel](group: str, name: str, model: type[Con
     return load_config(CONF_DIR / group / f"{name}.yaml", model)
 
 
-def laod_dataset_config(name: str) -> DatasetConfig:
+def load_dataset_config(name: str) -> DatasetConfig:
     return load_named_config("dataset", name, DatasetConfig)
 
 
