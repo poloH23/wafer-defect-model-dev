@@ -9,22 +9,13 @@ Usage:
 """
 
 import argparse
-import hashlib
 from pathlib import Path
 
 import numpy as np
 
 from src.common.config_schema import SplitConfig, load_config, load_dataset_config
+from src.common.hashing import file_sha256
 from src.data.split import save_split, split_indices, split_report
-
-
-def file_sha256(path: Path, chunk_size: int = 1 << 20) -> str:
-    """Fingerprint of the source file, so the split can be tied to the exact data it was made from."""
-    digest = hashlib.sha256()
-    with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(chunk_size), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def parse_args() -> argparse.Namespace:
@@ -55,15 +46,15 @@ def main() -> None:
     print(f"Smallest stratum -> total: {smallest['total']}, train: {smallest['train']}, val: {smallest['val']}, test: {smallest['test']}")
 
     split_path = save_split(
-        result=result,
-        output_dir=split_cfg.output_dir,
+        result,
+        split_cfg.output_dir,
         overwrite=args.overwrite,
         metadata={
             "config_file": Path(args.config).as_posix(),
             "source_file": dataset_cfg.source.as_posix(),
             "source_sha256": file_sha256(dataset_cfg.source_path),
             "label_key": dataset_cfg.label_key,
-            **split_cfg.model_dump(mode="json"),
+            **split_cfg.model_dump(mode="json"),  # every split parameter is recored by dumping the whole config
         },
     )
     print(f"Split saved: {split_path}")
