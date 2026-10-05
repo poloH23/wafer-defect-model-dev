@@ -14,7 +14,23 @@ def multilabel_metrics(
     thresholds: float | np.ndarray = 0.5,
     class_names: list[str] | None = None,
 ) -> dict[str, Any]:
-    """ """
+    """
+    Evaluate multi-label perdictions.
+
+    Args:
+        y_true: (N, C) binary groud truth
+        y_pred: (N, C) predicted probabilities (sigmoid outputs)
+        thresholds: a single decision threshold, or one per class (C,) after threshold tuning
+        class_names: names used as keys in the per-class results; default to class_0 ... class_{C-1}
+
+    Returns:
+        macro_ap: mean average precision over classes. Threshold-free, so it is the metric used to
+                  select checkpoints before per-class thresholds are tuned
+        macro_f1: F1 averaged with equal weight per class; rare classes count as much as common ones
+        micro_f1: F1 over all label decisions pooled; dominated by common classes
+        exact_match: share of samples whose C labels are ALL correct (the full defect combination is right)
+        per_class: {name: {precision, recall, f1, ap, support}}
+    """
     if y_true.shape != y_prob.shape or y_true.ndim != 2:
         raise ValueError(f"Excepted y_true and y_prob with the same (N, C) shape, got {y_true.shape} and {y_prob.shape}")
 
@@ -54,3 +70,19 @@ def multilabel_metrics(
             for c, name in enumerate(names)
         },
     }
+
+
+def flatten_metrics(metrics: dict[str, Any], prefix: str) -> dict[str, float]:
+    """
+    Flattern the output of multilabel_metrics into {name: value} for experiment tracking.
+
+    Summary metrics becom e.g. "val_macro_ap"; per-class AP and F1 become e.g. "val_ap_Near_Full",
+    so the progress of rare classes can be followed epoch by epoch. NaN values (a class without
+    positive samples) are skipped.
+    """
+    flat = {f"{prefix}_{key}": value for key, value in metrics.items() if key != "per_class"}
+    for name, stats in metrics["per_class"].items():
+        for stat in ["ap", "f1"]:
+            if not np.isnan(stats[stat]):
+                flat[f"{prefix}_{stat}_{name}"] = stats[stat]
+    return flat

@@ -1,12 +1,17 @@
 import numpy as np
 import pytest
 
-from src.training.metrics import multilabel_metrics
+from src.training.metrics import flatten_metrics, multilabel_metrics
+
+# ================= fixture: synthesised data =================
 
 
 @pytest.fixture
 def y_true() -> np.ndarray:
     return np.array([[1, 0], [0, 1], [1, 1], [0, 0]])
+
+
+# ================= Test: multilabel_metrics =================
 
 
 def test_perfect_predictions(y_true):
@@ -47,3 +52,16 @@ def test_class_without_positives_is_excluded_from_macro_ap():
 def test_shape_mismatch_raises(y_true):
     with pytest.raises(ValueError, match="shape"):
         multilabel_metrics(y_true, np.zeros((4, 3)))
+
+
+# ================= Test: flatten_metrics =================
+
+
+def test_flatten_metrics_names_and_nan_skipping():
+    y = np.array([[1, 0], [0, 0], [1, 0]])
+    flat = flatten_metrics(multilabel_metrics(y, y.astype(float), class_names=["Center", "Scratch"]), prefix="val")
+    assert flat["val_macro_ap"] == pytest.approx(1.0)
+    assert flat["val_ap_Center"] == pytest.approx(1.0)
+    assert "val_ap_Scratch" not in flat  # NaN: no positive sample
+    assert "val_f1_Scratch" in flat
+    assert "val_per_class" not in flat
