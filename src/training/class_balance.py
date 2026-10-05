@@ -38,3 +38,11 @@ def compute_pos_weight(labels: np.ndarray, mode: PosWeightMode = "sqrt", max_val
     if max_value is not None:
         ratio = np.minimum(ratio, max_value)
     return ratio.astype(np.float32)
+
+
+def expected_initial_bce(labels: np.ndarray, pos_weight: np.ndarray | None = None) -> float:
+    """ """
+    weights = np.ones(labels.shape, dtype=np.float64)
+    if pos_weight is not None:
+        weights = np.where(labels == 1, pos_weight[np.newaxis, :], 1.0)
+    return float(np.log(2) * weights.mean())
