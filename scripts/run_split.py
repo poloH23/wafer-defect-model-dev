@@ -55,7 +55,7 @@ def main() -> None:
     max_val_dev = max(abs(r["val"] / r["total"] - split_cfg.val_ratio) for r in rows)
     max_test_dev = max(abs(r["test"] / r["total"] - split_cfg.test_ratio) for r in rows)
     smallest = min(rows, key=lambda r: r["total"])
-    print(f"Max pre-stratum deviation -> val: {max_val_dev:.3%}, test: {max_test_dev:.3%}")
+    print(f"Max per-stratum deviation -> val: {max_val_dev:.3%}, test: {max_test_dev:.3%}")
     print(f"Smallest stratum -> total: {smallest['total']}, train: {smallest['train']}, val: {smallest['val']}, test: {smallest['test']}")
 
     split_path = save_split(
