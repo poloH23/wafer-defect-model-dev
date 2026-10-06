@@ -23,13 +23,13 @@ CONF_DIR = Path("conf")
 
 
 def resolve_path(path: str | Path) -> Path:
-    """Paths in configs is relative to the project root, so thry work from any working directory."""
+    """Paths in configs are relative to the project root, so they work from any working directory."""
     path = Path(path)
     return path if path.is_absolute() else (get_project_root() / path).resolve()
 
 
 class StrictModel(BaseModel):
-    # extra="forbid": an unknown key (usually a type) is an error, not silently ignored
+    # extra="forbid": an unknown key (usually a typo) is an error, not silently ignored
     # frozen=True: a loaded config cannot be modified halfway through a run
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -47,9 +47,9 @@ class DatasetConfig(StrictModel):
     @model_validator(mode="after")
     def check_class_names(self) -> Self:
         if len(self.class_names) != self.num_classes:
-            raise ValueError(f"class_name has {len(self.class_names)} entries, expected num_classes = {self.num_classes}")
+            raise ValueError(f"class_names has {len(self.class_names)} entries, expected num_classes = {self.num_classes}")
         if len(set(self.class_names)) != len(self.class_names):
-            raise ValueError("class_names contains duplicates.")
+            raise ValueError("class_names contains duplicates")
         return self
 
     @property
@@ -58,7 +58,7 @@ class DatasetConfig(StrictModel):
 
     @property
     def class_name_map(self) -> dict[str, str]:
-        """Map the generic ids produced by analysis module (class_0, class_1, ...) to readable names."""
+        """Map the generic ids produced by the analysis modules (class_0, class_1, ...) to readable names."""
         return {f"class_{i}": name for i, name in enumerate(self.class_names)}
 
 
@@ -69,6 +69,7 @@ class SplitConfig(StrictModel):
     val_ratio: float = Field(gt=0, lt=1)
     test_ratio: float = Field(gt=0, lt=1)
     min_stratum_count: int = Field(default=10, ge=1)
+    duplicate: bool = False
     output_root: Path = Path("data/splits")
 
     @model_validator(mode="after")
@@ -116,7 +117,7 @@ class PosWeightConfig(StrictModel):
 class TrainConfig(StrictModel):
     # MLflow experiment that groups every run of this project
     experiment_name: str
-    # Reference resolved by name: conf/split/<split>.yaml and conf/model/<model>.yaml
+    # References resolved by name: conf/split/<split>.yaml and conf/model/<model>.yaml
     split: str
     model: str
 
@@ -127,9 +128,9 @@ class TrainConfig(StrictModel):
     epochs: int = Field(gt=0)
     batch_size: int = Field(gt=0)
     learning_rate: float = Field(gt=0)
-    weight_decay: float = Field(gt=0)
+    weight_decay: float = Field(default=0.0, ge=0)
     scheduler: Literal["none", "cosine"] = "cosine"
-    # Stop when the monitored metric has not imporved for this many epochs; None diables it
+    # Stop when the monitored metric has not improved for this many epochs; None disables it
     early_stopping_patience: int | None = Field(default=None, gt=0)
     # Threshold-free metric used to pick the best checkpoint (decision thresholds are tuned later)
     monitor: Literal["val_macro_ap", "val_macro_f1"] = "val_macro_ap"
