@@ -2,7 +2,7 @@
 # end to end and to give a reference number. Ablations change ONE setting at a time from here.
 
 experiment_name: wafer_defect
-split: wafer_defect_v1
+split: wafer_defect_v2
 model: resnet18
 
 encoding: onehot
