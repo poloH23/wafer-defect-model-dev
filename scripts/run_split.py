@@ -15,6 +15,7 @@ import numpy as np
 
 from src.common.config_schema import SplitConfig, load_config, load_dataset_config
 from src.common.hashing import file_sha256
+from src.data.cleaning import find_duplicate_images
 from src.data.split import save_split, split_indices, split_report
 
 
@@ -30,11 +31,23 @@ def main() -> None:
     split_cfg = load_config(args.config, SplitConfig)
     dataset_cfg = load_dataset_config(split_cfg.dataset)
 
-    # Only the label array of the NPZ data is loaded here, the images are never loaded.
+    # Images are only loaded when they are needed to find duplicates
     with np.load(dataset_cfg.source_path) as data:
         labels = data[dataset_cfg.label_key]
+        images = data[dataset_cfg.image_key] if split_cfg.duplicate else None
 
-    result = split_indices(labels, val_ratio=split_cfg.val_ratio, test_ratio=split_cfg.test_ratio, seed=split_cfg.seed, min_stratum_count=split_cfg.min_stratum_count)
+    exclude = None
+    if images is not None:
+        exclude = find_duplicate_images(images, labels)
+        print(f"Excluding {exclude.size} duplicate images (the first copy of each is kept)")
+        combos, counts = np.unique(labels[exclude], axis=0, return_counts=True)
+        for combo, count in sorted(zip(combos, counts, strict=True), key=lambda pair: -pair[1])[:5]:
+            name = "+".join(n for n, flag in zip(dataset_cfg.class_names, combo, strict=True) if flag) or "Normal"
+            print(f"  {name:<35} {count}")
+
+    result = split_indices(
+        labels, val_ratio=split_cfg.val_ratio, test_ratio=split_cfg.test_ratio, seed=split_cfg.seed, min_stratum_count=split_cfg.min_stratum_count, exclude=exclude
+    )
     print(f"Split sizes: {result.sizes()}")
 
     # Stratification check: how far each stratum's val/test share drifts from the target ratio

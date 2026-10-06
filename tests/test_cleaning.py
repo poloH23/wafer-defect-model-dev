@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from src.data.cleaning import apply_invalid_pixel_policy, impute_neighbor_mode
+from src.data.cleaning import apply_invalid_pixel_policy, find_duplicate_images, impute_neighbor_mode
 
 NUM_VALUES = 3
 
@@ -81,3 +81,24 @@ def test_no_valid_neighbor_raises():
     images = np.full((1, 3, 3), 3, dtype=np.uint8)
     with pytest.raises(ValueError, match="none of its neighbors"):
         impute_neighbor_mode(images, NUM_VALUES)
+
+
+# ================= Test: find_duplicate_images =================
+
+
+def test_duplicates_keep_the_first_copy():
+    images = np.stack([blank(0)[0], blank(1)[0], blank(0)[0], blank(2)[0], blank(0)[0]])
+    labels = np.zeros((5, 2))
+    assert find_duplicate_images(images, labels).tolist() == [2, 4]
+
+
+def test_no_duplicates_returns_empty():
+    images = np.stack([blank(v)[0] for v in range(3)])
+    assert find_duplicate_images(images, np.zeros((3, 2))).size == 0
+
+
+def test_identical_images_with_different_labels_raise():
+    images = np.stack([blank(1)[0], blank(1)[0]])
+    labels = np.array([[1, 0], [0, 1]])
+    with pytest.raises(ValueError, match="identical but have different labels"):
+        find_duplicate_images(images, labels)

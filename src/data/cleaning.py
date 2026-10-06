@@ -2,6 +2,7 @@
 # The raw data is never modified: cleaning is applied in memery after loading, so the
 # file hash stays valid, and the rule is visible in code and config.
 
+import hashlib
 from collections import Counter
 from typing import Any, Literal
 
@@ -66,3 +67,23 @@ def apply_invalid_pixel_policy(images: np.ndarray, num_values: int, policy: Inva
     report["invalid_values"] = invalid_values
     report["replaced_with"] = {str(value): count for value, count in replaced.items()}
     return cleaned, report
+
+def find_duplicate_images(images: np.ndarray, labels: np.ndarray) -> np.ndarray:
+    """
+    Indices of exact duplicate images to exclude, keeping the first occurrence of each group.
+
+    Duplicates must be removed before splitting: with one copy in train and another in val or test,
+    the model is evaluated on images it has already memorized, and the scores are inflated.
+    Identical images with different labels cannot be resolved automatically, so they raise an error.
+    """
+    first_seen: dict[bytes, int] = {}
+    duplicates = []
+    for i, image in enumerate(images):
+        key = hashlib.sha1(np.ascontiguousarray(image).tobytes()).digest()
+        first = first_seen.setdefault(key, i)
+        if first == i or not np.array_equal(images[first], image): # new image, or a hash collision
+            continue
+        if not np.array_equal(labels[first], labels[i]):
+            raise ValueError(f"Image {first} and {i} are identical but have different labels")
+        duplicates.append(i)
+    return np.array(duplicates, dtype=np.int64)
