@@ -1,0 +1,19 @@
+# Split version v2 of the wafer_defect dataset: v1 parameters, with exact duplicate image removed.
+#
+# v1 left 157 validation and 174 test images with an identical copy in the training split
+# (1023 groups of identical images, no conflicting labels), so v1 scores are inflated.
+#
+# Once a split has been generated and used by any experiment, ever edit this file:
+# create a new version insdead, so results from different splits are never mixed up.
+
+dataset: wafer_defect
+version: v2
+
+seed: 42
+val_ratio: 0.1
+test_ratio: 0.1
+
+# Label combination with fewer samples than this are merged into one "rare" stratum
+min_stratum_count: 10
+
+duplicate: true
