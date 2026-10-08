@@ -40,6 +40,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train a model from an experiment config.")
     parser.add_argument("--config", required=True, help="Experiment config path, relative to the project root.")
     parser.add_argument("--sanity-check", action="store_true", help="Only overfit a single batch to verify the pipeline; nothing is logged.")
+    parser.add_argument("--seed", type=int, help="Override the config seed, e.g. to measure run-to-run variance. The effective seed is what gets logged.")
     return parser.parse_args()
 
 
@@ -51,6 +52,7 @@ def build_loaders(datasets: dict[str, DiscreteMapDataset], cfg: TrainConfig, dev
         "worker_init_fn": seed_worker,
         "persistent_workers": cfg.num_workers > 0,
     }
+    # A dedicated generator makes the shuffling order reproducible from the config seed
     generator = torch.Generator().manual_seed(cfg.seed)
     return {"train": DataLoader(datasets["train"], shuffle=True, generator=generator, **common), "val": DataLoader(datasets["val"], shuffle=False, **common)}
 
@@ -93,6 +95,8 @@ def run_sanity_check(
 def main() -> None:
     args = parse_args()
     train_cfg = load_config(args.config, TrainConfig)
+    if args.seed is not None:
+        train_cfg = train_cfg.model_copy(update={"seed": args.seed})
     split_cfg = load_split_config(train_cfg.split)
     dataset_cfg = load_dataset_config(split_cfg.dataset)
     model_cfg = load_model_config(train_cfg.model)
@@ -133,7 +137,8 @@ def main() -> None:
     loaders = build_loaders(datasets, train_cfg, device)
 
     setup_experiment(train_cfg.experiment_name)
-    with mlflow.start_run(run_name=Path(args.config).stem), tempfile.TemporaryDirectory() as tmp_dir:
+    run_name = Path(args.config).stem + (f"_seed{args.seed}" if args.seed is not None else "")
+    with mlflow.start_run(run_name=run_name), tempfile.TemporaryDirectory() as tmp_dir:
         mlflow.set_tags({**git_tags(), "config_file": Path(args.config).as_posix()})
         mlflow.log_params(
             {
@@ -152,6 +157,7 @@ def main() -> None:
         mlflow.log_artifact(str(split_cfg.output_dir / META_FILE), artifact_path="config")
         if pos_weight is not None:
             mlflow.log_dict(dict(zip(dataset_cfg.class_names, pos_weight.tolist(), strict=True)), "config/pos_weight.json")
+        mlflow.log_dict(cleaning_report, "config/pixel_clean.json")
 
         result = fit(
             model,
