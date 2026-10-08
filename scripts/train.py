@@ -20,7 +20,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-from src.common.config_schema import DatasetConfig, TrainConfig, load_config, load_dataset_config, load_model_config, load_split_config, resolve_path
+from src.common.config_schema import TrainConfig, load_config, load_dataset_config, load_model_config, load_split_config, resolve_path
 from src.common.hashing import file_sha256
 from src.data.cleaning import apply_invalid_pixel_policy
 from src.data.dataset import DiscreteMapDataset, build_split_datasets, load_npz_arrays, seed_worker
@@ -62,7 +62,7 @@ def run_sanity_check(
     images: np.ndarray,
     labels: np.ndarray,
     train_idx: np.ndarray,
-    dataset_cfg: DatasetConfig,
+    num_values: int,
     cfg: TrainConfig,
     pos_weight: np.ndarray | None,
     loss_fn: nn.Module,
@@ -73,7 +73,7 @@ def run_sanity_check(
     # ordered by class, so the first 32 samples would all share one label combination and
     # "overfitting" them would prove almost nothing.
     batch_idx = np.random.default_rng(cfg.seed).choice(train_idx, size=SANITY_BATCH_SIZE, replace=True)
-    batch = DiscreteMapDataset(images, labels, batch_idx, dataset_cfg.num_pixel_values, cfg.encoding, transform=None)
+    batch = DiscreteMapDataset(images, labels, batch_idx, num_values, cfg.encoding, transform=None)
     batch_images = torch.stack([batch[i][0] for i in range(len(batch))])
     batch_targets = torch.stack([batch[i][1] for i in range(len(batch))])
 
@@ -102,6 +102,7 @@ def main() -> None:
     model_cfg = load_model_config(train_cfg.model)
     if dataset_cfg.num_pixel_values is None:
         raise ValueError("This training scripts expects discrete-valued map; set num_pixel_values in the dataset config.")
+    num_values = dataset_cfg.num_pixel_values
 
     set_seed(train_cfg.seed)
     device = resolve_device()
@@ -130,7 +131,7 @@ def main() -> None:
     optimizer = torch.optim.AdamW(model.parameters(), lr=train_cfg.learning_rate, weight_decay=train_cfg.weight_decay)
 
     if args.sanity_check:
-        passed = run_sanity_check(model, images, labels, split.train_idx, dataset_cfg, train_cfg, pos_weight, loss_fn, optimizer, device)
+        passed = run_sanity_check(model, images, labels, split.train_idx, num_values, train_cfg, pos_weight, loss_fn, optimizer, device)
         sys.exit(0 if passed else 1)
 
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=train_cfg.epochs) if train_cfg.scheduler == "cosine" else None
