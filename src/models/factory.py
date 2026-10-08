@@ -1,5 +1,9 @@
 # Build classification backbones adapted to the task's input size, channels and number of labels.
 
+from pathlib import Path
+from typing import Any
+
+import torch
 import torchvision
 from torch import nn
 
@@ -29,9 +33,25 @@ def build_model(name: str, num_classes: int, in_channels: int, pretrained: bool 
 
     if small_input_stem or in_channels != 3:
         kernel_size, stride, padding = (3, 1, 1) if small_input_stem else (7, 2, 3)
+
         model.conv1 = nn.Conv2d(in_channels=in_channels, out_channels=model.conv1.out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
     if small_input_stem:
         model.maxpool = nn.Identity()
 
     model.fc = nn.Linear(model.fc.in_features, num_classes)
     return model
+
+
+def load_checkpoint(path: str | Path, device: torch.device) -> tuple[nn.Module, dict[str, Any]]:
+    """
+    Rebuild a model from a checkpoint saved by scripts/train.py, in evaluation mode.
+
+    The checkpoint stores everything needed to rebuild the architecture, so evaluation never depends
+    on config files that may have changed since training. pretrained=False because every weight is
+    restored from the checkpoint anyway, so nothing needs to be downloaded.
+    """
+    checkpoint = torch.load(path, map_location=device, weights_only=True)
+    model_cfg = checkpoint["model_config"]
+    model = build_model(model_cfg["name"], checkpoint["num_classes"], checkpoint["in_channels"], pretrained=False, small_input_stem=model_cfg["small_input_stem"])
+    model.load_state_dict(checkpoint["model_state"])
+    return model.to(device).eval(), checkpoint
