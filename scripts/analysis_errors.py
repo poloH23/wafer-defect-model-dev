@@ -55,17 +55,17 @@ def main() -> None:
 
     split_cfg = load_split_config(train_cfg.split)
     dataset_cfg = load_dataset_config(split_cfg.dataset)
+    if dataset_cfg.num_pixel_values is None:
+        raise ValueError("This analysis expects discrete-valued maps; set num_pixel_values in the dataset config.")
+    num_values = dataset_cfg.num_pixel_values
     # Lineage: analyze the run on exactly the split it was trained and validated with
     if load_split_meta(split_cfg.output_dir)["split_digest"] != run.data.params["split_digest"]:
         raise RuntimeError(f"Split '{train_cfg.split}' on disk differs from the one this run used.")
 
     images, labels = load_npz_arrays(dataset_cfg.source_path, dataset_cfg.image_key, dataset_cfg.label_key)
-
-    if not dataset_cfg.num_pixel_values:
-        raise ValueError("The number of pixel values is missing, dataset validation is unable to proceed.")
-    images, _ = apply_invalid_pixel_policy(images, dataset_cfg.num_pixel_values, dataset_cfg.invalid_pixel_policy)
+    images, _ = apply_invalid_pixel_policy(images, num_values, dataset_cfg.invalid_pixel_policy)
     val_idx = load_split(split_cfg.output_dir).val_idx
-    val_set = DiscreteMapDataset(images, labels, val_idx, dataset_cfg.num_pixel_values, checkpoint["encoding"])
+    val_set = DiscreteMapDataset(images, labels, val_idx, num_values, checkpoint["encoding"])
     loader = DataLoader(val_set, batch_size=train_cfg.batch_size, shuffle=False)
 
     # The loss value is not used here; predict() only needs a loss function to report one
@@ -84,7 +84,7 @@ def main() -> None:
     for row in confusions[:10]:
         print(f"  {row['true']:<35} -> {row['predicted']:<35} {row['count']}")
 
-    #
+    # Plot the errors in the same colors as the EDA report, when an EDA config exists for this dataset
     try:
         colors = load_named_config("eda", dataset_cfg.name, EdaConfig).plot.discrete_colors
     except FileNotFoundError:

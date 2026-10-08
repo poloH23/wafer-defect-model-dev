@@ -30,15 +30,17 @@ def build_model(name: str, num_classes: int, in_channels: int, pretrained: bool 
         raise ValueError(f"Unsupported model '{name}', choose from {SUPPROTED_MODELS}")
 
     model = torchvision.models.get_model(name, weights="DEFAULT" if pretrained else None)
+    conv1, fc = model.conv1, model.fc
+    if not isinstance(conv1, nn.Conv2d) or not isinstance(fc, nn.Linear):
+        raise TypeError(f"'{name}' does not have the expected ResNet stem (conv1) and head (fc)")
 
     if small_input_stem or in_channels != 3:
         kernel_size, stride, padding = (3, 1, 1) if small_input_stem else (7, 2, 3)
-
-        model.conv1 = nn.Conv2d(in_channels=in_channels, out_channels=model.conv1.out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
+        model.conv1 = nn.Conv2d(in_channels=in_channels, out_channels=conv1.out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
     if small_input_stem:
         model.maxpool = nn.Identity()
 
-    model.fc = nn.Linear(model.fc.in_features, num_classes)
+    model.fc = nn.Linear(fc.in_features, num_classes)
     return model
 
 
