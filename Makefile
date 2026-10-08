@@ -2,6 +2,7 @@
         init requirements requirements-bootstrap requirements-refresh \
         conda-dev conda-export conda-custom \
         clean gitkeep-clean clean-zone \
+        eda split sanity-check train mlflow-ui test analyze-errors \
         docker-build docker-run docker-run-fastapi docker-run-flask \
         demo-run gitkeep-add system-info
 
@@ -63,8 +64,13 @@ TRAIN_CONFIG ?= conf/experiments/wafer_baseline.yaml
 sanity-check: ## Overfit one batch to verify the training pipeline (TRAIN_CONFIG=...)
 	python scripts/train.py --config $(TRAIN_CONFIG) --sanity-check
 
-train: ## Train the model and record the run in MLflow (TRAIN_CONFIG=...)
-	python scripts/train.py --config $(TRAIN_CONFIG)
+SEED ?=
+
+train: ## Train a model and record the run in MLflow (TRAIN_CONFIG=...)
+	python scripts/train.py --config $(TRAIN_CONFIG) $(if $(SEED), --seed $(SEED))
+
+analyze-errors: ## Analyze validation errors of a run and attach them to it in MLflow (RUN_ID=...)
+	python scripts/analyze_errors.py --run-id $(RUN_ID)
 
 mlflow-ui: ## Open the local MLflow UI at http://127.0.0.1:5000
 	mlflow ui --backend-store-uri sqlite:///mlflow.db
