@@ -80,6 +80,49 @@ Every push or pull request triggers GitHub Actions (defined in `.github/workflow
 - **Test suite**: Executes pytest and generates a coverage report.
 
 
+## Data Qality Findings
+
+Issues found in the official dataset, and how they are handeled. The raw file is never modified:
+every rule below is applied in code and configured under 'conf/'.
+
+- **Extra duplicate images.** 1,024 images are byte-for-byte copies of another image with the same labels.
+  1,000 of them form a complete second copy of the Center+Edge_Loc+Scratch combination, which explains
+  why the documentation lists 2,000 samples for that combination and 1,000 for every other one. The
+  remaining 24 belong to Random (16) and Near_Full (8). A first random split left 157 validation and
+  174 test images with an identical copy in the training split, inflating the validation scores.
+  Split 'v2' keeps a single copy of each image, and every reported result uses it.
+- **Undocumented pixel values.** The documentation lists three pixel values (0 = empty, 1 = pass,
+  2 = fail), but the file contains 214 pixels with the value 3 in 105 images, all labeled Random (97)
+  or Near_Full (8): the two classes whose labels the authors corrected after release.
+
+
+## Limitations
+
+### Data
+
+- **Partly synthetic data.** The dataset authors generated part of the samples with a generative
+  adversarial network to balance the classes, and synthetic samples are not marked.
+- **Artificially balanced class distribution.** Most label combinations have exactly 1,000 samples.
+  Real production lines are dominated by normal wafers, so precision in production would be lower
+  than reported here, and decision thresholds would need to be recalibrated on real data.
+- **Near_Full and Random never co-occur with other defects.** The model has never seen them in
+  mixed patterns, so its behavior on such combinations is untested.
+
+### Evaluation
+- **Small rare-class evaluation sets.** After deduplication, Near_Full has 141 samples: 14 in
+  validation and 15 in test. A single test error changes Near_Full recall by about 6.7 percentage points.
+- **A single random split.** All splits come from the same source and the same distribution.
+  A split by time, production line or fab would give a more realistic estimate, but this
+  information is not available in the dataset.
+
+### Scope
+
+- **Fixed input format.** The model is trained on 52×52 maps from a single source; other die
+  layouts or resolutions would require retraining.
+- **No deployment evaluation.** Inference latency and robustness to distribution shift are out
+  of scope here and are covered by the follow-up deployment project.
+
+
 ## Project Structure
 
 <!-- TODO:  -->
