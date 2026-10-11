@@ -52,25 +52,28 @@ gitkeep-clean:  ## Remove all .gitkeep files
 EDA_CONFIG ?= conf/eda/wafer_defect.yaml
 SPLIT_CONFIG ?= conf/split/wafer_defect_v1.yaml
 
-eda: ## Run dataset EDA (EDA_CONFIG=conf/eda/wafer_defect.yaml)
+eda:  ## Run dataset EDA (EDA_CONFIG=conf/eda/wafer_defect.yaml)
 	python scripts/run_eda.py --config $(EDA_CONFIG)
 
-split: ## Create a fixed train/val/test split (SPLIT_CONFIG=conf/split/wafer_defect_v1.yaml)
+split:  ## Create a fixed train/val/test split (SPLIT_CONFIG=conf/split/wafer_defect_v1.yaml)
 	python scripts/run_split.py --config $(SPLIT_CONFIG)
 
 # === 🤖 Training ===
 TRAIN_CONFIG ?= conf/experiments/wafer_baseline.yaml
 
-sanity-check: ## Overfit one batch to verify the training pipeline (TRAIN_CONFIG=...)
+sanity-check:  ## Overfit one batch to verify the training pipeline (TRAIN_CONFIG=...)
 	python scripts/train.py --config $(TRAIN_CONFIG) --sanity-check
 
 SEED ?=
 
-train: ## Train a model and record the run in MLflow (TRAIN_CONFIG=...)
+train:  ## Train a model and record the run in MLflow (TRAIN_CONFIG=...)
 	python scripts/train.py --config $(TRAIN_CONFIG) $(if $(SEED), --seed $(SEED))
 
-analyze-errors: ## Analyze validation errors of a run and attach them to it in MLflow (RUN_ID=...)
+analyze-errors:  ## Analyze validation errors of a run and attach them to it in MLflow (RUN_ID=...)
 	python scripts/analyze_errors.py --run-id $(RUN_ID)
+
+edge-coverage:  ## Edge_Loc vs Edge_Ring edge coverage analysis of a run (RUN_ID=...; run analyze-errors first)
+	python scripts/analyze_edge_coverage.py --run-id $(RUN_ID)
 
 mlflow-ui: ## Open the local MLflow UI at http://127.0.0.1:5000
 	mlflow ui --backend-store-uri sqlite:///mlflow.db

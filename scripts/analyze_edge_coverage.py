@@ -21,10 +21,10 @@ from typing import Any
 import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
-from src.evaluation.edge_coverage import edge_coverage, edge_coverage_batch, percentile_rank, separability_auc
-from src.evaluation.run_context import load_clean_arrays, load_run_context
 
 from src.data.split import load_split
+from src.evaluation.edge_coverage import edge_coverage, edge_coverage_batch, percentile_rank, separability_auc
+from src.evaluation.run_context import load_clean_arrays, load_run_context
 
 
 def parse_args() -> argparse.Namespace:
