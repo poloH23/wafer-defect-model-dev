@@ -1,11 +1,9 @@
-from pathlib import Path
-
 import numpy as np
 import pytest
 import torch
 from torch.utils.data import DataLoader
 
-from src.data.dataset import DiscreteMapDataset, build_split_datasets, load_npz_arrays, seed_worker
+from src.data.dataset import DiscreteMapDataset, build_split_datasets, seed_worker
 from src.data.split import split_indices
 from src.data.transforms import RandomDihedral
 
@@ -23,16 +21,6 @@ def arrays() -> tuple[np.ndarray, np.ndarray]:
 
 
 # ================= Test Cases =================
-
-
-def test_load_npz_arrays_downcasts_to_uint8(tmp_path: Path, arrays):
-    images, labels = arrays
-    path = tmp_path / "data.npz"
-    np.savez(path, arr_0=images.astype(np.int64), arr_1=labels)
-    loaded_images, loaded_labels = load_npz_arrays(path, "arr_0", "arr_1")
-    assert loaded_images.dtype == np.uint8
-    assert np.array_equal(loaded_images, images)
-    assert np.array_equal(loaded_labels, labels)
 
 
 def test_item_shapes_and_dtypes(arrays):

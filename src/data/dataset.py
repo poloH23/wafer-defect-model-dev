@@ -2,7 +2,6 @@
 # All encoding and augmentation logic lives in the NumPy-only module (src.data.transforms).
 # This module only selects samples by index and converts them to tensors.
 
-from pathlib import Path
 
 import numpy as np
 import torch
@@ -12,24 +11,12 @@ from src.data.split import SplitResult
 from src.data.transforms import EncodingMode, RandomDihedral, encode_discrete
 
 
-def load_npz_arrays(path: str | Path, image_key: str, label_key: str) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Load images and labels once, so every split shares the same arrays instead of copying them.
-    Integer images whose values fit in uint8 are stored as uint8 for memory saving.
-    """
-    with np.load(path) as data:
-        images = data[image_key]
-        labels = data[label_key]
-
-    if np.issubdtype(images.dtype, np.integer) and images.min() >= 0 and images.max() <= np.iinfo(np.uint8).max:
-        images = images.astype(np.uint8)
-    return images, labels
-
 class DiscreteMapDataset(Dataset):
     """
     Serves (image, target) pair for the samples selected by 'indices'.
     - image: float32 tensor (C, H, W), produced by encode_discrete, then augmented if a transform is given
-    - target: float32 multi-hot vector for 2D labels (EncodingMode)
+    - target: float32 multi-hot vector for 2D labels (EncodingMode),
+              int64 class index for 1D labels (CrossEntropyLoss).
     """
     def __init__(
         self,
