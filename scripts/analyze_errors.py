@@ -60,8 +60,8 @@ def main() -> None:
     swaps = label_swaps(y_true, y_pred, names)
     confusions = combination_confusions(y_true, y_pred, names)
     confidence = error_confidence(y_true, y_pred, y_prob)
-    print(f"Misclassified validation samples: {errors.size} / {len(y_true)} (threshold: {THRESHOLD})")
-    print("\nMost of frequent swaps (class missed -> class predicted instead):")
+    print(f"Misclassified validation samples: {errors.size} / {len(y_true)} (threshold {THRESHOLD})")
+    print("\nMost frequent swaps (class missed -> class predicted instead):")
     for row in swaps[:10]:
         print(f"  {row['missed']:<12} -> {row['predicted_instead']:<12} {row['count']}")
     print("\nMost frequent combination confusion:")
@@ -82,7 +82,7 @@ def main() -> None:
     figure = plot_errors(images[val_idx[shown]], y_true[shown], y_pred[shown], names, sample_ids=val_idx[shown], plot_kwargs=build_discrete_plot_kwargs(colors) if colors else None)
 
     with mlflow.start_run(run_id=args.run_id):
-        mlflow.log_dict = (
+        mlflow.log_dict(
             {
                 "threshold": THRESHOLD,
                 "num_validation_samples": int(len(y_true)),
@@ -90,7 +90,7 @@ def main() -> None:
                 "label_errors": label_error_counts(y_true, y_pred, names),
                 "label_swaps": swaps,
                 "combination_confusions": confusions,
-                "confidence": confidence,
+                "error_confidence": confidence,
                 # Indices refer to the full dataset, e.g. for scripts/preview_augmentation.py --index
                 "samples": error_records(errors, val_idx, y_true, y_pred, y_prob, names),
             },
