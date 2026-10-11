@@ -19,6 +19,7 @@ torch==2.14.0
 torchvision
 torchmetrics
 scikit-learn
+scipy
 
 hydra-core
 optuna

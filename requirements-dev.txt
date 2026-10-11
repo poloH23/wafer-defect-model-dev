@@ -675,6 +675,7 @@ scikit-learn==1.9.1
 scipy==1.18.1
     # via
     #   -c requirements.txt
+    #   -r requirements.in
     #   grad-cam
     #   mlflow
     #   scikit-learn
