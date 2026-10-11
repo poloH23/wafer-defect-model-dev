@@ -11,22 +11,20 @@ studying test errors while still developing the model would turn it into a secon
 
 import argparse
 import tempfile
-from pathlib import Path
 
 import matplotlib.pyplot as plt
 import mlflow
-from mlflow.tracking import MlflowClient
+import numpy as np
 from torch import nn
 from torch.utils.data import DataLoader
 
-from src.common.config_schema import EdaConfig, TrainConfig, load_config, load_dataset_config, load_named_config, load_split_config
-from src.data.cleaning import apply_invalid_pixel_policy
-from src.data.dataset import DiscreteMapDataset, load_npz_arrays
-from src.data.split import load_split, load_split_meta
+from src.common.config_schema import EdaConfig, load_named_config
+from src.data.dataset import DiscreteMapDataset
+from src.data.split import load_split
 from src.eda.plotting import build_discrete_plot_kwargs
-from src.evaluation.error_analysis import combination_confusions, label_error_counts, label_swaps, misclassified, plot_errors
+from src.evaluation.error_analysis import combination_confusions, error_confidence, error_records, label_error_counts, label_swaps, misclassified, plot_errors
+from src.evaluation.run_context import load_clean_arrays, load_run_context
 from src.models.factory import load_checkpoint
-from src.training.tracking import resolve_tracking_uri
 from src.training.trainer import predict, resolve_device
 
 THRESHOLD = 0.5
@@ -36,46 +34,32 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Analyze the validation errors of an MLflow run.")
     parser.add_argument("--run-id", required=True, help="MLflow run id of a training run.")
     parser.add_argument("--max-images", type=int, default=16, help="Maximum number of misclassified images to plot.")
+    parser.add_argument("--plot_seed", type=int, default=0, help="Seed for choosing which misclassified images to plot.")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    mlflow.set_tracking_uri(resolve_tracking_uri())
-    run = MlflowClient().get_run(args.run_id)
-
+    device = resolve_device()
     with tempfile.TemporaryDirectory() as tmp_dir:
-        # The config logged with the run, not the current YAML file, which may have changed since
-        config_name = Path(run.data.tags["config_file"]).name
-        config_path = mlflow.artifacts.download_artifacts(run_id=args.run_id, artifact_path=f"config/{config_name}", dst_path=tmp_dir)
+        ctx = load_run_context(args.run_id, tmp_dir)
         checkpoint_path = mlflow.artifacts.download_artifacts(run_id=args.run_id, artifact_path="checkpoints/best_model.pt", dst_path=tmp_dir)
-        train_cfg = load_config(config_path, TrainConfig)
-        device = resolve_device()
         model, checkpoint = load_checkpoint(checkpoint_path, device)
 
-    split_cfg = load_split_config(train_cfg.split)
-    dataset_cfg = load_dataset_config(split_cfg.dataset)
-    if dataset_cfg.num_pixel_values is None:
-        raise ValueError("This analysis expects discrete-valued maps; set num_pixel_values in the dataset config.")
-    num_values = dataset_cfg.num_pixel_values
-    # Lineage: analyze the run on exactly the split it was trained and validated with
-    if load_split_meta(split_cfg.output_dir)["split_digest"] != run.data.params["split_digest"]:
-        raise RuntimeError(f"Split '{train_cfg.split}' on disk differs from the one this run used.")
-
-    images, labels = load_npz_arrays(dataset_cfg.source_path, dataset_cfg.image_key, dataset_cfg.label_key)
-    images, _ = apply_invalid_pixel_policy(images, num_values, dataset_cfg.invalid_pixel_policy)
-    val_idx = load_split(split_cfg.output_dir).val_idx
-    val_set = DiscreteMapDataset(images, labels, val_idx, num_values, checkpoint["encoding"])
-    loader = DataLoader(val_set, batch_size=train_cfg.batch_size, shuffle=False)
+    images, labels = load_clean_arrays(ctx)
+    val_idx = load_split(ctx.split_cfg.output_dir).val_idx
+    val_set = DiscreteMapDataset(images, labels, val_idx, ctx.num_values, checkpoint["encoding"])
+    loader = DataLoader(val_set, batch_size=ctx.train_cfg.batch_size, shuffle=False)
 
     # The loss value is not used here; predict() only needs a loss function to report one
     y_true, y_prob, _ = predict(model, loader, nn.BCEWithLogitsLoss(), device)
     y_true, y_pred = y_true.astype(int), (y_prob >= THRESHOLD).astype(int)
-    names = dataset_cfg.class_names
+    names = ctx.dataset_cfg.class_names
 
     errors = misclassified(y_true, y_pred)
     swaps = label_swaps(y_true, y_pred, names)
     confusions = combination_confusions(y_true, y_pred, names)
+    confidence = error_confidence(y_true, y_pred, y_prob)
     print(f"Misclassified validation samples: {errors.size} / {len(y_true)} (threshold: {THRESHOLD})")
     print("\nMost of frequent swaps (class missed -> class predicted instead):")
     for row in swaps[:10]:
@@ -83,13 +67,18 @@ def main() -> None:
     print("\nMost frequent combination confusion:")
     for row in confusions[:10]:
         print(f"  {row['true']:<35} -> {row['predicted']:<35} {row['count']}")
+    print("\nConfidence of the wrong label decisions (uncertain = probability between 0.2 and 0.8):")
+    for kind, stats in confidence.items():
+        if stats["count"]:
+            print(f"  {kind:<16} count {stats['count']:>3} | median probability {stats['median']:.3f} | uncertain {stats['share_uncertain']:.0%}")
 
-    # Plot the errors in the same colors as the EDA report, when an EDA config exists for this dataset
+    # Plot a random sample of errors: the first errors by index would all come from the same few combinations
+    rng = np.random.default_rng(args.plot_seed)
+    shown = np.sort(rng.choice(errors, size=min(args.max_images, errors.size), replace=False)) if errors.size else errors
     try:
-        colors = load_named_config("eda", dataset_cfg.name, EdaConfig).plot.discrete_colors
+        colors = load_named_config("eda", ctx.dataset_cfg.name, EdaConfig).plot.discrete_colors
     except FileNotFoundError:
         colors = None
-    shown = errors[: args.max_images]
     figure = plot_errors(images[val_idx[shown]], y_true[shown], y_pred[shown], names, sample_ids=val_idx[shown], plot_kwargs=build_discrete_plot_kwargs(colors) if colors else None)
 
     with mlflow.start_run(run_id=args.run_id):
@@ -101,12 +90,14 @@ def main() -> None:
                 "label_errors": label_error_counts(y_true, y_pred, names),
                 "label_swaps": swaps,
                 "combination_confusions": confusions,
-                "misclassified_dataset_indices": val_idx[errors].tolist(),
+                "confidence": confidence,
+                # Indices refer to the full dataset, e.g. for scripts/preview_augmentation.py --index
+                "samples": error_records(errors, val_idx, y_true, y_pred, y_prob, names),
             },
             "analysis/val_errors.json",
         )
         mlflow.log_figure(figure, "analysis/val_errors.png")
-    plt.close()
+    plt.close(figure)
     print(f"\nAnalysis attached to run {args.run_id} under analysis/")
 
 
