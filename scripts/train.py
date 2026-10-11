@@ -23,7 +23,8 @@ from torch.utils.data import DataLoader
 from src.common.config_schema import TrainConfig, load_config, load_dataset_config, load_model_config, load_split_config, resolve_path
 from src.common.hashing import file_sha256
 from src.data.cleaning import apply_invalid_pixel_policy
-from src.data.dataset import DiscreteMapDataset, build_split_datasets, load_npz_arrays, seed_worker
+from src.data.dataset import DiscreteMapDataset, build_split_datasets, seed_worker
+from src.data.io import load_npz_arrays
 from src.data.split import META_FILE, load_split, load_split_meta
 from src.data.transforms import RandomDihedral, encoded_channels
 from src.models.factory import build_model
