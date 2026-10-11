@@ -68,3 +68,49 @@ def plot_errors(
         ax.set_title(f"{header}true: {combination_name(y_true[k], class_names)}\npred: {combination_name(y_pred[k], class_names)}", fontsize=9)
     fig.tight_layout()
     return fig
+
+
+def error_records(
+    positions: np.ndarray,
+    dataset_indices: np.ndarray,
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    y_prob: np.ndarray,
+    class_names: list[str],
+) -> list[dict[str, Any]]:
+    """One record per misclassified sample: its index in the full dataset, true and predicted labels, and probabilities."""
+    return [
+        {
+            "index": int(dataset_indices[i]),
+            "true": [name for name, flag in zip(class_names, y_true[i], strict=True) if flag],
+            "predicted": [name for name, flag in zip(class_names, y_pred[i], strict=True) if flag],
+            "probabilities": {name: round(float(p), 4) for name, p in zip(class_names, y_prob[i], strict=True)},
+        }
+        for i in positions
+    ]
+
+
+def _describe(probabilities: np.ndarray) -> dict[str, float]:
+    if probabilities.size == 0:
+        return {"count": 0}
+    return {
+        "count": int(probabilities.size),
+        "median": float(np.median(probabilities)),
+        # Share of wrong decisions the model made with little confidence (probability between 0.2 and 0.8)
+        "share_uncertain": float(np.mean((probabilities > 0.2) & (probabilities < 0.8))),
+    }
+
+
+def error_confidence(y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray) -> dict[str, dict[str, float]]:
+    """
+    Predicted probabilities of the wrong label decisions.
+
+    A missed label with a probability just below the threshold means the model was unsure;
+    a probability near 0 means it was confidently wrong (and symmetrically, near 1 for a false alarm).
+    Mostly unsure mistakes fit ambiguous data; mostly confident mistakes point to wrong labels or a
+    feature the model learned incorrectly.
+    """
+    return {
+        "false_negatives": _describe(y_prob[(y_true == 1) & (y_pred == 0)]),
+        "false_positives": _describe(y_prob[(y_true == 0) & (y_pred == 1)]),
+    }
