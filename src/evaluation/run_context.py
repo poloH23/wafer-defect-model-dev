@@ -16,13 +16,18 @@ from src.data.io import load_npz_arrays
 from src.data.split import load_split_meta
 from src.training.tracking import resolve_tracking_uri
 
+# Checkpoint location of runs created before the checkpoint_artifact tag existed
+LEGACY_CHECKPOINT_ARTIFACT = "checkpoints/best_model.pt"
+
 
 @dataclass(frozen=True)
 class RunContext:
     run_id: str
+    tags: dict[str, str]
     train_cfg: TrainConfig
     split_cfg: SplitConfig
     dataset_cfg: DatasetConfig
+    # Number of discrete pixel categories, checked to be set
     num_values: int
 
 
@@ -45,7 +50,20 @@ def load_run_context(run_id: str, download_dir: str | Path) -> RunContext:
         raise ValueError("This analysis expects discrete-valued maps; set num_pixel_values in the dataset config.")
     if load_split_meta(split_cfg.output_dir)["split_digest"] != run.data.params["split_digest"]:
         raise RuntimeError(f"Split '{train_cfg.split}' on disk differs from the one run {run_id} used")
-    return RunContext(run_id=run_id, train_cfg=train_cfg, split_cfg=split_cfg, dataset_cfg=dataset_cfg, num_values=dataset_cfg.num_pixel_values)
+    return RunContext(
+        run_id=run_id,
+        tags=dict(run.data.tags),
+        train_cfg=train_cfg,
+        split_cfg=split_cfg,
+        dataset_cfg=dataset_cfg,
+        num_values=dataset_cfg.num_pixel_values,
+    )
+
+
+def download_checkpoint(ctx: RunContext, download_dir: str | Path) -> str:
+    """Download the run's saved model; older runs stored it under a fixed name instead of a tag."""
+    artifact = ctx.tags.get("checkpoint_artifact", LEGACY_CHECKPOINT_ARTIFACT)
+    return mlflow.artifacts.download_artifacts(run_id=ctx.run_id, artifact_path=artifact, dst_path=str(download_dir))
 
 
 def load_clean_arrays(ctx: RunContext) -> tuple[np.ndarray, np.ndarray]:

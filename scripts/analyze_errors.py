@@ -1,9 +1,9 @@
 """
-Analysis the validation error of a trained run and attatch the results to that same MLflow run
+Analyze the validation errors of a trained run and attach the results to that same MLflow run
 (artifacts under analysis/), so each model and the analysis of its mistakes stay together.
 
 Usage:
-    python scripts/analysis_errors.py --run-id <MLflow run id>
+    python scripts/analyze_errors.py --run-id <MLflow run id>
 
 Only the validation split is analyzed. The test split stays untouched until the final evaluation:
 studying test errors while still developing the model would turn it into a second validation set.
@@ -23,7 +23,7 @@ from src.data.dataset import DiscreteMapDataset
 from src.data.split import load_split
 from src.eda.plotting import build_discrete_plot_kwargs
 from src.evaluation.error_analysis import combination_confusions, error_confidence, error_records, label_error_counts, label_swaps, misclassified, plot_errors
-from src.evaluation.run_context import load_clean_arrays, load_run_context
+from src.evaluation.run_context import download_checkpoint, load_clean_arrays, load_run_context
 from src.models.factory import load_checkpoint
 from src.training.trainer import predict, resolve_device
 
@@ -43,7 +43,7 @@ def main() -> None:
     device = resolve_device()
     with tempfile.TemporaryDirectory() as tmp_dir:
         ctx = load_run_context(args.run_id, tmp_dir)
-        checkpoint_path = mlflow.artifacts.download_artifacts(run_id=args.run_id, artifact_path="checkpoints/best_model.pt", dst_path=tmp_dir)
+        checkpoint_path = download_checkpoint(ctx, tmp_dir)
         model, checkpoint = load_checkpoint(checkpoint_path, device)
 
     images, labels = load_clean_arrays(ctx)

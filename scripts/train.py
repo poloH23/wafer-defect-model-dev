@@ -35,6 +35,8 @@ from src.training.trainer import fit, overfit_single_batch, resolve_device, set_
 
 SANITY_BATCH_SIZE = 32
 SANITY_STEPS = 200
+# Recorded as a run tag, so analysis scripts find the checkpoint without hard-coding its path
+CHECKPOINT_ARTIFACT = "checkpoints/model.pt"
 
 
 def parse_args() -> argparse.Namespace:
@@ -148,10 +150,12 @@ def main() -> None:
                 **flatten_params(model_cfg.model_dump(mode="json"), prefix="model_cfg"),
                 "dataset": dataset_cfg.name,
                 "split_digest": split_meta["split_digest"],
+                "invalid_pixels_imputed": cleaning_report["invalid_pixels"] if cleaning_report["policy"] == "neighbor_mode" else 0,
                 "source_sha256": source_sha256,
                 "in_channels": in_channels,
                 "num_parameters": sum(p.numel() for p in model.parameters()),
                 "device": device.type,
+                "val_samples": len(datasets["val"]),
             }
         )
         # The exact configs used, so the run can be reporduced even after the YAML files change
@@ -174,13 +178,27 @@ def main() -> None:
             scheduler=scheduler,
             early_stopping_patience=train_cfg.early_stopping_patience,
             on_epoch_end=mlflow.log_metrics,
+            restore_best=train_cfg.checkpoint == "best",
         )
 
-        mlflow.log_metrics({"best_epoch": result.best_epoch, f"best_{train_cfg.monitor}": result.best_score, "epochs_run": result.epochs_run})
+        # The best epoch is always logged for information; the saved model follows train_cfg.checkpoint
+        saved_epoch = result.best_epoch if train_cfg.checkpoint == "best" else result.epochs_run
+        saved_score = result.best_score if train_cfg.checkpoint == "best" else result.final_score
+
+        mlflow.log_metrics(
+            {
+                "best_epoch": result.best_epoch,
+                f"best_{train_cfg.monitor}": result.best_score,
+                f"final_{train_cfg.monitor}": result.final_score,
+                "saved_epoch": saved_epoch,
+                "epochs_run": result.epochs_run,
+            }
+        )
         mlflow.log_dict(result.best_metrics, "metrics/best_val_metrics.json")
+        mlflow.log_dict(result.final_metrics, "metrics/final_val_metrics.json")
 
         # Everything needed to rebuild the model for evaluation or ONNX export later
-        checkpoint_path = Path(tmp_dir) / "best_model.pt"
+        checkpoint_path = Path(tmp_dir) / Path(CHECKPOINT_ARTIFACT).name
         torch.save(
             {
                 "model_state": model.state_dict(),
@@ -189,13 +207,17 @@ def main() -> None:
                 "in_channels": in_channels,
                 "encoding": train_cfg.encoding,
                 "class_names": dataset_cfg.class_names,
-                "best_epoch": result.best_epoch,
+                "epoch": saved_epoch,
+                "selection": train_cfg.checkpoint,
             },
             checkpoint_path,
         )
 
-        mlflow.log_artifact(str(checkpoint_path), artifact_path="checkpoints")
-        print(f"Best {train_cfg.monitor}: {result.best_score:.4f} at epoch {result.best_epoch} (run: {mlflow.active_run().info.run_id})")
+        mlflow.log_artifact(str(checkpoint_path), artifact_path=str(Path(CHECKPOINT_ARTIFACT).parent))
+        print(
+            f"Saved the {train_cfg.checkpoint} model: epoch {saved_epoch}, {train_cfg.monitor} {saved_score:.4f} "
+            f"(best epoch {result.best_epoch}: {result.best_score:.4f}) | run {mlflow.active_run().info.run_id}"
+        )
 
 
 if __name__ == "__main__":
