@@ -26,12 +26,18 @@ def tiny_model() -> nn.Module:
     return nn.Linear(NUM_FEATURES, NUM_CLASSES)
 
 
+# ================= Test: predict =================
+
+
 def test_predict_shapes_and_probability_range():
     loader = make_loader(50, seed=1)
     y_true, y_prob, loss = predict(tiny_model(), loader, nn.BCEWithLogitsLoss(), torch.device("cpu"))
     assert y_true.shape == y_prob.shape == (50, NUM_CLASSES)
     assert ((y_prob >= 0) & (y_prob <= 1)).all()
     assert loss > 0
+
+
+# ================= Test: fit =================
 
 
 def test_fit_learns_and_restores_best_weights():
@@ -94,6 +100,36 @@ def test_unknown_monitor_raises():
             class_names=CLASS_NAMES,
             monitor="val_accuracy",
         )
+
+
+@pytest.mark.parametrize("restore_best", [True, False])
+def test_returned_weights_follow_restore_best(restore_best):
+    set_seed(0)
+    model = tiny_model()
+    snapshots = {}
+
+    def snapshot(_record, epoch):
+        snapshots[epoch] = {k: v.detach().clone() for k, v in model.state_dict().items()}
+
+    result = fit(
+        model,
+        make_loader(256, seed=1, shuffle=True),
+        make_loader(100, seed=2),
+        nn.BCEWithLogitsLoss(),
+        torch.optim.Adam(model.parameters(), lr=0.05),
+        epochs=8,
+        device=torch.device("cpu"),
+        class_names=CLASS_NAMES,
+        on_epoch_end=snapshot,
+        restore_best=restore_best,
+    )
+    expected_epoch = result.best_epoch if restore_best else result.epochs_run
+    for key, value in model.state_dict().items():
+        assert torch.equal(value, snapshots[expected_epoch][key])
+    assert result.final_metrics["macro_ap"] == pytest.approx(result.final_score)
+
+
+# ================= Test: overfit_single_batch =================
 
 
 def test_overfit_single_batch_fits_every_label():

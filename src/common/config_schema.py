@@ -134,9 +134,20 @@ class TrainConfig(StrictModel):
     early_stopping_patience: int | None = Field(default=None, gt=0)
     # Threshold-free metric used to pick the best checkpoint (decision thresholds are tuned later)
     monitor: Literal["val_macro_ap", "val_macro_f1"] = "val_macro_ap"
+    # Which weights to keep: "best" = the epoch with the highest monitor value, "last" = the final epoch.
+    checkpoint: Literal["best", "last"] = "best"
 
     seed: int = 42
     num_workers: int = Field(default=4, ge=0)
+
+    @model_validator(mode="after")
+    def check_checkpoint_protocol(self) -> Self:
+        if self.checkpoint == "last" and self.early_stopping_patience is not None:
+            raise ValueError(
+                "checkpoint 'last' cannot be combined with early stopping: training would stop before the "
+                "learning rate schedule finishes, so the kept model would never go through the annealing phase"
+            )
+        return self
 
 
 def load_config[ConfigT: BaseModel](path: str | Path, model: type[ConfigT]) -> ConfigT:
