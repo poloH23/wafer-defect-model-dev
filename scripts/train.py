@@ -143,7 +143,7 @@ def main() -> None:
     setup_experiment(train_cfg.experiment_name)
     run_name = Path(args.config).stem + (f"_seed{args.seed}" if args.seed is not None else "")
     with mlflow.start_run(run_name=run_name), tempfile.TemporaryDirectory() as tmp_dir:
-        mlflow.set_tags({**git_tags(), "config_file": Path(args.config).as_posix()})
+        mlflow.set_tags({**git_tags(), "config_file": Path(args.config).as_posix(), "checkpoint_artifact": CHECKPOINT_ARTIFACT})
         mlflow.log_params(
             {
                 **flatten_params(train_cfg.model_dump(mode="json")),
