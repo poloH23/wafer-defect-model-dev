@@ -107,6 +107,14 @@ every rule below is applied in code and configured under 'conf/'.
   than reported here, and decision thresholds would need to be recalibrated on real data.
 - **Near_Full and Random never co-occur with other defects.** The model has never seen them in
   mixed patterns, so its behavior on such combinations is untested.
+- **Edge_Loc / Edge_Ring label ambiguity.** By definition, Edge_Ring is a defect along the whole wafer
+  edge and Edge_Loc a defect on part of it. A rule-based edge coverage measure (the share of the
+  circumference whose outermost band consists mostly of failed dies) separates the two labels well
+  overall (ROC AUC 0.987–0.996 for sector thresholds from 0.4 to 0.6), yet about 3% of Edge_Loc samples
+  cover nearly the entire edge, some of them completely. All 14 validation samples where the baseline
+  predicted Edge_Ring instead of Edge_Loc come from this group, in the top 4% of Edge_Loc coverage under
+  every threshold tested. In this region the labels contradict the class definitions, so part of the
+  remaining error reflects how the data was labeled rather than the model's capacity.
 
 ### Evaluation
 - **Small rare-class evaluation sets.** After deduplication, Near_Full has 141 samples: 14 in
