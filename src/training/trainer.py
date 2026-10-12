@@ -1,7 +1,9 @@
-# Training and eveluation loops for multi-label classification (one sigmoid per class)
-# Delibrately free of MLFlow: per-epoch metrics are reported through an optional callback,
-# so the loop can be tested and reused without and tracking backend.
-# The training script simply passes mlflow.log_metrics as that callback.
+"""
+Training and eveluation loops for multi-label classification (one sigmoid per class)
+Delibrately free of MLFlow: per-epoch metrics are reported through an optional callback,
+so the loop can be tested and reused without and tracking backend.
+The training script simply passes mlflow.log_metrics as that callback.
+"""
 
 import math
 import random
@@ -73,6 +75,9 @@ class FitResult:
     best_score: float
     # Full multilabel_metrics output (including pre-class results) of the best epoch
     best_metrics: dict[str, Any]
+    # Same for the last epoch that was run
+    final_score: float
+    final_metrics: dict[str, Any]
     epochs_run: int
     stopped_early: bool
 
@@ -90,6 +95,7 @@ def fit(
     scheduler: torch.optim.lr_scheduler.LRScheduler | None = None,
     early_stopping_patience: int | None = None,
     on_epoch_end: EpochCallback | None = None,
+    restore_best: bool = True,
 ) -> FitResult:
     """
     Train for up to 'epochs', evaluate on the validation set after every epoch, and keep the weights
@@ -98,6 +104,7 @@ def fit(
     best_score = -math.inf
     best_state: dict[str, torch.Tensor] | None = None
     best_epoch, best_metrics = 0, {}
+    score, metrics = math.nan, {}
     stale_epoch, epoch, stopped_early = 0, 0, False
 
     for epoch in range(1, epochs + 1):
@@ -116,7 +123,8 @@ def fit(
         improved = score > best_score
         if improved:
             best_score, best_epoch, best_metrics = score, epoch, metrics
-            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+            if restore_best:
+                best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
             stale_epoch = 0
         else:
             stale_epoch += 1
@@ -129,10 +137,19 @@ def fit(
             stopped_early = True
             break
 
-    if best_state is None:
-        raise RuntimeError("No epoch produce a valid '{monitor}' score.")
-    model.load_state_dict(best_state)
-    return FitResult(best_epoch=best_epoch, best_score=best_score, best_metrics=best_metrics, epochs_run=epoch, stopped_early=stopped_early)
+    if best_epoch == 0:
+        raise RuntimeError(f"No epoch produced a valid '{monitor}' score")
+    if restore_best and best_state is not None:
+        model.load_state_dict(best_state)
+    return FitResult(
+        best_epoch=best_epoch,
+        best_score=best_score,
+        best_metrics=best_metrics,
+        final_score=score,
+        final_metrics=metrics,
+        epochs_run=epoch,
+        stopped_early=stopped_early,
+    )
 
 
 def overfit_single_batch(

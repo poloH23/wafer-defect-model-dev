@@ -70,3 +70,25 @@ def test_committed_config_is_valid(group, name):
     if isinstance(cfg, TrainConfig):
         load_named_config("split", cfg.split, SplitConfig)
         load_named_config("model", cfg.model, ModelConfig)
+
+
+TRAIN_YAML = """
+experiment_name: toy
+split: toy_v1
+model: resnet18
+epochs: 10
+batch_size: 8
+learning_rate: 1.0e-3
+checkpoint: last
+"""
+
+
+def test_last_checkpoint_without_early_stopping_is_valid(tmp_path):
+    cfg = load_config(write(tmp_path, TRAIN_YAML), TrainConfig)
+    assert cfg.checkpoint == "last"
+    assert cfg.early_stopping_patience is None
+
+
+def test_last_checkpoint_rejects_early_stopping(tmp_path):
+    with pytest.raises(ValidationError, match="cannot be combined with early stopping"):
+        load_config(write(tmp_path, TRAIN_YAML + "early_stopping_patience: 5\n"), TrainConfig)
