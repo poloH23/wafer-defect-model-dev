@@ -2,7 +2,7 @@
         init requirements requirements-bootstrap requirements-refresh \
         conda-dev conda-export conda-custom \
         clean gitkeep-clean clean-zone \
-        eda split sanity-check train mlflow-ui test analyze-errors \
+        eda split sanity-check train train-seed compare mlflow-ui test analyze-errors \
         docker-build docker-run docker-run-fastapi docker-run-flask \
         demo-run gitkeep-add system-info
 
@@ -68,6 +68,14 @@ SEED ?=
 
 train:  ## Train a model and record the run in MLflow (TRAIN_CONFIG=...)
 	python scripts/train.py --config $(TRAIN_CONFIG) $(if $(SEED), --seed $(SEED))
+
+SEEDS ?= 0 1 2
+
+train-seeds:  ## Train one config once per seed (TRAIN_CONFIG=..., SEEDS="0 1 2")
+	for seed in $(SEEDS); do python scripts/train.py --config $(TRAIN_CONFIG) --seed $$seed || exit 1; done
+
+compare:  ## Compare experiment configs over seeds (CONFIGS="a.yaml b.yaml", optional OUTPUT=...)
+	python scripts/compare_runs.py --configs $(CONFIGS) $(if $(OUTPUT),--output $(OUTPUT))
 
 analyze-errors:  ## Analyze validation errors of a run and attach them to it in MLflow (RUN_ID=...)
 	python scripts/analyze_errors.py --run-id $(RUN_ID)
