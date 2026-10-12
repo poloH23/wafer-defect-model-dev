@@ -16,9 +16,6 @@ from src.data.io import load_npz_arrays
 from src.data.split import load_split_meta
 from src.training.tracking import resolve_tracking_uri
 
-# Checkpoint location of runs created before the checkpoint_artifact tag existed
-LEGACY_CHECKPOINT_ARTIFACT = "checkpoints/best_model.pt"
-
 
 @dataclass(frozen=True)
 class RunContext:
@@ -50,6 +47,7 @@ def load_run_context(run_id: str, download_dir: str | Path) -> RunContext:
         raise ValueError("This analysis expects discrete-valued maps; set num_pixel_values in the dataset config.")
     if load_split_meta(split_cfg.output_dir)["split_digest"] != run.data.params["split_digest"]:
         raise RuntimeError(f"Split '{train_cfg.split}' on disk differs from the one run {run_id} used")
+
     return RunContext(
         run_id=run_id,
         tags=dict(run.data.tags),
@@ -60,10 +58,22 @@ def load_run_context(run_id: str, download_dir: str | Path) -> RunContext:
     )
 
 
+def find_checkpoint_artifact(ctx: RunContext) -> str:
+    """
+    Path of the run's saved model: the checkpoint_artifact tag when the run has one, otherwise the
+    single .pt file logged under checkpoints/ (runs saved before the tag existed, or without it).
+    """
+    if "checkpoint_artifact" in ctx.tags:
+        return ctx.tags["checkpoint_artifact"]
+    candidates = [a.path for a in MlflowClient().list_artifacts(ctx.run_id, "checkpoints") if a.path.endswith(".pt")]
+    if len(candidates) != 1:
+        raise FileNotFoundError(f"Expected exactly one .pt file under checkpoints/ in run {ctx.run_id}, found {candidates}")
+    return candidates[0]
+
+
 def download_checkpoint(ctx: RunContext, download_dir: str | Path) -> str:
-    """Download the run's saved model; older runs stored it under a fixed name instead of a tag."""
-    artifact = ctx.tags.get("checkpoint_artifact", LEGACY_CHECKPOINT_ARTIFACT)
-    return mlflow.artifacts.download_artifacts(run_id=ctx.run_id, artifact_path=artifact, dst_path=str(download_dir))
+    """Download the run's saved model and return its local path."""
+    return mlflow.artifacts.download_artifacts(run_id=ctx.run_id, artifact_path=find_checkpoint_artifact(ctx), dst_path=str(download_dir))
 
 
 def load_clean_arrays(ctx: RunContext) -> tuple[np.ndarray, np.ndarray]:
