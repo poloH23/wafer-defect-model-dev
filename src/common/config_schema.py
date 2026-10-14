@@ -101,7 +101,17 @@ class EdaConfig(StrictModel):
 
 
 class ModelConfig(StrictModel):
-    name: Literal["resnet18", "resnet34", "resnet50"]
+    # Must match src.models.factory.SUPPORTED_MODELS (checked by tests/test_models.py); listed here
+    name: Literal[
+        "resnet18",
+        "resnet34",
+        "resnet50",
+        "mobilenet_v3_small",
+        "mobilenet_v3_large",
+        "efficientnet_b0",
+        "shufflenet_v2_x0_5",
+        "shufflenet_v2_x1_0",
+    ]
     pretrained: bool = False
     # Replace the ImageNet stem (7x7 conv stride 2 + max pool) with a 3x3 stride-1 conv, for small inputs
     small_input_stem: bool = True

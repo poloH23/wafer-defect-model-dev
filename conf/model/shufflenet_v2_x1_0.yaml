@@ -1,0 +1,10 @@
+# ShuffleNetV2 (1.0x): channel split and shuffle, designed around measured speed rather than FLOPs alone.
+
+name: shufflenet_v2_x1_0
+
+# Trained from scratch, like the ResNet-18 baseline, so the comparison is between architectures only
+pretrained: false
+
+# Remove the first two of the five stride-2 steps, so a 52x52 map reaches the classifier as 7x7,
+# the same as the small-input ResNet stem (see src/models/factory.py)
+small_input_stem: true
