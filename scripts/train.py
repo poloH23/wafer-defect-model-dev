@@ -28,6 +28,7 @@ from src.data.io import load_npz_arrays
 from src.data.split import META_FILE, load_split, load_split_meta
 from src.data.transforms import RandomDihedral, encoded_channels
 from src.models.factory import build_model
+from src.models.profiling import count_flops, count_parameters
 from src.training.class_balance import compute_pos_weight, expected_initial_bce
 from src.training.losses import build_loss
 from src.training.tracking import flatten_params, git_tags, setup_experiment
@@ -44,7 +45,27 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--config", required=True, help="Experiment config path, relative to the project root.")
     parser.add_argument("--sanity-check", action="store_true", help="Only overfit a single batch to verify the pipeline; nothing is logged.")
     parser.add_argument("--seed", type=int, help="Override the config seed, e.g. to measure run-to-run variance. The effective seed is what gets logged.")
+    parser.add_argument(
+        "--learning-rate",
+        type=float,
+        help="Override the config learning rate, e.g. for a small per-architecture learning rate comparison. "
+        "Recorded in the 'overrides' tag, so comparisons keep runs with different learning rates apart.",
+    )
     return parser.parse_args()
+
+
+def apply_overrides(cfg: TrainConfig, args: argparse.Namespace) -> tuple[TrainConfig, dict[str, float]]:
+    """
+    Apply command-line overrides other than the seed, and return the ones that actually change the config.
+    Seeds are not recorded as overrides: runs that differ only by seed are repetitions of one configuration.
+    """
+    overrides: dict[str, float] = {}
+    if args.learning_rate is not None and args.learning_rate != cfg.learning_rate:
+        overrides["learning_rate"] = args.learning_rate
+    updates: dict[str, float | int] = {**overrides}
+    if args.seed is not None:
+        updates["seed"] = args.seed
+    return cfg.model_copy(update=updates), overrides
 
 
 def build_loaders(datasets: dict[str, DiscreteMapDataset], cfg: TrainConfig, device: torch.device) -> dict[str, DataLoader]:
@@ -57,7 +78,10 @@ def build_loaders(datasets: dict[str, DiscreteMapDataset], cfg: TrainConfig, dev
     }
     # A dedicated generator makes the shuffling order reproducible from the config seed
     generator = torch.Generator().manual_seed(cfg.seed)
-    return {"train": DataLoader(datasets["train"], shuffle=True, generator=generator, **common), "val": DataLoader(datasets["val"], shuffle=False, **common)}
+    return {
+        "train": DataLoader(datasets["train"], shuffle=True, generator=generator, **common),
+        "val": DataLoader(datasets["val"], shuffle=False, **common),
+    }
 
 
 def run_sanity_check(
@@ -97,14 +121,12 @@ def run_sanity_check(
 
 def main() -> None:
     args = parse_args()
-    train_cfg = load_config(args.config, TrainConfig)
-    if args.seed is not None:
-        train_cfg = train_cfg.model_copy(update={"seed": args.seed})
+    train_cfg, overrides = apply_overrides(load_config(args.config, TrainConfig), args)
     split_cfg = load_split_config(train_cfg.split)
     dataset_cfg = load_dataset_config(split_cfg.dataset)
     model_cfg = load_model_config(train_cfg.model)
     if dataset_cfg.num_pixel_values is None:
-        raise ValueError("This training scripts expects discrete-valued map; set num_pixel_values in the dataset config.")
+        raise ValueError("This training script expects discrete-valued maps; set num_pixel_values in the dataset config.")
     num_values = dataset_cfg.num_pixel_values
 
     set_seed(train_cfg.seed)
@@ -118,14 +140,14 @@ def main() -> None:
 
     images, labels = load_npz_arrays(dataset_cfg.source_path, dataset_cfg.image_key, dataset_cfg.label_key)
     # Validate every image at once, before any model or MLflow run is created
-    images, cleaning_report = apply_invalid_pixel_policy(images, dataset_cfg.num_pixel_values, dataset_cfg.invalid_pixel_policy)
+    images, cleaning_report = apply_invalid_pixel_policy(images, num_values, dataset_cfg.invalid_pixel_policy)
     if cleaning_report["invalid_pixels"]:
         print(f"Imputed {cleaning_report['invalid_pixels']} out-of-range pixels in {cleaning_report['invalid_images']} images: {cleaning_report['replaced_with']}")
     split = load_split(split_cfg.output_dir)
     train_transform = RandomDihedral(seed=train_cfg.seed) if train_cfg.augment else None
-    datasets = build_split_datasets(images, labels, split, dataset_cfg.num_pixel_values, train_cfg.encoding, train_transform)
+    datasets = build_split_datasets(images, labels, split, num_values, train_cfg.encoding, train_transform)
 
-    in_channels = encoded_channels(dataset_cfg.num_pixel_values, train_cfg.encoding)
+    in_channels = encoded_channels(num_values, train_cfg.encoding)
     model = build_model(model_cfg.name, dataset_cfg.num_classes, in_channels, model_cfg.pretrained, model_cfg.small_input_stem).to(device)
 
     # Class weight come from the training split only
@@ -141,9 +163,14 @@ def main() -> None:
     loaders = build_loaders(datasets, train_cfg, device)
 
     setup_experiment(train_cfg.experiment_name)
-    run_name = Path(args.config).stem + (f"_seed{args.seed}" if args.seed is not None else "")
+    run_name = Path(args.config).stem
+    if "learning_rate" in overrides:
+        run_name += f"_lr{overrides['learning_rate']:g}"
+    if args.seed is not None:
+        run_name += f"_seed{args.seed}"
+    overrides_tag = ",".join(f"{key}={value}" for key, value in sorted(overrides.items())) or "none"
     with mlflow.start_run(run_name=run_name), tempfile.TemporaryDirectory() as tmp_dir:
-        mlflow.set_tags({**git_tags(), "config_file": Path(args.config).as_posix(), "checkpoint_artifact": CHECKPOINT_ARTIFACT})
+        mlflow.set_tags({**git_tags(), "config_file": Path(args.config).as_posix(), "checkpoint_artifact": CHECKPOINT_ARTIFACT, "overrides": overrides_tag})
         mlflow.log_params(
             {
                 **flatten_params(train_cfg.model_dump(mode="json")),
@@ -153,17 +180,20 @@ def main() -> None:
                 "invalid_pixels_imputed": cleaning_report["invalid_pixels"] if cleaning_report["policy"] == "neighbor_mode" else 0,
                 "source_sha256": source_sha256,
                 "in_channels": in_channels,
-                "num_parameters": sum(p.numel() for p in model.parameters()),
+                "num_parameters": count_parameters(model),
+                # Per image, at the dataset's input size (batch of 1)
+                "flops": count_flops(model, (1, in_channels, *images.shape[1:])),
                 "device": device.type,
+                # Lets comparisons turn exact-match rates into numbers of misclassified samples
                 "val_samples": len(datasets["val"]),
             }
         )
-        # The exact configs used, so the run can be reporduced even after the YAML files change
+        # The exact configs used, so the run can be reproduced even after the YAML files change
         mlflow.log_artifact(str(resolve_path(args.config)), artifact_path="config")
         mlflow.log_artifact(str(split_cfg.output_dir / META_FILE), artifact_path="config")
         if pos_weight is not None:
             mlflow.log_dict(dict(zip(dataset_cfg.class_names, pos_weight.tolist(), strict=True)), "config/pos_weight.json")
-        mlflow.log_dict(cleaning_report, "config/pixel_clean.json")
+        mlflow.log_dict(cleaning_report, "config/pixel_cleaning.json")
 
         result = fit(
             model,
@@ -184,7 +214,6 @@ def main() -> None:
         # The best epoch is always logged for information; the saved model follows train_cfg.checkpoint
         saved_epoch = result.best_epoch if train_cfg.checkpoint == "best" else result.epochs_run
         saved_score = result.best_score if train_cfg.checkpoint == "best" else result.final_score
-
         mlflow.log_metrics(
             {
                 "best_epoch": result.best_epoch,
@@ -212,7 +241,6 @@ def main() -> None:
             },
             checkpoint_path,
         )
-
         mlflow.log_artifact(str(checkpoint_path), artifact_path=str(Path(CHECKPOINT_ARTIFACT).parent))
         print(
             f"Saved the {train_cfg.checkpoint} model: epoch {saved_epoch}, {train_cfg.monitor} {saved_score:.4f} "

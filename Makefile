@@ -2,7 +2,7 @@
         init requirements requirements-bootstrap requirements-refresh \
         conda-dev conda-export conda-custom \
         clean gitkeep-clean clean-zone \
-        eda split sanity-check train train-seed compare mlflow-ui test analyze-errors \
+        eda split sanity-check train train-seed lr-grid compare mlflow-ui test analyze-errors \
         docker-build docker-run docker-run-fastapi docker-run-flask \
         demo-run gitkeep-add system-info
 
@@ -65,14 +65,19 @@ sanity-check:  ## Overfit one batch to verify the training pipeline (TRAIN_CONFI
 	python scripts/train.py --config $(TRAIN_CONFIG) --sanity-check
 
 SEED ?=
+LR ?=
+LRS ?= 3.0e-4 1.0e-3 3.0e-3
 
-train:  ## Train a model and record the run in MLflow (TRAIN_CONFIG=...)
-	python scripts/train.py --config $(TRAIN_CONFIG) $(if $(SEED), --seed $(SEED))
+train:  ## Train a model and record the run in MLflow (TRAIN_CONFIG=..., optional SEED=..., LR=...)
+	python scripts/train.py --config $(TRAIN_CONFIG) $(if $(SEED),--seed $(SEED)) $(if $(LR),--learning-rate $(LR))
 
 SEEDS ?= 0 1 2
 
-train-seeds:  ## Train one config once per seed (TRAIN_CONFIG=..., SEEDS="0 1 2")
-	for seed in $(SEEDS); do python scripts/train.py --config $(TRAIN_CONFIG) --seed $$seed || exit 1; done
+train-seeds:  ## Train one config once per seed (TRAIN_CONFIG=..., SEEDS="0 1 2", optional LR=...)
+	for seed in $(SEEDS); do python scripts/train.py --config $(TRAIN_CONFIG) --seed $$seed $(if $(LR),--learning-rate $(LR)) || exit 1; done
+
+lr-grid:  ## One run with seed 0 per learning rate (TRAIN_CONFIG=..., LRS="3.0e-4 1.0e-3 3.0e-3")
+	for lr in $(LRS); do python scripts/train.py --config $(TRAIN_CONFIG) --seed 0 --learning-rate $$lr || exit 1; done
 
 compare:  ## Compare experiment configs over seeds (CONFIGS="a.yaml b.yaml", optional OUTPUT=...)
 	python scripts/compare_runs.py --configs $(CONFIGS) $(if $(OUTPUT),--output $(OUTPUT))
