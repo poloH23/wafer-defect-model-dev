@@ -16,7 +16,7 @@ import mlflow
 from mlflow.tracking import MlflowClient
 
 from src.common.config_schema import TrainConfig, load_config, resolve_path
-from src.evaluation.compare import check_same_split, find_runs, summarize_runs, to_markdown
+from src.evaluation.compare import check_same_split, find_runs, group_by_overrides, summarize_runs, to_markdown
 from src.training.tracking import resolve_tracking_uri
 
 DEFAULT_METRICS = ["val_exact_match", "val_macro_f1", "val_macro_ap"]
@@ -46,12 +46,17 @@ def main() -> None:
             raise ValueError(f"No finished run with checkpoint 'last' for {config}")
     check_same_split([run for runs in runs_by_config.values() for run in runs])
 
-    summaries = [summarize_runs(config, runs, args.metrics, args.last_k, client) for config, runs in runs_by_config.items()]
+    # Within a config, runs with different overrides (e.g. learning rates) are separate rows
+    summaries = [
+        summarize_runs(config, group, args.metrics, args.last_k, client, overrides=overrides)
+        for config, runs in runs_by_config.items()
+        for overrides, group in group_by_overrides(runs).items()
+    ]
     for summary in summaries:
         if summary.has_duplicate_seeds:
-            print(f"WARNING: {summary.config_file} has several runs with the same seed: {summary.seeds}")
+            print(f"WARNING: {summary.label} has several runs with the same seed: {summary.seeds}")
         if len(summary.seeds) < 2:
-            print(f"WARNING: {summary.config_file} has a single run, so its variance is unknown")
+            print(f"WARNING: {summary.label} has a single run, so its variance is unknown")
 
     table = to_markdown(summaries, args.last_k)
     print(table)
