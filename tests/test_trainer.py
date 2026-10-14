@@ -139,3 +139,16 @@ def test_overfit_single_batch_fits_every_label():
     result = overfit_single_batch(model, x, y, nn.BCEWithLogitsLoss(), torch.optim.Adam(model.parameters(), lr=0.1), torch.device("cpu"), steps=500)
     assert result["exact_match"] == 1.0
     assert result["final_loss"] < 0.1 * result["initial_loss"]
+
+
+def test_overfit_check_does_not_depend_on_batchnorm_running_statistics():
+    # MobileNetV3 uses a BatchNorm momentum of 0.01: after a few hundred steps on a single batch the
+    # running statistics are still far from that batch's statistics, so an evaluation-mode check
+    # would report a failure even though the model has fit the batch perfectly. A slower momentum
+    # and inputs far from zero mean / unit variance make that effect certain here.
+    set_seed(0)
+    x, y = next(iter(make_loader(32, seed=3)))
+    model = nn.Sequential(nn.Linear(NUM_FEATURES, 16), nn.BatchNorm1d(16, momentum=0.001), nn.ReLU(), nn.Linear(16, NUM_CLASSES))
+    result = overfit_single_batch(model, x * 10 + 5, y, nn.BCEWithLogitsLoss(), torch.optim.Adam(model.parameters(), lr=0.05), torch.device("cpu"), steps=300)
+    assert result["exact_match"] == 1.0
+    assert result["final_loss"] < 0.1 * result["initial_loss"]
