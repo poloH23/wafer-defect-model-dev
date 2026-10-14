@@ -5,7 +5,17 @@ import mlflow
 import pytest
 from mlflow.tracking import MlflowClient
 
-from src.evaluation.compare import ERRORS_METRIC, check_same_split, find_runs, mean_std, normalize_config_path, summarize_runs, tail_mean, to_markdown
+from src.evaluation.compare import (
+    ERRORS_METRIC,
+    check_same_split,
+    find_runs,
+    group_by_overrides,
+    mean_std,
+    normalize_config_path,
+    summarize_runs,
+    tail_mean,
+    to_markdown,
+)
 from src.training import tracking
 from src.training.tracking import setup_experiment
 
@@ -24,10 +34,18 @@ def tracking_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return tmp_path
 
 
-def log_run(config: str, seed: int, exact_match: list[float], checkpoint: str = "last", split_digest: str = "d1", status: str = "FINISHED") -> str:
+def log_run(
+    config: str,
+    seed: int,
+    exact_match: list[float],
+    checkpoint: str = "last",
+    split_digest: str = "d1",
+    status: str = "FINISHED",
+    overrides: str | None = None,
+) -> str:
     run = mlflow.start_run(run_name=f"{Path(config).stem}_seed{seed}")
-    mlflow.set_tags({"config_file": config})
-    mlflow.log_params({"checkpoint": checkpoint, "seed": seed, "split_digest": split_digest, "val_samples": 100})
+    mlflow.set_tags({"config_file": config, **({"overrides": overrides} if overrides else {})})
+    mlflow.log_params({"checkpoint": checkpoint, "seed": seed, "split_digest": split_digest, "val_samples": 100, "num_parameters": 11_170_000, "flops": 3_600_000_000})
     for epoch, value in enumerate(exact_match, start=1):
         mlflow.log_metrics({"val_exact_match": value, "val_macro_ap": 0.99}, step=epoch)
     mlflow.end_run(status=status)
@@ -117,5 +135,22 @@ def test_markdown_table(tracking_root):
     client = MlflowClient()
     summaries = [summarize_runs(c, find_runs(EXPERIMENT, c), ["val_exact_match"], last_k=1, client=client) for c in (BASELINE, AUGMENT)]
     table = to_markdown(summaries, last_k=1)
-    assert "| `baseline` | 0, 1 | 3.0 ± 1.4 | 0.9700 ± 0.0141 |" in table
-    assert "| `augment` | 0 | 3.0 | 0.9700 |" in table  # a single run has no standard deviation
+    assert "| baseline | 0, 1 | 11.17 | 3600 | 3.0 ± 1.4 | 0.9700 ± 0.0141 |" in table
+    assert "| augment | 0 | 11.17 | 3600 | 3.0 | 0.9700 |" in table  # a single run has no standard deviation
+
+
+# ================= Test: group_by_overrides =================
+
+
+def test_runs_with_different_overrides_are_separate_rows(tracking_root):
+    log_run(BASELINE, 0, [0.90])  # older run without the overrides tag
+    log_run(BASELINE, 1, [0.92], overrides="none")
+    log_run(BASELINE, 0, [0.80], overrides="learning_rate=0.0003")
+    groups = group_by_overrides(find_runs(EXPERIMENT, BASELINE))
+    assert {key: len(runs) for key, runs in groups.items()} == {"learning_rate=0.0003": 1, "none": 2}
+
+    client = MlflowClient()
+    summaries = [summarize_runs(BASELINE, runs, ["val_exact_match"], last_k=1, client=client, overrides=key) for key, runs in groups.items()]
+    table = to_markdown(summaries, last_k=1)
+    assert "| baseline (learning_rate=0.0003) | 0 |" in table
+    assert "| baseline | 0, 1 |" in table

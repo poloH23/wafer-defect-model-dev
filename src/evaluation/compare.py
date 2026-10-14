@@ -18,6 +18,8 @@ from mlflow.tracking import MlflowClient
 
 # Derived metric: exact-match rate turned into a number of misclassified validation samples
 ERRORS_METRIC = "val_errors"
+# Value of the overrides tag for runs that use their config as is
+NO_OVERRIDES = "none"
 
 
 def normalize_config_path(path: str | Path) -> str:
@@ -52,6 +54,18 @@ def mean_std(values: list[float]) -> tuple[float, float]:
     return float(array.mean()), float(array.std(ddof=1)) if array.size > 1 else math.nan
 
 
+def group_by_overrides(runs: list[Run]) -> dict[str, list[Run]]:
+    """
+    Split the runs of one config by their command-line overrides (e.g. a learning rate), so that
+    only repetitions of the same configuration, differing by seed alone, are averaged together.
+    Runs made before the overrides tag existed had no overrides.
+    """
+    groups: dict[str, list[Run]] = {}
+    for run in runs:
+        groups.setdefault(run.data.tags.get("overrides", NO_OVERRIDES), []).append(run)
+    return dict(sorted(groups.items()))
+
+
 def check_same_split(runs: list[Run]) -> str | None:
     """Every compared run must use the same split: scores on different validation sets are not comparable."""
     digests = {run.data.params.get("split_digest") for run in runs}
@@ -63,17 +77,33 @@ def check_same_split(runs: list[Run]) -> str | None:
 @dataclass
 class ConfigSummary:
     config_file: str
+    overrides: str
     run_ids: list[str]
     seeds: list[int]
     # metric -> (mean, std) over runs
     metrics: dict[str, tuple[float, float]]
+    # Model size and compute per image, identical for every run of the same architecture
+    num_parameters: int | None = None
+    flops: int | None = None
+
+    @property
+    def label(self) -> str:
+        name = f"{Path(self.config_file).stem}"
+        return name if self.overrides == NO_OVERRIDES else f"{name} ({self.overrides})"
 
     @property
     def has_duplicate_seeds(self) -> bool:
         return len(set(self.seeds)) != len(self.seeds)
 
 
-def summarize_runs(config_file: str | Path, runs: list[Run], metrics: list[str], last_k: int, client: MlflowClient) -> ConfigSummary:
+def summarize_runs(
+    config_file: str | Path,
+    runs: list[Run],
+    metrics: list[str],
+    last_k: int,
+    client: MlflowClient,
+    overrides: str = NO_OVERRIDES,
+) -> ConfigSummary:
     """
     Per run, the mean of each metric over its last 'last_k' epochs; then mean ± std over runs.
     If val_exact_match is requested and the runs logged val_samples, val_errors is added as well.
@@ -90,11 +120,15 @@ def summarize_runs(config_file: str | Path, runs: list[Run], metrics: list[str],
     summary = {name: mean_std(values) for name, values in per_run.items()}
     if errors and len(errors) == len(runs):
         summary = {ERRORS_METRIC: mean_std(errors), **summary}
+    params = runs[0].data.params
     return ConfigSummary(
         config_file=normalize_config_path(config_file),
+        overrides=overrides,
         run_ids=[run.info.run_id for run in runs],
         seeds=sorted(int(run.data.params["seed"]) for run in runs),
         metrics=summary,
+        num_parameters=int(params["num_parameters"]) if "num_parameters" in params else None,
+        flops=int(params["flops"]) if "flops" in params else None,
     )
 
 
@@ -103,16 +137,21 @@ def format_mean_std(name: str, mean: float, std: float) -> str:
     return f"{mean:.{digits}f}" if math.isnan(std) else f"{mean:.{digits}f} ± {std:.{digits}f}"
 
 
+def format_count(value: int | None, unit: float, digits: int) -> str:
+    return "-" if value is None else f"{value / unit:.{digits}f}"
+
+
 def to_markdown(summaries: list[ConfigSummary], last_k: int) -> str:
-    """Comparison table: one row per config, one column per metric."""
+    """Comparison table: one row per configuration, with its size and compute, then one column per metric."""
     metric_names = list(summaries[0].metrics)
     lines = [
-        f"Mean of the last {last_k} epochs per run; mean ± standard deviation over runs (seeds).",
+        f"Mean of the last {last_k} epochs per run; mean ± standard deviation over runs (seeds). FLOPs per image.",
         "",
-        "| Config | Seeds | " + " | ".join(metric_names) + " |",
-        "|---|---|" + "---|" * len(metric_names),
+        "| Config | Seeds | Params (M) | MFLOPs | " + " | ".join(metric_names) + " |",
+        "|---|---|---|---|" + "---|" * len(metric_names),
     ]
     for s in summaries:
         cells = [format_mean_std(name, *s.metrics[name]) for name in metric_names]
-        lines.append(f"| `{Path(s.config_file).stem}` | {', '.join(map(str, s.seeds))} | " + " | ".join(cells) + " |")
+        size = f"{format_count(s.num_parameters, 1e6, 2)} | {format_count(s.flops, 1e6, 0)}"
+        lines.append(f"| {s.label} | {', '.join(map(str, s.seeds))} | {size} | " + " | ".join(cells) + " |")
     return "\n".join(lines) + "\n"
