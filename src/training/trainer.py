@@ -1,8 +1,8 @@
 """
-Training and eveluation loops for multi-label classification (one sigmoid per class)
-Delibrately free of MLFlow: per-epoch metrics are reported through an optional callback,
-so the loop can be tested and reused without and tracking backend.
-The training script simply passes mlflow.log_metrics as that callback.
+Training and evaluation loops for multi-label classification (one sigmoid per class).
+Deliberately free of MLflow: per-epoch metrics are reported through an optional callback, so the
+loop can be tested and reused without any tracking backend. The training script simply passes
+mlflow.log_metrics as that callback.
 """
 
 import math
@@ -18,7 +18,7 @@ from torch.utils.data import DataLoader
 
 from src.training.metrics import flatten_metrics, multilabel_metrics
 
-# Called once per epoch with (metrics, epoch); matches the signature of mlflow.log_metrics (metrics, step)
+# Called once per epoch with (metrics, epoch); matches the signature of mlflow.log_metrics(metrics, step)
 EpochCallback = Callable[[dict[str, float], int], Any]
 
 
@@ -173,16 +173,20 @@ def overfit_single_batch(
     with torch.no_grad():
         initial_loss = loss_fn(model(images), targets).item()
 
-    final_loss = initial_loss
+    final_loss, logits = initial_loss, None
     for _ in range(steps):
         optimizer.zero_grad(set_to_none=True)
-        loss = loss_fn(model(images), targets)
+        logits = model(images)
+        loss = loss_fn(logits, targets)
         loss.backward()
         optimizer.step()
         final_loss = loss.item()
 
-    model.eval()
-    with torch.no_grad():
-        predictions = (torch.sigmoid(model(images)) >= 0.5).float()
+    # The fit is measured on the outputs of the last training step, the same forward pass as
+    # final_loss, not in evaluation mode: evaluation mode uses BatchNorm running statistics, which
+    # some architectures update slowly (MobileNetV3 uses a momentum of 0.01).
+    if logits is None:
+        raise ValueError("steps must be at least 1")
+    predictions = (torch.sigmoid(logits.detach()) >= 0.5).float()
     exact_match = (predictions == targets).all(dim=1).float().mean().item()
     return {"initial_loss": initial_loss, "final_loss": final_loss, "exact_match": exact_match}
