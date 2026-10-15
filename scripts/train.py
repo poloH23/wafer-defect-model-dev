@@ -108,8 +108,8 @@ def run_sanity_check(
     result = overfit_single_batch(model, batch_images, batch_targets, loss_fn, optimizer, device, steps=SANITY_STEPS)
     expected = expected_initial_bce(labels[batch_idx], pos_weight)
 
-    print(f"  initial loss : {result['initial_loss']:.4f} (excepted about {expected:.4f} for an untrained model)")
-    print(f"  final lose   : {result['final_loss']:.4f}")
+    print(f"  initial loss : {result['initial_loss']:.4f} (expected about {expected:.4f} for an untrained model)")
+    print(f"  final loss   : {result['final_loss']:.4f}")
     print(f"  exact match  : {result['exact_match']:.1%} of the batch")
 
     if not 0.5 * expected <= result["initial_loss"] <= 2.0 * expected:
