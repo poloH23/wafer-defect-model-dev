@@ -28,3 +28,4 @@ mlflow
 grad-cam
 onnx
 onnxruntime
+onnxscript
