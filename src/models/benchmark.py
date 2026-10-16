@@ -36,7 +36,9 @@ def export_onnx(model: nn.Module, path: str | Path, input_shape: tuple[int, ...]
     """
     model.eval()
     example = torch.zeros((2, *input_shape[1:]))
-    torch.onnx.export(model, (example,), str(path), input_names=["input"], output_names=["logits"], dynamic_shapes=({0: torch.export.Dim("batch")},), external_data=False)
+    torch.onnx.export(
+        model, (example,), str(path), input_names=["input"], output_names=["logits"], dynamic_shapes=({0: torch.export.Dim("batch")},), external_data=False, verbose=False
+    )
     return Path(path)
 
 
