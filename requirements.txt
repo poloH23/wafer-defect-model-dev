@@ -252,6 +252,8 @@ ml-dtypes==0.6.0
     # via
     #   -c requirements-dev.txt
     #   onnx
+    #   onnx-ir
+    #   onnxscript
 mlflow==3.16.1
     # via
     #   -c requirements-dev.txt
@@ -292,7 +294,9 @@ numpy==2.5.3
     #   ml-dtypes
     #   mlflow
     #   onnx
+    #   onnx-ir
     #   onnxruntime
+    #   onnxscript
     #   opencv-python-headless
     #   optuna
     #   pandas
@@ -377,7 +381,17 @@ onnx==1.23.0
     # via
     #   -c requirements-dev.txt
     #   -r requirements.in
+    #   onnx-ir
+    #   onnxscript
+onnx-ir==1.0.0
+    # via
+    #   -c requirements-dev.txt
+    #   onnxscript
 onnxruntime==1.30.0
+    # via
+    #   -c requirements-dev.txt
+    #   -r requirements.in
+onnxscript==0.7.2
     # via
     #   -c requirements-dev.txt
     #   -r requirements.in
@@ -425,6 +439,7 @@ packaging==26.3
     #   mlflow-skinny
     #   mlflow-tracing
     #   onnxruntime
+    #   onnxscript
     #   optuna
     #   skops
     #   torchmetrics
@@ -567,6 +582,7 @@ starlette==1.7.0
 sympy==1.14.0
     # via
     #   -c requirements-dev.txt
+    #   onnx-ir
     #   torch
 threadpoolctl==3.7.0
     # via
@@ -614,6 +630,8 @@ typing-extensions==4.16.0
     #   lightning-utilities
     #   mlflow-skinny
     #   onnx
+    #   onnx-ir
+    #   onnxscript
     #   opentelemetry-api
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
