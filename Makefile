@@ -2,7 +2,7 @@
         init requirements requirements-bootstrap requirements-refresh \
         conda-dev conda-export conda-custom \
         clean gitkeep-clean clean-zone \
-        eda split sanity-check train train-seed lr-grid compare benchmark mlflow-ui test analyze-errors \
+        eda split sanity-check train train-seed lr-grid compare benchmark search mlflow-ui test analyze-errors \
         docker-build docker-run docker-run-fastapi docker-run-flask \
         demo-run gitkeep-add system-info
 
@@ -92,6 +92,11 @@ BENCH_MODELS ?= resnet18 mobilenet_v3_small mobilenet_v3_large efficientnet_b0 s
 
 benchmark:  ## Measure size, latency and throughput of architectures on this machine (BENCH_MODELS="...")
 	python scripts/benchmark_models.py --dataset wafer_defect --models $(BENCH_MODELS) --output reports/experiments/benchmark.md
+
+SEARCH_CONFIG ?= conf/search/slim_resnet_v1.yaml
+
+search:  ## Multi-objective search (validation errors vs FLOPs) with Optuna; rerun to resume (SEARCH_CONFIG=...)
+	python scripts/search.py --config $(SEARCH_CONFIG)
 
 mlflow-ui: ## Open the local MLflow UI at http://127.0.0.1:5000
 	mlflow ui --backend-store-uri sqlite:///mlflow.db

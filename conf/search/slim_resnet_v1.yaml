@@ -1,0 +1,26 @@
+# Multi-objective search over slim ResNets: minimize validation errors and FLOPs.
+#
+# A slim ResNet keeps ResNet's GPU-friendly structure, a few dense convolutions,
+# while cutting FLOPs toward mobile architectures.
+# The search maps how far it can shrink before accuracy drops.
+#
+# Screening only: one seed and half the full schedule per trial. Pareto-optimal configurations are
+# retrained with 3 seeds and 30 epochs before any conclusion (docs/model_selection.md).
+
+study_name: slim_resnet_v1
+experiment_name: wafer_defect_search    # MLflow experiment, kept apart from the main comparisons
+base_experiment: wafer_augment          # every setting not searched: split, encoding, augmentation, batch size...
+epochs: 15
+n_trials: 50
+seed: 0
+last_k: 3
+
+space:
+  # width 64 with depth 2 is exactly ResNet-18; width 8 probes where accuracy starts to drop
+  width: [8, 16, 24, 32, 48, 64]
+  depth: [1, 2]                         # residual blocks in every one of the four stages
+  small_input_stem: [true, false]
+  # Upper bound 1.0e-2: the architecture comparison suggested rates above 1.0e-3 suit augmentation
+  learning_rate: {low: 3.0e-4, high: 1.0e-2, log: true}
+  weight_decay: {low: 1.0e-5, high: 1.0e-3, log: true}
+  warmup_epochs: [0, 1, 2, 3]
