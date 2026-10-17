@@ -8,6 +8,7 @@ from typing import Any
 import torch
 import torchvision
 from torch import nn
+from torchvision.models.resnet import BasicBlock
 
 SUPPORTED_MODELS = (
     "resnet18",
@@ -18,6 +19,7 @@ SUPPORTED_MODELS = (
     "efficientnet_b0",
     "shufflenet_v2_x0_5",
     "shufflenet_v2_x1_0",
+    "slim_resnet",
 )
 
 # Every supported architecture downsamples its input 32x in total, in five stride-2 steps, a design
@@ -26,7 +28,69 @@ SUPPORTED_MODELS = (
 SMALL_INPUT_REMOVED_DOWNSAMPLING = 2
 
 
-def build_model(name: str, num_classes: int, in_channels: int, pretrained: bool = False, small_input_stem: bool = True) -> nn.Module:
+class SlimResNet(nn.Module):
+    """
+    A ResNet whose width and depth are configurable, built from torchvision's BasicBlock.
+
+    width: channels of the first stage; each following stage doubles them (width, 2w, 4w, 8w).
+    depths: number of residual blocks in each of the four stages.
+
+    With width=64, depths=(2, 2, 2, 2) it is exactly ResNet-18. Narrower and shallower versions
+    keep ResNet's structure, a few dense convolutions that GPUs run efficiently, while cutting FLOPs
+    toward the level of mobile architectures.
+    """
+
+    def __init__(self, num_classes: int, in_channels: int, width: int = 64, depths: tuple[int, ...] = (2, 2, 2, 2), small_input_stem: bool = True):
+        super().__init__()
+        if len(depths) != 4 or min(depths) < 1:
+            raise ValueError(f"depths must give at least one block for each of the 4 stages, got {depths}")
+        if small_input_stem:
+            # Same as the small-input stem of build_model: 3x3 stride-1 conv, no max pool
+            self.stem = nn.Sequential(nn.Conv2d(in_channels, width, 3, stride=1, padding=1, bias=False), nn.BatchNorm2d(width), nn.ReLU(inplace=True))
+        else:
+            self.stem = nn.Sequential(
+                nn.Conv2d(in_channels, width, 7, stride=2, padding=3, bias=False),
+                nn.BatchNorm2d(width),
+                nn.ReLU(inplace=True),
+                nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            )
+
+        stages, channels = [], width
+        for index, depth in enumerate(depths):
+            out_channels = width * 2**index
+            stride = 1 if index == 0 else 2
+            downsample = None
+            if stride != 1 or channels != out_channels:
+                downsample = nn.Sequential(nn.Conv2d(channels, out_channels, 1, stride=stride, bias=False), nn.BatchNorm2d(out_channels))
+            blocks = [BasicBlock(channels, out_channels, stride=stride, downsample=downsample)]
+            blocks += [BasicBlock(out_channels, out_channels) for _ in range(depth - 1)]
+            stages.append(nn.Sequential(*blocks))
+            channels = out_channels
+        self.stages = nn.Sequential(*stages)
+        self.pool = nn.AdaptiveAvgPool2d(1)
+        self.fc = nn.Linear(channels, num_classes)
+
+        # Same initialization as torchvision's ResNet
+        for module in self.modules():
+            if isinstance(module, nn.Conv2d):
+                nn.init.kaiming_normal_(module.weight, mode="fan_out", nonlinearity="relu")
+            elif isinstance(module, nn.BatchNorm2d):
+                nn.init.ones_(module.weight)
+                nn.init.zeros_(module.bias)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.fc(torch.flatten(self.pool(self.stages(self.stem(x))), 1))
+
+
+def build_model(
+    name: str,
+    num_classes: int,
+    in_channels: int,
+    pretrained: bool = False,
+    small_input_stem: bool = True,
+    width: int = 64,
+    depths: tuple[int, ...] = (2, 2, 2, 2),
+) -> nn.Module:
     """
     A torchvision architecture with its input layer, early downsampling and classifier head
     adapted to the task.
@@ -45,6 +109,10 @@ def build_model(name: str, num_classes: int, in_channels: int, pretrained: bool 
     """
     if name not in SUPPORTED_MODELS:
         raise ValueError(f"Unsupported model '{name}', choose from {SUPPORTED_MODELS}")
+    if name == "slim_resnet":
+        if pretrained:
+            raise ValueError("slim_resnet has no pretrained weights")
+        return SlimResNet(num_classes, in_channels, width=width, depths=tuple(depths), small_input_stem=small_input_stem)
 
     model = torchvision.models.get_model(name, weights="DEFAULT" if pretrained else None)
     if name.startswith("resnet"):
@@ -148,6 +216,15 @@ def load_checkpoint(path: str | Path, device: torch.device) -> tuple[nn.Module, 
     """
     checkpoint = torch.load(path, map_location=device, weights_only=True)
     model_cfg = checkpoint["model_config"]
-    model = build_model(model_cfg["name"], checkpoint["num_classes"], checkpoint["in_channels"], pretrained=False, small_input_stem=model_cfg["small_input_stem"])
+    model = build_model(
+        model_cfg["name"],
+        checkpoint["num_classes"],
+        checkpoint["in_channels"],
+        pretrained=False,
+        small_input_stem=model_cfg["small_input_stem"],
+        # Absent from checkpoints saved before slim_resnet existed; the defaults are then unused
+        width=model_cfg.get("width", 64),
+        depths=tuple(model_cfg.get("depths", (2, 2, 2, 2))),
+    )
     model.load_state_dict(checkpoint["model_state"])
     return model.to(device).eval(), checkpoint

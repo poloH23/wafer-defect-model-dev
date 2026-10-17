@@ -102,6 +102,7 @@ class EdaConfig(StrictModel):
 
 class ModelConfig(StrictModel):
     # Must match src.models.factory.SUPPORTED_MODELS (checked by tests/test_models.py); listed here
+    # rather than imported so that loading configs never requires torch
     name: Literal[
         "resnet18",
         "resnet34",
@@ -111,10 +112,25 @@ class ModelConfig(StrictModel):
         "efficientnet_b0",
         "shufflenet_v2_x0_5",
         "shufflenet_v2_x1_0",
+        "slim_resnet",
     ]
     pretrained: bool = False
-    # Replace the ImageNet stem (7x7 conv stride 2 + max pool) with a 3x3 stride-1 conv, for small inputs
+    # Remove the early downsampling designed for 224x224 photos, so small inputs keep their detail
+    # (see src.models.factory.build_model)
     small_input_stem: bool = True
+    # slim_resnet only: channels of the first stage (doubled at each stage) and blocks per stage
+    width: int = Field(default=64, ge=4)
+    depths: list[int] = Field(default=[2, 2, 2, 2], min_length=4, max_length=4)
+
+    @model_validator(mode="after")
+    def check_slim_resnet_options(self) -> Self:
+        if self.name != "slim_resnet" and (self.width != 64 or self.depths != [2, 2, 2, 2]):
+            raise ValueError("width and depths only apply to slim_resnet")
+        if min(self.depths) < 1:
+            raise ValueError("every stage needs at least one block")
+        if self.name == "slim_resnet" and self.pretrained:
+            raise ValueError("slim_resnet has no pretrained weights")
+        return self
 
 
 class PosWeightConfig(StrictModel):
@@ -140,6 +156,8 @@ class TrainConfig(StrictModel):
     learning_rate: float = Field(gt=0)
     weight_decay: float = Field(default=0.0, ge=0)
     scheduler: Literal["none", "cosine"] = "cosine"
+    # Epochs of linear learning-rate warmup before the schedule, against the instability of early epochs
+    warmup_epochs: int = Field(default=0, ge=0)
     # Stop when the monitored metric has not improved for this many epochs; None disables it
     early_stopping_patience: int | None = Field(default=None, gt=0)
     # Threshold-free metric used to pick the best checkpoint (decision thresholds are tuned later)
@@ -151,6 +169,12 @@ class TrainConfig(StrictModel):
     num_workers: int = Field(default=4, ge=0)
 
     @model_validator(mode="after")
+    def check_warmup(self) -> Self:
+        if self.warmup_epochs >= self.epochs:
+            raise ValueError("warmup_epochs must be smaller than epochs")
+        return self
+
+    @model_validator(mode="after")
     def check_checkpoint_protocol(self) -> Self:
         if self.checkpoint == "last" and self.early_stopping_patience is not None:
             raise ValueError(
@@ -158,6 +182,45 @@ class TrainConfig(StrictModel):
                 "learning rate schedule finishes, so the kept model would never go through the annealing phase"
             )
         return self
+
+
+class FloatRange(StrictModel):
+    low: float = Field(gt=0)
+    high: float = Field(gt=0)
+    log: bool = True
+
+    @model_validator(mode="after")
+    def check_order(self) -> Self:
+        if self.low >= self.high:
+            raise ValueError("low must be smaller than high")
+        return self
+
+
+class SearchSpace(StrictModel):
+    # Architecture (slim_resnet): drives FLOPs
+    width: list[int] = Field(min_length=1)
+    depth: list[int] = Field(min_length=1)  # blocks in every stage
+    small_input_stem: list[bool] = Field(min_length=1)
+    # Training: drives accuracy
+    learning_rate: FloatRange
+    weight_decay: FloatRange
+    warmup_epochs: list[int] = Field(min_length=1)
+
+
+class SearchConfig(StrictModel):
+    study_name: str
+    # MLflow experiment for the trials, kept apart from the main experiment
+    experiment_name: str
+    # Every setting not searched (split, encoding, augmentation, batch size, ...) comes from this
+    # experiment config: conf/experiments/<base_experiment>.yaml
+    base_experiment: str
+    # Shorter than the full schedule: the search screens candidates, finalists are retrained in full
+    epochs: int = Field(gt=0)
+    n_trials: int = Field(gt=0)
+    seed: int = 0
+    # Each trial is scored by its validation errors averaged over its last `last_k` epochs
+    last_k: int = Field(default=3, gt=0)
+    space: SearchSpace
 
 
 def load_config[ConfigT: BaseModel](path: str | Path, model: type[ConfigT]) -> ConfigT:
@@ -171,9 +234,14 @@ def load_config[ConfigT: BaseModel](path: str | Path, model: type[ConfigT]) -> C
     return model.model_validate(data)
 
 
+def named_config_path(group: str, name: str) -> Path:
+    """Path of a named config, e.g. ("experiments", "wafer_augment") -> <root>/conf/experiments/wafer_augment.yaml."""
+    return resolve_path(CONF_DIR / group / f"{name}.yaml")
+
+
 def load_named_config[ConfigT: BaseModel](group: str, name: str, model: type[ConfigT]) -> ConfigT:
     """Configs refer to each other by name; this resolves a name to conf/<group>/<name>.yaml."""
-    return load_config(CONF_DIR / group / f"{name}.yaml", model)
+    return load_config(named_config_path(group, name), model)
 
 
 def load_dataset_config(name: str) -> DatasetConfig:
@@ -186,3 +254,7 @@ def load_split_config(name: str) -> SplitConfig:
 
 def load_model_config(name: str) -> ModelConfig:
     return load_named_config("model", name, ModelConfig)
+
+
+def load_experiment_config(name: str) -> TrainConfig:
+    return load_named_config("experiments", name, TrainConfig)

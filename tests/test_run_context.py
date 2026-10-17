@@ -5,9 +5,9 @@ import mlflow
 import pytest
 
 from src.common.config_schema import DatasetConfig, SplitConfig, TrainConfig
-from src.evaluation.run_context import RunContext, find_checkpoint_artifact
+from src.evaluation.run_context import RunContext, find_checkpoint_artifact, load_train_config
 from src.training import tracking
-from src.training.tracking import setup_experiment
+from src.training.tracking import EFFECTIVE_TRAIN_CONFIG, setup_experiment
 
 
 @pytest.fixture(autouse=True)
@@ -53,3 +53,35 @@ def test_ambiguous_or_missing_checkpoint_raises():
         find_checkpoint_artifact(context(log_run(["a.pt", "b.pt"]), {}))
     with pytest.raises(FileNotFoundError, match="exactly one"):
         find_checkpoint_artifact(context(log_run([]), {}))
+
+
+# ========== the training config of a run ==========
+
+TRAIN_CFG = TrainConfig(experiment_name="e", split="s", model="m", epochs=1, batch_size=1, learning_rate=0.1)
+
+
+def test_effective_config_is_preferred(tmp_path):
+    # e.g. a search trial: its config_file is a search config, which is not a training config
+    effective = TRAIN_CFG.model_copy(update={"learning_rate": 0.003})
+    with mlflow.start_run() as run:
+        mlflow.log_dict(effective.model_dump(mode="json"), EFFECTIVE_TRAIN_CONFIG)
+        mlflow.log_dict({"study_name": "not a training config"}, "config/search.yaml")
+    assert load_train_config(run.info.run_id, {"config_file": "conf/search/search.yaml"}, tmp_path) == effective
+
+
+def test_older_runs_fall_back_to_their_experiment_yaml(tmp_path):
+    yaml_path = tmp_path / "baseline.yaml"
+    yaml_path.write_text(
+        """
+experiment_name: e
+split: s
+model: m
+epochs: 1
+batch_size: 1
+learning_rate: 1.0e-1
+""",
+        encoding="utf-8",
+    )
+    with mlflow.start_run() as run:
+        mlflow.log_artifact(str(yaml_path), artifact_path="config")
+    assert load_train_config(run.info.run_id, {"config_file": "conf/experiments/baseline.yaml"}, tmp_path / "download") == TRAIN_CFG
