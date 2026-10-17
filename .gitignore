@@ -25,6 +25,9 @@ mlflow.db
 mlruns/
 mlartifacts/
 
+# Optuna
+optuna.db
+
 # Hydra
 outputs/
 multirun/
