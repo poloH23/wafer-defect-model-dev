@@ -7,8 +7,18 @@ import pytest
 from optuna.distributions import CategoricalDistribution, FloatDistribution
 from pydantic import ValidationError
 
-from src.common.config_schema import SearchConfig, TrainConfig
-from src.training.search import count_trials, plot_trials, resume_seed, suggest_configs, to_markdown, trial_rows
+from src.common.config_schema import ModelConfig, SearchConfig, TrainConfig, load_config
+from src.training.search import (
+    count_trials,
+    export_trial,
+    plot_trials,
+    resume_seed,
+    slim_model_name,
+    suggest_configs,
+    to_markdown,
+    trial_rows,
+    trial_to_configs,
+)
 
 BASE = TrainConfig(
     experiment_name="main", split="toy_v1", model="resnet18", epochs=30, batch_size=8, learning_rate=1e-3, augment=True, early_stopping_patience=None, checkpoint="last"
@@ -106,3 +116,56 @@ def test_resume_seed_avoids_replaying_old_trials(tmp_path):
     earlier = [trial.params for trial in optuna.load_study(study_name="s", storage=storage).trials[:2]]
     assert params not in earlier
     assert count_trials("s", storage) == 3
+
+
+# ========== exporting trials ==========
+
+
+def completed_trial(params: dict, values: tuple[float, float] = (57.3, 192.2)) -> optuna.trial.FrozenTrial:
+    distributions = {
+        "width": CategoricalDistribution([8, 16, 32]),
+        "depth": CategoricalDistribution([1, 2]),
+        "small_input_stem": CategoricalDistribution([True, False]),
+        "learning_rate": FloatDistribution(1e-4, 1e-2, log=True),
+        "weight_decay": FloatDistribution(1e-5, 1e-3, log=True),
+        "warmup_epochs": CategoricalDistribution([0, 1, 5]),
+    }
+    study = optuna.create_study(directions=["minimize", "minimize"])
+    for _ in range(3):  # so the exported trial gets a number other than 0
+        study.add_trial(optuna.trial.create_trial(params=params, distributions=distributions, values=list(values), user_attrs={"run_id": "abc123"}))
+    return study.trials[-1]
+
+
+def test_slim_model_name():
+    assert slim_model_name(ModelConfig(name="slim_resnet", width=16, depths=[2, 2, 2, 2], small_input_stem=True)) == "slim_resnet_w16_d2_small"
+    assert slim_model_name(ModelConfig(name="slim_resnet", width=32, depths=[1, 2, 1, 1], small_input_stem=False)) == "slim_resnet_w32_d1-2-1-1_std"
+
+
+def test_confirmation_configs_use_the_full_schedule_of_the_base_experiment():
+    train_cfg, model_cfg = trial_to_configs(PARAMS, SEARCH, BASE)
+    # Searched settings come from the trial...
+    assert (train_cfg.learning_rate, train_cfg.weight_decay, train_cfg.warmup_epochs, model_cfg.width) == (2e-3, 1e-4, 1, 16)
+    # ...but schedule, seed and MLflow experiment from the base experiment, unlike the screening run
+    assert (train_cfg.epochs, train_cfg.seed, train_cfg.experiment_name) == (BASE.epochs, BASE.seed, BASE.experiment_name)
+    assert train_cfg.model == "slim_resnet_w16_d1_std"
+
+
+def test_exported_configs_reload_to_the_same_configs(tmp_path):
+    params = {**PARAMS, "weight_decay": 1.02e-05}  # a value YAML must keep as a float
+    model_path, experiment_path = export_trial(completed_trial(params), SEARCH, BASE, conf_dir=tmp_path)
+    assert experiment_path.name == "wafer_toy_t002.yaml"
+    expected_train, expected_model = trial_to_configs(params, SEARCH, BASE)
+    assert load_config(experiment_path, TrainConfig) == expected_train
+    assert load_config(model_path, ModelConfig) == expected_model
+    header = experiment_path.read_text(encoding="utf-8")
+    assert "trial 2" in header and "abc123" in header and "57.3 validation errors" in header
+
+
+def test_export_never_silently_replaces_a_different_file(tmp_path):
+    trial = completed_trial(PARAMS)
+    export_trial(trial, SEARCH, BASE, conf_dir=tmp_path)
+    export_trial(trial, SEARCH, BASE, conf_dir=tmp_path)  # identical content: fine
+    changed = completed_trial({**PARAMS, "learning_rate": 5e-3})
+    with pytest.raises(FileExistsError, match="different content"):
+        export_trial(changed, SEARCH, BASE, conf_dir=tmp_path)
+    export_trial(changed, SEARCH, BASE, conf_dir=tmp_path, overwrite=True)
