@@ -20,7 +20,12 @@
       "mobilenet_v3_small",
       "mobilenet_v3_large",
       "efficientnet_b0",
-      "shufflenet_v2_x1_0"
+      "shufflenet_v2_x1_0",
+      "slim_resnet_w16_d2_std",
+      "slim_resnet_w24_d1_std",
+      "slim_resnet_w32_d1_std",
+      "slim_resnet_w16_d2_small",
+      "slim_resnet_w32_d1_small"
     ],
     "encoding": "onehot",
     "server_threads": 6,
@@ -34,60 +39,60 @@
       "parameters": 11172936,
       "flops": 3046553600,
       "onnx_mb": 44.739647,
-      "onnx_max_abs_diff": 7.152557373046875e-07,
+      "onnx_max_abs_diff": 9.5367431640625e-07,
       "cpu_server": {
-        "median_ms": 3.7583205000828457,
-        "p95_ms": 4.20640060003734
+        "median_ms": 3.7685015004171873,
+        "p95_ms": 4.195622200222715
       },
       "edge_proxy": {
-        "median_ms": 10.417021999955978,
-        "p95_ms": 11.047181499952785
+        "median_ms": 10.537683499933337,
+        "p95_ms": 11.490122549457737
       },
       "gpu_latency": {
-        "median_ms": 1.5466720461845398,
-        "p95_ms": 5.394414305686947
+        "median_ms": 1.4301599860191345,
+        "p95_ms": 3.1965647697448647
       },
-      "gpu_throughput_img_s": 3804.9253043268877
+      "gpu_throughput_img_s": 3795.6164779940163
     },
     {
       "model": "mobilenet_v3_small",
       "parameters": 1526056,
       "flops": 93573968,
       "onnx_mb": 6.33156,
-      "onnx_max_abs_diff": 9.313225746154785e-10,
+      "onnx_max_abs_diff": 1.862645149230957e-09,
       "cpu_server": {
-        "median_ms": 0.3656730000329844,
-        "p95_ms": 0.5040893500108723
+        "median_ms": 0.33955849994526943,
+        "p95_ms": 0.3852039497360238
       },
       "edge_proxy": {
-        "median_ms": 0.6325709998691309,
-        "p95_ms": 0.6970416002786806
+        "median_ms": 0.6355320001603104,
+        "p95_ms": 0.6819407492912432
       },
       "gpu_latency": {
-        "median_ms": 2.253040075302124,
-        "p95_ms": 3.734651184082029
+        "median_ms": 1.844976007938385,
+        "p95_ms": 6.517891335487365
       },
-      "gpu_throughput_img_s": 10885.605291100384
+      "gpu_throughput_img_s": 11078.813198158849
     },
     {
       "model": "mobilenet_v3_large",
       "parameters": 4212280,
       "flops": 354656336,
       "onnx_mb": 17.064718,
-      "onnx_max_abs_diff": 5.820766091346741e-11,
+      "onnx_max_abs_diff": 2.3283064365386963e-10,
       "cpu_server": {
-        "median_ms": 0.8255795000877697,
-        "p95_ms": 0.9403753000469806
+        "median_ms": 0.8585000005041366,
+        "p95_ms": 0.9839651497713928
       },
       "edge_proxy": {
-        "median_ms": 1.8820924997271504,
-        "p95_ms": 2.01277819974166
+        "median_ms": 1.8551425000623567,
+        "p95_ms": 1.9960804501351959
       },
       "gpu_latency": {
-        "median_ms": 2.084879994392395,
-        "p95_ms": 3.4578464746475115
+        "median_ms": 2.289952039718628,
+        "p95_ms": 3.7218303442001304
       },
-      "gpu_throughput_img_s": 4057.297188537467
+      "gpu_throughput_img_s": 4062.961777332182
     },
     {
       "model": "efficientnet_b0",
@@ -96,18 +101,18 @@
       "onnx_mb": 16.477915,
       "onnx_max_abs_diff": 0.0,
       "cpu_server": {
-        "median_ms": 1.6122860001814843,
-        "p95_ms": 1.8560790500941946
+        "median_ms": 1.573319000272022,
+        "p95_ms": 1.80035294888512
       },
       "edge_proxy": {
-        "median_ms": 3.5042474999045226,
-        "p95_ms": 3.716588249835695
+        "median_ms": 3.506280500005232,
+        "p95_ms": 3.9341569012321993
       },
       "gpu_latency": {
-        "median_ms": 3.7695040702819824,
-        "p95_ms": 27.76636419296264
+        "median_ms": 3.7767839431762695,
+        "p95_ms": 5.344121742248531
       },
-      "gpu_throughput_img_s": 2422.066988194795
+      "gpu_throughput_img_s": 2356.8747347110134
     },
     {
       "model": "shufflenet_v2_x1_0",
@@ -116,18 +121,118 @@
       "onnx_mb": 5.297794,
       "onnx_max_abs_diff": 1.862645149230957e-09,
       "cpu_server": {
-        "median_ms": 0.8054649999849062,
-        "p95_ms": 0.9052784499090193
+        "median_ms": 0.8202420003726729,
+        "p95_ms": 1.095095349319308
       },
       "edge_proxy": {
-        "median_ms": 1.4151109999147593,
-        "p95_ms": 1.5554080001265902
+        "median_ms": 1.4298160003818339,
+        "p95_ms": 1.6433707498435979
       },
       "gpu_latency": {
-        "median_ms": 2.0837279558181763,
-        "p95_ms": 9.517305898666379
+        "median_ms": 2.3147199153900146,
+        "p95_ms": 3.164260816574097
       },
-      "gpu_throughput_img_s": 7350.731966646543
+      "gpu_throughput_img_s": 7335.653760900642
+    },
+    {
+      "model": "slim_resnet_w16_d2_std",
+      "parameters": 703128,
+      "flops": 17896832,
+      "onnx_mb": 2.903783,
+      "onnx_max_abs_diff": 5.438923835754395e-07,
+      "cpu_server": {
+        "median_ms": 0.06890599979669787,
+        "p95_ms": 0.10026595027738949
+      },
+      "edge_proxy": {
+        "median_ms": 0.0972420011748909,
+        "p95_ms": 0.14450600010604828
+      },
+      "gpu_latency": {
+        "median_ms": 0.8990080058574677,
+        "p95_ms": 8.070169830322266
+      },
+      "gpu_throughput_img_s": 180684.79917289063
+    },
+    {
+      "model": "slim_resnet_w24_d1_std",
+      "parameters": 694976,
+      "flops": 19695936,
+      "onnx_mb": 2.830813,
+      "onnx_max_abs_diff": 2.086162567138672e-07,
+      "cpu_server": {
+        "median_ms": 0.06424399998650188,
+        "p95_ms": 0.09693274932942585
+      },
+      "edge_proxy": {
+        "median_ms": 0.11563399948499864,
+        "p95_ms": 0.15545299966106538
+      },
+      "gpu_latency": {
+        "median_ms": 0.7390080094337463,
+        "p95_ms": 0.9462096273899078
+      },
+      "gpu_throughput_img_s": 212927.34625660963
+    },
+    {
+      "model": "slim_resnet_w32_d1_std",
+      "parameters": 1232296,
+      "flops": 32893696,
+      "onnx_mb": 4.977235,
+      "onnx_max_abs_diff": 2.980232238769531e-07,
+      "cpu_server": {
+        "median_ms": 0.07773050037940266,
+        "p95_ms": 0.10860414986382239
+      },
+      "edge_proxy": {
+        "median_ms": 0.13979049981571734,
+        "p95_ms": 0.17875569910756892
+      },
+      "gpu_latency": {
+        "median_ms": 0.64478400349617,
+        "p95_ms": 1.05797923207283
+      },
+      "gpu_throughput_img_s": 162970.9591507809
+    },
+    {
+      "model": "slim_resnet_w16_d2_small",
+      "parameters": 701208,
+      "flops": 192163328,
+      "onnx_mb": 2.894765,
+      "onnx_max_abs_diff": 1.2814998626708984e-06,
+      "cpu_server": {
+        "median_ms": 0.2834699998857104,
+        "p95_ms": 0.3340893991662596
+      },
+      "edge_proxy": {
+        "median_ms": 0.7216614994831616,
+        "p95_ms": 0.767324750086118
+      },
+      "gpu_latency": {
+        "median_ms": 1.1322879791259766,
+        "p95_ms": 1.7063839495182034
+      },
+      "gpu_throughput_img_s": 24672.24381192436
+    },
+    {
+      "model": "slim_resnet_w32_d1_small",
+      "parameters": 1228456,
+      "flops": 349330432,
+      "onnx_mb": 4.960535,
+      "onnx_max_abs_diff": 7.450580596923828e-08,
+      "cpu_server": {
+        "median_ms": 0.4491754989430774,
+        "p95_ms": 0.507724849649093
+      },
+      "edge_proxy": {
+        "median_ms": 1.1729664993254119,
+        "p95_ms": 1.3231443001131993
+      },
+      "gpu_latency": {
+        "median_ms": 0.7070399820804596,
+        "p95_ms": 5.176945662498474
+      },
+      "gpu_throughput_img_s": 18165.881860758094
     }
   ]
 }
