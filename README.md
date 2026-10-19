@@ -96,6 +96,44 @@ every rule below is applied in code and configured under 'conf/'.
   or Near_Full (8): the two classes whose labels the authors corrected after release.
 
 
+## Methodology
+
+The full account, with the reasoning behind each design decision, is in
+[docs/methodology.md](docs/methodology.md). In short:
+
+- **A trustworthy evaluation first.** All decisions use the validation split; the test split is
+  evaluated once, at the end. Runs train the full cosine schedule and keep the final epoch, and
+  configurations are compared over 3 seeds. The earlier protocol, keeping the best epoch with early
+  stopping, biases scores upward and had made run-to-run noise six times larger. The accuracy metric
+  is the number of misclassified samples: macro average precision saturated at about 0.998 and could
+  no longer rank models.
+- **Understanding the errors before chasing them.** A rule-based measure of how far a defect wraps
+  around the wafer edge showed that the most frequent confusion, Edge_Loc vs Edge_Ring, comes from
+  labels that contradict the class definitions: every such error of the baseline lies in the top 4%
+  of Edge_Loc coverage. Accuracy is limited by label quality, so the focus moved to efficiency.
+- **Capacity is not the bottleneck.** Five architectures from 94 to 3,047 MFLOPs reach the same
+  accuracy within noise, each at a learning rate chosen by the same pre-declared rule:
+
+  | Architecture | MFLOPs | Validation errors (3 seeds) |
+  |---|---|---|
+  | EfficientNet-B0 | 646 | 42.1 ± 2.0 |
+  | ShuffleNetV2 1.0x | 250 | 43.1 ± 2.1 |
+  | MobileNetV3-Large | 355 | 43.9 ± 1.0 |
+  | ResNet-18 | 3,047 | 44.1 ± 4.2 |
+  | MobileNetV3-Small | 94 | 46.2 ± 0.2 |
+
+- **Compute is not speed.** Benchmarks on GPU and CPU (ONNX Runtime) show that FLOPs predict CPU
+  latency exactly but not GPU latency, which follows the number of layers: ResNet-18, the most
+  expensive model, has the lowest GPU latency.
+- **Mapping the trade-off.** A multi-objective Optuna search over slim ResNets (validation errors vs
+  FLOPs, 50 screening trials) finds accuracy flat down to about 33 MFLOPs, a third of
+  MobileNetV3-Small, and dropping steeply below 20 MFLOPs. Its finalists are being confirmed with the
+  full protocol.
+- **Selection rules fixed in advance.** How one model is chosen for each deployment target (cloud GPU,
+  CPU server, edge) is written in [docs/model_selection.md](docs/model_selection.md), committed before
+  the search and the test evaluation, so the choice cannot be adapted to the results.
+
+
 ## Limitations
 
 ### Data
@@ -117,6 +155,7 @@ every rule below is applied in code and configured under 'conf/'.
   remaining error reflects how the data was labeled rather than the model's capacity.
 
 ### Evaluation
+
 - **Small rare-class evaluation sets.** After deduplication, Near_Full has 141 samples: 14 in
   validation and 15 in test. A single test error changes Near_Full recall by about 6.7 percentage points.
 - **A single random split.** All splits come from the same source and the same distribution.
