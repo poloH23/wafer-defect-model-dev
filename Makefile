@@ -98,6 +98,11 @@ SEARCH_CONFIG ?= conf/search/slim_resnet_v1.yaml
 search:  ## Multi-objective search (validation errors vs FLOPs) with Optuna; rerun to resume (SEARCH_CONFIG=...)
 	python scripts/search.py --config $(SEARCH_CONFIG)
 
+TRIALS ?=
+
+export-trials:  ## Export search trials as configs for confirmation runs (SEARCH_CONFIG=..., TRIALS="15 46 10")
+	python scripts/export_trial.py --config $(SEARCH_CONFIG) --trials $(TRIALS)
+
 mlflow-ui: ## Open the local MLflow UI at http://127.0.0.1:5000
 	mlflow ui --backend-store-uri sqlite:///mlflow.db
 
