@@ -31,6 +31,28 @@ a target under the rules below is therefore also trained with 3 seeds at 3e-3, i
 at that rate. The rate with fewer mean errors is kept; if the two are within 4 errors, the original
 rate is kept. The rules below are then applied again with the updated numbers.
 
+## Search finalists
+
+*Added after the screening search `slim_resnet_v1` (`reports/experiments/slim_resnet_v1.md`) and before
+any confirmation run.*
+
+The search screens each configuration with 15 epochs and a single seed. Screening errors are higher
+than full-schedule errors, and a longer schedule may rank configurations differently, so more than the
+single best trial is confirmed:
+
+- **Finalists**: Pareto-optimal trials whose screening errors are at most **the best screening errors
+  + 20**. The margin is wide on purpose: repeated configurations with similar hyperparameters varied by
+  up to about 7 errors in the search, and the change of schedule adds uncertainty on top. In
+  `slim_resnet_v1` the rule selects trials **15, 46, 10, 29 and 36** (74.7, 69.3, 61.0, 57.3 and 57.0
+  screening errors; best 57.0, threshold 77.0). It excludes trials 42 and 11 (122.0 and 115.7 errors
+  at 3.2 and 5.3 MFLOPs), twice the best errors, a gap a longer schedule cannot plausibly close.
+- **Configs**: generated with `scripts/export_trial.py`: each trial's architecture, learning rate,
+  weight decay and warmup, with the base experiment's full 30-epoch schedule.
+- **Evidence**: 3 seeds each and `scripts/benchmark_models.py`, like every other candidate.
+
+The search tuned learning rates for a 15-epoch schedule, which favours higher rates. The
+learning-rate check for finalists described above therefore applies to them as to every other candidate.
+
 ## Eligibility
 
 A candidate is eligible when its mean validation errors are at most **the best candidate's mean + 4**.
