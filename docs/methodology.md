@@ -116,14 +116,20 @@ PyTorch outputs before being timed.
 | EfficientNet-B0 | 4.03 | 2,407 | 1.91 | 3.59 |
 | ShuffleNetV2 1.0x | 2.08 | 7,332 | 0.74 | 1.42 |
 
-- **On CPU, FLOPs rank the models exactly as measured latency does**, for both CPU targets.
+- **On CPU, FLOPs predict latency within an architecture family, but not exactly across families.**
+  Among the five off-the-shelf architectures, FLOPs rank the models exactly as measured latency does.
+  Benchmarking the slim ResNets later showed the limit: with 6 threads, ResNet-style dense
+  convolutions complete about 690 to 810 MFLOPs per millisecond, the mobile architectures only 280
+  to 410, so a slim ResNet with twice the FLOPs of MobileNetV3-Small is still faster on the CPU
+  server (0.28 vs 0.34 ms).
 - **On GPU, single-image latency follows the number of layers, not FLOPs**: ResNet-18, with the most
   FLOPs but few layers, is the fastest; EfficientNet-B0, with the most layers, the slowest. With a
   batch of 256 the GPU is busy enough for compute to matter again, but depthwise convolutions are
   limited by memory bandwidth, so speed grows far less than FLOPs shrink.
 
-This validated FLOPs as the search objective for the CPU and edge targets, and showed that GPU speed
-has to be measured directly. It also shaped the GPU target: one model serves both single requests and
+This supported FLOPs as the search objective for the CPU and edge targets, as long as the search stays
+within one architecture family, and showed that GPU speed, like any comparison across families, has
+to be measured directly. It also shaped the GPU target: one model serves both single requests and
 batch review, since the mode belongs to the serving layer (dynamic batching), and fewer models mean
 less to validate, monitor and retrain.
 
@@ -183,6 +189,10 @@ Single-seed, 15-epoch results; not conclusions until confirmed with the full pro
   schedule are the most exposed, which is why finalists are confirmed with the full schedule.
 - **A cheap objective attracts the sampler.** FLOPs is exact and easy to reduce, so 28 of 50 trials
   landed below 40 MFLOPs and none above 800: the expensive end of the curve stayed unexplored.
+- **A proxy is valid within a scope.** FLOPs ranked CPU latency perfectly within each architecture
+  family and imperfectly across families, where dense and depthwise convolutions use the hardware
+  differently. The search compared slim ResNets only, the scope in which its proxy holds; comparisons
+  across families use measured latency.
 - **Enqueue reference points.** Evaluating a known configuration such as the ResNet-18 equivalent at
   the start (`study.enqueue_trial`) would have given an anchor at the same fidelity, and measured the
   gap between 15 and 30 epochs.
