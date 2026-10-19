@@ -10,6 +10,8 @@ import torchvision
 from torch import nn
 from torchvision.models.resnet import BasicBlock
 
+from src.common.config_schema import ModelConfig
+
 SUPPORTED_MODELS = (
     "resnet18",
     "resnet34",
@@ -104,6 +106,9 @@ def build_model(
         Loads ImageNet weights. Layers that are replaced (the first conv when the number of input
         channels changes, the ResNet stem, the classifier head) are re-initialized.
 
+    width, depths:
+        Only used by slim_resnet (see SlimResNet), which is always trained from scratch.
+
     The head outputs raw logits (no sigmoid): BCEWithLogitsLoss applies the sigmoid itself,
     in a numerically stable way.
     """
@@ -134,7 +139,8 @@ def _set_module(model: nn.Module, name: str, module: nn.Module) -> None:
 
 
 def _adapt_resnet_stem(model: nn.Module, name: str, in_channels: int, small_input_stem: bool) -> None:
-    """get_model is typed to return a plain nn.Module, so type checkers cannot know conv1 exists."""
+    # get_model is typed to return a plain nn.Module, so type checkers cannot know conv1 exists.
+    # The isinstance check tells them, and fails with a clear message otherwise.
     conv1 = model.conv1
     if not isinstance(conv1, nn.Conv2d):
         raise TypeError(f"'{name}' does not have the expected ResNet stem (conv1)")
@@ -147,7 +153,7 @@ def _adapt_resnet_stem(model: nn.Module, name: str, in_channels: int, small_inpu
 
 def _remove_first_downsampling(model: nn.Module, count: int) -> None:
     """
-    Make the first 'count' downsampling operations stride 1, in the order the modules are defined,
+    Make the first `count` downsampling operations stride 1, in the order the modules are defined,
     which for the supported architectures is the forward order. A stride-2 convolution keeps its
     padding, so it now preserves the spatial size; a stride-2 max pool is removed.
 
@@ -206,6 +212,22 @@ def _replace_last_linear(model: nn.Module, num_classes: int) -> None:
     _set_module(model, name, nn.Linear(linear.in_features, num_classes))
 
 
+def build_model_from_config(model_cfg: ModelConfig, num_classes: int, in_channels: int) -> nn.Module:
+    """
+    The single place where a model config becomes a model. Training, benchmarking and checkpoint
+    loading all go through it, so a new architecture option cannot be forgotten in one of them.
+    """
+    return build_model(
+        model_cfg.name,
+        num_classes,
+        in_channels,
+        pretrained=model_cfg.pretrained,
+        small_input_stem=model_cfg.small_input_stem,
+        width=model_cfg.width,
+        depths=tuple(model_cfg.depths),
+    )
+
+
 def load_checkpoint(path: str | Path, device: torch.device) -> tuple[nn.Module, dict[str, Any]]:
     """
     Rebuild a model from a checkpoint saved by scripts/train.py, in evaluation mode.
@@ -215,16 +237,9 @@ def load_checkpoint(path: str | Path, device: torch.device) -> tuple[nn.Module, 
     restored from the checkpoint anyway, so nothing needs to be downloaded.
     """
     checkpoint = torch.load(path, map_location=device, weights_only=True)
-    model_cfg = checkpoint["model_config"]
-    model = build_model(
-        model_cfg["name"],
-        checkpoint["num_classes"],
-        checkpoint["in_channels"],
-        pretrained=False,
-        small_input_stem=model_cfg["small_input_stem"],
-        # Absent from checkpoints saved before slim_resnet existed; the defaults are then unused
-        width=model_cfg.get("width", 64),
-        depths=tuple(model_cfg.get("depths", (2, 2, 2, 2))),
-    )
+    # Checkpoints saved before slim_resnet existed have no width/depths: the config defaults apply.
+    # pretrained=False: every weight comes from the checkpoint, nothing needs to be downloaded.
+    model_cfg = ModelConfig.model_validate({**checkpoint["model_config"], "pretrained": False})
+    model = build_model_from_config(model_cfg, checkpoint["num_classes"], checkpoint["in_channels"])
     model.load_state_dict(checkpoint["model_state"])
     return model.to(device).eval(), checkpoint

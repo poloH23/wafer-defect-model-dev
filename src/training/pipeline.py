@@ -27,7 +27,7 @@ from src.data.dataset import DiscreteMapDataset, build_split_datasets, seed_work
 from src.data.io import load_npz_arrays
 from src.data.split import META_FILE, SplitResult, load_split, load_split_meta
 from src.data.transforms import RandomDihedral, encoded_channels
-from src.models.factory import build_model
+from src.models.factory import build_model_from_config
 from src.models.profiling import count_flops, count_parameters
 from src.training.class_balance import compute_pos_weight, expected_initial_bce
 from src.training.losses import build_loss
@@ -119,15 +119,7 @@ def build_components(train_cfg: TrainConfig, model_cfg: ModelConfig, data: Prepa
     datasets = build_split_datasets(data.images, data.labels, data.split, data.num_values, train_cfg.encoding, train_transform)
 
     in_channels = encoded_channels(data.num_values, train_cfg.encoding)
-    model = build_model(
-        model_cfg.name,
-        data.dataset_cfg.num_classes,
-        in_channels,
-        model_cfg.pretrained,
-        model_cfg.small_input_stem,
-        width=model_cfg.width,
-        depths=tuple(model_cfg.depths),
-    ).to(device)
+    model = build_model_from_config(model_cfg, data.dataset_cfg.num_classes, in_channels).to(device)
 
     # Class weights come from the training split only
     pos_weight = compute_pos_weight(data.labels[data.split.train_idx], train_cfg.pos_weight.mode, train_cfg.pos_weight.max_value)
