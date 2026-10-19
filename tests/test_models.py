@@ -4,7 +4,7 @@ import pytest
 import torch
 
 from src.common.config_schema import ModelConfig
-from src.models.factory import SUPPORTED_MODELS, build_model
+from src.models.factory import SUPPORTED_MODELS, build_model, build_model_from_config
 from src.models.profiling import count_flops, count_parameters
 
 
@@ -99,3 +99,34 @@ def test_mobile_architectures_are_cheaper_than_resnet18():
     flops = {name: count_flops(build_model(name, 8, 3), (1, 3, 52, 52)) for name in ("resnet18", "mobilenet_v3_small", "shufflenet_v2_x1_0")}
     assert flops["mobilenet_v3_small"] < flops["resnet18"]
     assert flops["shufflenet_v2_x1_0"] < flops["resnet18"]
+
+
+# ========== slim_resnet ==========
+
+
+def test_slim_resnet_with_resnet18_settings_is_resnet18():
+    reference = build_model("resnet18", num_classes=8, in_channels=3)
+    slim = build_model("slim_resnet", num_classes=8, in_channels=3, width=64, depths=(2, 2, 2, 2))
+    assert count_parameters(slim) == count_parameters(reference)
+    assert count_flops(slim, (1, 3, 52, 52)) == count_flops(reference, (1, 3, 52, 52))
+
+
+def test_slim_resnet_gets_cheaper_when_narrower_or_shallower():
+    def flops(width: int, depth: int) -> int:
+        return count_flops(build_model("slim_resnet", 8, 3, width=width, depths=(depth,) * 4), (1, 3, 52, 52))
+
+    assert flops(16, 2) < flops(32, 2) < flops(64, 2)
+    assert flops(32, 1) < flops(32, 2)
+
+
+def test_slim_resnet_has_no_pretrained_weights():
+    with pytest.raises(ValueError, match="no pretrained weights"):
+        build_model("slim_resnet", 8, 3, pretrained=True)
+
+
+def test_build_model_from_config_honours_every_option():
+    # A slim config must not silently become the default width-64 ResNet-18
+    cfg = ModelConfig(name="slim_resnet", width=16, depths=[1, 2, 1, 1], small_input_stem=False)
+    from_config = build_model_from_config(cfg, num_classes=8, in_channels=3)
+    direct = build_model("slim_resnet", 8, 3, small_input_stem=False, width=16, depths=(1, 2, 1, 1))
+    assert count_parameters(from_config) == count_parameters(direct) < count_parameters(build_model("resnet18", 8, 3))

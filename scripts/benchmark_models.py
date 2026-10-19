@@ -23,7 +23,7 @@ import torch
 from src.common.config_schema import load_dataset_config, load_model_config, resolve_path
 from src.data.transforms import encoded_channels
 from src.models.benchmark import export_onnx, hardware_info, onnx_max_abs_diff, physical_cores, summarize_timings, time_onnx_cpu, time_torch_cuda
-from src.models.factory import build_model
+from src.models.factory import build_model_from_config
 from src.models.profiling import count_flops, count_parameters
 
 # An ONNX export whose outputs differ from PyTorch by more than this is treated as broken
@@ -44,7 +44,7 @@ def parse_args() -> argparse.Namespace:
 
 def benchmark_model(name: str, num_classes: int, input_shape: tuple[int, ...], args: argparse.Namespace, tmp_dir: Path) -> dict[str, Any]:
     model_cfg = load_model_config(name)
-    model = build_model(model_cfg.name, num_classes, input_shape[1], pretrained=False, small_input_stem=model_cfg.small_input_stem).eval()
+    model = build_model_from_config(model_cfg.model_copy(update={"pretrained": False}), num_classes, input_shape[1]).eval()
     result: dict[str, Any] = {"model": name, "parameters": count_parameters(model), "flops": count_flops(model, input_shape)}
 
     onnx_path = export_onnx(model, tmp_dir / f"{name}.onnx", input_shape)
