@@ -123,8 +123,10 @@ The full account, with the reasoning behind each design decision, is in
   | MobileNetV3-Small | 94 | 46.2 ± 0.2 |
 
 - **Compute is not speed.** Benchmarks on GPU and CPU (ONNX Runtime) show that FLOPs predict CPU
-  latency exactly but not GPU latency, which follows the number of layers: ResNet-18, the most
-  expensive model, has the lowest GPU latency.
+  latency within an architecture family but not across families, where ResNet-style convolutions run
+  about twice as many FLOPs per millisecond as mobile ones, and do not predict GPU latency, which
+  follows the number of layers: ResNet-18, the most expensive model, is faster on the GPU than every
+  mobile architecture.
 - **Mapping the trade-off.** A multi-objective Optuna search over slim ResNets (validation errors vs
   FLOPs, 50 screening trials) finds accuracy flat down to about 33 MFLOPs, a third of
   MobileNetV3-Small, and dropping steeply below 20 MFLOPs. Its finalists are being confirmed with the
