@@ -10,7 +10,10 @@ The project moved through one question at a time. Each answer shaped the next ex
 2. Where do the remaining errors come from? → mostly ambiguous labels, not model weakness
 3. Does capacity matter, then? → no: architectures 32x apart in compute reach the same accuracy
 4. How does compute translate into speed? → it depends on the hardware, so it was measured
-5. How small can a model get? → a search that maps accuracy against compute
+5. How small can a model get? → a search mapped the trade-off; its most promising finding did not
+   survive confirmation
+6. Does the choice hold on unseen data? → yes, and the test evaluation exposed two flaws of the
+   selection protocol
 
 ## 1. Data and evaluation protocol
 
@@ -55,7 +58,6 @@ share of the circumference whose outermost band consists mostly of failed dies.
   4% of Edge_Loc coverage, inside the typical range of Edge_Ring. Three of them cover the entire edge.
 - Prediction probabilities show the model is confident in these decisions: it follows the class
   definitions, and the labels contradict them in that region.
-
 About a third of the remaining errors are of this kind. This is the evidence behind the project's
 central decision: accuracy is limited by label quality, so beyond a point, effort goes into
 efficiency rather than into more accuracy.
@@ -169,12 +171,12 @@ point of the trade-off curve can be traced, analyzed and retrained.
 
 ### Screening results
 
-Single-seed, 15-epoch results; not conclusions until confirmed with the full protocol.
+Single-seed, 15-epoch results, recorded here as they were seen. The first finding did not survive the
+full-protocol confirmation (section 7).
 
-- **Accuracy is flat from about 33 MFLOPs upward**: from 33 to 349 MFLOPs, ten times the compute,
-  the best errors fall only from 61.0 to 57.0. Below about 20 MFLOPs they rise steeply, doubling by
-  3 MFLOPs. Hypothesis 1 holds down to roughly a third of MobileNetV3-Small's compute, and the search
-  located its limit.
+- **In screening, accuracy looked flat from about 33 MFLOPs upward**: from 33 to 349 MFLOPs, ten times
+  the compute, the best errors fell only from 61.0 to 57.0, and rose steeply below about 20 MFLOPs.
+  It suggested that hypothesis 1 held down to roughly a third of MobileNetV3-Small's compute.
 - **At low compute, the standard stem wins**: downsampling the input early and spending the compute
   on more channels beat keeping the full resolution with fewer channels, against the assumption that
   motivated the small-input stem. At the most accurate end, the small-input stem still wins.
@@ -196,6 +198,9 @@ Single-seed, 15-epoch results; not conclusions until confirmed with the full pro
 - **Enqueue reference points.** Evaluating a known configuration such as the ResNet-18 equivalent at
   the start (`study.enqueue_trial`) would have given an anchor at the same fidelity, and measured the
   gap between 15 and 30 epochs.
+- **Screening can mislead in level and in ranking.** Confirmed with 3 seeds and the full schedule, the
+  apparent plateau became a 10-error gap between 33 and 192 MFLOPs, and the two best screening trials
+  swapped places. Single-seed, low-fidelity results locate candidates; they do not support conclusions.
 - **Repeated configurations measure noise for free.** The sampler drew one architecture seven times;
   with similar hyperparameters, its errors stayed within 1.7.
 - **Searches get interrupted.** Optuna does not store its sampler's random state, so a resumed search
@@ -204,8 +209,73 @@ Single-seed, 15-epoch results; not conclusions until confirmed with the full pro
 
 ## 7. Confirmation and selection
 
-The search finalists are retrained with 3 seeds and the full schedule, benchmarked, and compared with
-the off-the-shelf architectures. The rules that turn this evidence into one model per deployment
-target are in [model_selection.md](model_selection.md); they were committed before the search, the
-confirmation runs and the test evaluation. Each selected model then gets per-class decision thresholds
-tuned on the validation split, and is evaluated once on the test split.
+The search finalists were the Pareto-optimal trials within 20 screening errors of the best, a rule
+written down before they were retrained: five slim ResNets, retrained with 3 seeds and the full
+30-epoch schedule. Mean validation errors, computed without rounding:
+
+| Candidate | MFLOPs | Validation errors |
+|---|---|---|
+| EfficientNet-B0 | 646 | 42.07 |
+| ShuffleNetV2 1.0x (learning rate 3e-3) | 250 | 43.07 |
+| MobileNetV3-Large | 355 | 43.93 |
+| ResNet-18 | 3,047 | 44.07 |
+| MobileNetV3-Small | 94 | 46.20 |
+| Slim ResNet, width 16, 2 blocks, small stem | 192 | 48.73 |
+| Slim ResNet, width 32, 1 block, small stem | 349 | 53.13 |
+| Slim ResNet, width 32, 1 block, standard stem | 33 | 58.67 |
+| Slim ResNet, width 24, 1 block, standard stem | 20 | 64.07 |
+| Slim ResNet, width 16, 2 blocks, standard stem | 18 | 71.67 |
+
+**What this says about the hypotheses.** None of the slim ResNets is as accurate as the off-the-shelf
+architectures, even at similar compute: at 192 to 349 MFLOPs they make 5 to 10 more errors than
+ShuffleNetV2 and MobileNetV3-Large at 250 to 355. Hypothesis 1 holds for the off-the-shelf
+architectures, whose designs (depthwise convolutions, and in some squeeze-and-excitation blocks)
+appear to get more accuracy out of each FLOP, but not for a plain ResNet shrunk down. Hypothesis 2 holds for speed, the slim ResNets being the fastest models on every target,
+but at an accuracy cost that excludes them. A negative result, and the reason the confirmation stage
+exists: selecting from the screening alone would have chosen a model that the full protocol shows to
+be less accurate.
+
+**Selection.** The rules of [model_selection.md](model_selection.md) were then applied: a candidate is
+eligible within 4 errors of the best (42.07 + 4 = 46.07), and each target takes the fastest eligible
+one. ShuffleNetV2 has the highest GPU throughput and the lowest CPU and edge latency among the four
+eligible candidates, so **one model, ShuffleNetV2 1.0x, serves all three targets**. MobileNetV3-Small,
+faster on every target, missed eligibility by 0.13 errors. Since the comparison table rounds to one
+decimal, exact values were computed, after both possible outcomes and their consequences had been
+written down, so that the margin could not influence the decision.
+
+## 8. What the test evaluation showed
+
+Each candidate was evaluated once on the test split, with per-class thresholds tuned on the
+validation split; the full report is `reports/final/test_evaluation.md`. The selected model makes
+46.0 ± 1.7 errors out of 3,700 test samples (95% interval 34.3 to 58.7), an exact match of 98.76%.
+
+- **Validation conclusions generalize.** Test and validation errors differ by 1 to 2 for every
+  off-the-shelf candidate. Many decisions were taken on the validation split; none overfitted it.
+- **The finite test set dominates uncertainty.** Across seeds, the selected model's errors vary by a
+  standard deviation of 1.7; across bootstrap resamples of the test set, its 95% interval spans about
+  ±12. Comparing two models on the same resamples cancels the samples both get wrong and narrows the
+  interval of their difference to about ±7.
+- **The selection logic is confirmed.** No off-the-shelf architecture differs detectably from the
+  selected model, while four of the five slim ResNets are significantly less accurate.
+- **Threshold tuning did not help.** Tuned thresholds increased test errors for all ten candidates, by
+  2.8 on average. They maximized per-class F1 while the primary metric counts samples with any wrong
+  label, and with 40 to 70 validation errors per model, each threshold followed a handful of samples:
+  for the selected model, the Edge_Ring threshold ranged from 0.05 to 0.50 across seeds.
+### Lessons for the next selection protocol
+
+The test evaluation exposed two flaws. They are reported, not corrected, since changing the rules
+after seeing the results would defeat the protocol; the next protocol should avoid them.
+
+- **Decide equivalence with paired comparisons, not a fixed margin.** The 4-error margin reflected
+  training noise only, while the validation set's own sampling noise is about ±12 errors. Widening the
+  margin to 12 would not have fixed it: it would also have admitted two slim ResNets, one of them the
+  fastest eligible model on GPU and CPU, and both less accurate on the test set (one significantly, the
+  other nearly so). The principled criterion is the one applied to the test set: a paired bootstrap
+  comparison of each candidate with the best one on the validation split, accepting a candidate when
+  the upper bound of the interval of its extra errors stays below a tolerance fixed in advance (a
+  non-inferiority test).
+- **Give every candidate the same tuning.** The learning-rate check covered only candidates that would
+  be selected, so a candidate excluded by an unsuitable learning rate was never rechecked.
+- **Align threshold tuning with the primary metric, and require it to beat noise.** Tune thresholds to
+  minimize the samples with any wrong label, and keep 0.5 unless the tuned thresholds improve on it by
+  more than validation noise.
