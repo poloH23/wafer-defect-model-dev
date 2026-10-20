@@ -9,6 +9,7 @@ from src.common.config_schema import (
     ModelConfig,
     SearchConfig,
     SplitConfig,
+    TestEvaluationConfig,
     TrainConfig,
     load_config,
     load_named_config,
@@ -159,3 +160,12 @@ def test_search_config(tmp_path):
 def test_search_range_must_be_ordered(tmp_path):
     with pytest.raises(ValidationError, match="low must be smaller than high"):
         load_config(write(tmp_path, SEARCH_YAML.replace("low: 1.0e-4, high: 1.0e-2", "low: 1.0e-2, high: 1.0e-4")), SearchConfig)
+
+
+def test_test_evaluation_config_rejects_inconsistencies():
+    selected = {"experiment": "a", "overrides": "none"}
+    assert TestEvaluationConfig(selected=selected).deliverable_seed == 0
+    with pytest.raises(ValidationError, match="deliverable_seed"):
+        TestEvaluationConfig(selected=selected, seeds=[1, 2], deliverable_seed=0)
+    with pytest.raises(ValidationError, match="appear once"):
+        TestEvaluationConfig(selected=selected, others=[selected])
