@@ -77,9 +77,74 @@ responsive; throughput decides the batch mode.
 selected for another target, then the one with fewer parameters. Fewer distinct models mean less to
 validate, monitor and retrain; a single model for all three targets is an acceptable outcome.
 
-## After selection
+## Outcome of the selection
 
-1. Tune one decision threshold per class on the validation split, for each selected model.
-2. Evaluate each selected model once on the test split, with those thresholds.
-3. Report the test results as they are. A disappointing test result is reported, not fixed by
-   changing the model, the thresholds or this protocol.
+*Added after the confirmation runs, before any evaluation on the test split.*
+
+Mean validation errors over 3 seeds, computed without rounding (the comparison table shows one
+decimal, too coarse for the margins below):
+
+| Candidate | Validation errors | Eligible |
+|---|---|---|
+| EfficientNet-B0 | 42.0667 | yes (best) |
+| ShuffleNetV2 1.0x (learning rate 3e-3) | 43.0667 | yes |
+| MobileNetV3-Large | 43.9333 | yes |
+| ResNet-18 | 44.0667 | yes |
+| MobileNetV3-Small | 46.2000 | no |
+| Slim ResNets (trials 29, 36, 10, 46, 15) | 48.7333 to 71.6667 | no |
+
+The eligibility threshold is 42.0667 + 4 = 46.0667. Among the four eligible candidates:
+
+- **Cloud GPU**: all have a median latency under 5 ms; ShuffleNetV2 has the highest batch-256
+  throughput (7,336 images/s; next MobileNetV3-Large, 4,063).
+- **CPU server**: ShuffleNetV2 (0.82 ms) and MobileNetV3-Large (0.86 ms) are within 10%, a tie
+  resolved in favor of ShuffleNetV2, already selected for the other targets. In the first benchmark
+  run ShuffleNetV2 was faster outright (0.74 vs 0.85 ms).
+- **Edge**: ShuffleNetV2 (1.43 ms; next MobileNetV3-Large, 1.86 ms).
+ShuffleNetV2 already uses a learning rate of 3e-3, so the learning-rate check does not apply.
+**ShuffleNetV2 1.0x with a learning rate of 3e-3 is selected for all three deployment targets.**
+
+**Sensitivity.** The outcome rests on a margin of 0.1333 errors: MobileNetV3-Small misses
+eligibility by that much, and if eligible it would have been selected for all three targets
+(11,079 images/s, 0.34 ms and 0.64 ms). Before the exact values were computed, both outcomes and
+their consequences were written down, so the margin could not influence the decision.
+
+**A flaw of this protocol.** The learning-rate check only covers candidates that would be selected,
+so a candidate excluded because its learning rate did not suit it is never checked. MobileNetV3-Small
+is such a case: its single-seed run at 3e-3 had 43.6 errors, 2.6 fewer than its mean at 1e-3, and a
+check covering candidates near the threshold might have made it eligible. The flaw is reported here
+rather than fixed, since changing the rule after seeing whom the change favors is what this protocol
+exists to prevent.
+
+**Unequal tuning.** The slim ResNets were tuned more than the off-the-shelf architectures (50 screening
+trials over learning rate, weight decay and warmup, against three learning rates). This cannot have
+helped them here, as none became eligible, but it should be kept in mind in any comparison of their
+accuracy.
+
+## Test evaluation
+
+*Added before the test split was used for anything.* The test split is evaluated once, with
+`scripts/evaluate_test.py` and `conf/evaluation/final_test.yaml`; the script refuses to overwrite an
+existing report.
+
+1. **Models.** All 3 seeds of the selected configuration, as trained on the training split. They
+   are not retrained on training plus validation data: the validation split must stay unseen by
+   training to tune the decision thresholds.
+2. **Thresholds.** For each model (each seed) and each class, the threshold that maximizes that
+   class's F1 on the validation split, among 0.05 to 0.95 in steps of 0.05. Ties go to the value
+   closest to 0.5, the untuned default.
+3. **Primary result.** Test errors (samples with any label wrong) at the tuned thresholds, as mean
+   and standard deviation over the 3 seeds. Also reported: errors at the 0.5 default (the effect of
+   tuning), exact match, macro F1, macro average precision, and per-class precision, recall and F1.
+4. **Two kinds of uncertainty.** Training randomness, as the standard deviation over seeds. The
+   finite test set, as a 95% bootstrap confidence interval of the seed-averaged errors (2,000
+   resamples of test samples, fixed seed, percentile method).
+5. **Every other candidate, for transparency only.** The same procedure is applied to the other nine
+   candidates, each at its pre-declared learning rate, and reported with the paired difference
+   between the selected configuration and each of them: the difference in seed-averaged errors on
+   identical bootstrap resamples of the test set, with its 95% confidence interval. These results show
+   whether the validation-based selection holds on unseen data; **they do not change the selection**.
+6. **Deliverable.** The seed-0 model of the selected configuration, with its tuned thresholds. It is
+   fixed in advance rather than picked as the best seed, which would be one more selection on noise.
+7. **Reporting.** Results are committed as they come out. A disappointing result is reported, not
+   fixed by changing the model, the thresholds or this protocol.
