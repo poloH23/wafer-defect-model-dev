@@ -26,7 +26,7 @@ from mlflow.entities import Run
 from torch import nn
 from torch.utils.data import DataLoader
 
-from src.common.config_schema import CandidateRef, TestEvaluationConfig, load_config, load_experiment_config, resolve_path
+from src.common.config_schema import CandidateRef, EvaluationConfig, load_config, load_experiment_config, resolve_path
 from src.data.dataset import DiscreteMapDataset
 from src.data.split import load_split
 from src.evaluation.bootstrap import bootstrap_ci, paired_difference, resample_weights, sample_errors
@@ -130,7 +130,7 @@ def fmt(stats: dict[str, float], digits: int = 1) -> str:
 
 
 def to_markdown(
-    cfg: TestEvaluationConfig, summaries: list[dict[str, Any]], comparisons: list[dict[str, Any]], selected_results: dict[int, dict[str, Any]], n_test: int, code_version: str
+    cfg: EvaluationConfig, summaries: list[dict[str, Any]], comparisons: list[dict[str, Any]], selected_results: dict[int, dict[str, Any]], n_test: int, code_version: str
 ) -> str:
     level = round(cfg.confidence_level * 100)
     lines = [
@@ -182,7 +182,7 @@ def to_markdown(
         per_seed = [selected_results[s]["tuned"]["per_class"][name] for s in seeds]
         mean = {key: float(np.mean([p[key] for p in per_seed])) for key in ("precision", "recall", "f1", "ap")}
         thresholds = ", ".join(f"{selected_results[s]['thresholds'][name]:.2f}" for s in seeds)
-        ap = "–" if np.isnan(mean["ap"]) else f"{mean['ap']:.4f}"  # AP is undefined without positive test samples
+        ap = "-" if np.isnan(mean["ap"]) else f"{mean['ap']:.4f}"  # AP is undefined without positive test samples
         lines.append(f"| {name} | {per_seed[0]['support']} | {mean['precision']:.4f} | {mean['recall']:.4f} | {mean['f1']:.4f} | {ap} | {thresholds} |")
     deliverable = selected_results[cfg.deliverable_seed]
     lines += ["", f"**Deliverable**: seed {cfg.deliverable_seed} of the selected configuration (MLflow run {deliverable['run_id']}), with its tuned thresholds."]
@@ -196,7 +196,7 @@ def main() -> None:
         raise FileExistsError(f"{args.output} exists: the test split has already been evaluated (see the docstring before deleting it)")
     # Checked before any test sample is read: the report must point to the exact code and protocol
     code_version = committed_version(git_tags())
-    cfg = load_config(args.config, TestEvaluationConfig)
+    cfg = load_config(args.config, EvaluationConfig)
     mlflow.set_tracking_uri(resolve_tracking_uri())
     device = resolve_device()
 

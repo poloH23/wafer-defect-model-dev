@@ -238,10 +238,10 @@ class CandidateRef(StrictModel):
     # conf/experiments/<experiment>.ysml
     experiment: str
     # The overrides tag of the candidate's runs, e.g. "learning_rate=0.003", or "none"
-    overrides: str
+    overrides: str = "none"
 
 
-class TestEvaluationConfig(StrictModel):
+class EvaluationConfig(StrictModel):
     """The single evaluation on the test split (docs/model_selection.md, "Test evaluation")."""
 
     selected: CandidateRef
