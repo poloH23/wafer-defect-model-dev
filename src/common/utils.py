@@ -97,7 +97,7 @@ class Timer:
         logger.info(f"[Timer] Start: {self.name}...")
         return self
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         end_time = time.perf_counter()
         duration = timer_duration_str(self.start_time, end_time)
         logger.info(f"[Timer] Done: {self.name}. Cost: {duration}")

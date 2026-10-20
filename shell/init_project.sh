@@ -12,11 +12,11 @@
 
 set -euo pipefail
 
-echo ">>> [1/4] Install runtime dependencies (requirements.txt)"
-pip install -r requirements.txt
-
-echo ">>> [2/4] Install development dependencies (requirements-dev.txt)"
+echo ">>> [1/4] Install dependencies (requirements-dev.txt: a superset that already includes requirements.txt)"
 pip install -r requirements-dev.txt
+
+echo ">>> [2/4] Install the project in editable mode (makes 'src' importable anywhere)"
+pip install -e .
 
 echo ">>> [3/4] Mount pre-commit git hook"
 pre-commit install

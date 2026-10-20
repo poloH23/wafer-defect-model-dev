@@ -80,6 +80,98 @@ Every push or pull request triggers GitHub Actions (defined in `.github/workflow
 - **Test suite**: Executes pytest and generates a coverage report.
 
 
+## Data Qality Findings
+
+Issues found in the official dataset, and how they are handeled. The raw file is never modified:
+every rule below is applied in code and configured under 'conf/'.
+
+- **Extra duplicate images.** 1,024 images are byte-for-byte copies of another image with the same labels.
+  1,000 of them form a complete second copy of the Center+Edge_Loc+Scratch combination, which explains
+  why the documentation lists 2,000 samples for that combination and 1,000 for every other one. The
+  remaining 24 belong to Random (16) and Near_Full (8). A first random split left 157 validation and
+  174 test images with an identical copy in the training split, inflating the validation scores.
+  Split 'v2' keeps a single copy of each image, and every reported result uses it.
+- **Undocumented pixel values.** The documentation lists three pixel values (0 = empty, 1 = pass,
+  2 = fail), but the file contains 214 pixels with the value 3 in 105 images, all labeled Random (97)
+  or Near_Full (8): the two classes whose labels the authors corrected after release.
+
+
+## Methodology
+
+The full account, with the reasoning behind each design decision, is in
+[docs/methodology.md](docs/methodology.md). In short:
+
+- **A trustworthy evaluation first.** All decisions use the validation split; the test split is
+  evaluated once, at the end. Runs train the full cosine schedule and keep the final epoch, and
+  configurations are compared over 3 seeds. The earlier protocol, keeping the best epoch with early
+  stopping, biases scores upward and had made run-to-run noise six times larger. The accuracy metric
+  is the number of misclassified samples: macro average precision saturated at about 0.998 and could
+  no longer rank models.
+- **Understanding the errors before chasing them.** A rule-based measure of how far a defect wraps
+  around the wafer edge showed that the most frequent confusion, Edge_Loc vs Edge_Ring, comes from
+  labels that contradict the class definitions: every such error of the baseline lies in the top 4%
+  of Edge_Loc coverage. Accuracy is limited by label quality, so the focus moved to efficiency.
+- **Capacity is not the bottleneck.** Five architectures from 94 to 3,047 MFLOPs reach the same
+  accuracy within noise, each at a learning rate chosen by the same pre-declared rule:
+
+  | Architecture | MFLOPs | Validation errors (3 seeds) |
+  |---|---|---|
+  | EfficientNet-B0 | 646 | 42.1 ± 2.0 |
+  | ShuffleNetV2 1.0x | 250 | 43.1 ± 2.1 |
+  | MobileNetV3-Large | 355 | 43.9 ± 1.0 |
+  | ResNet-18 | 3,047 | 44.1 ± 4.2 |
+  | MobileNetV3-Small | 94 | 46.2 ± 0.2 |
+
+- **Compute is not speed.** Benchmarks on GPU and CPU (ONNX Runtime) show that FLOPs predict CPU
+  latency within an architecture family but not across families, where ResNet-style convolutions run
+  about twice as many FLOPs per millisecond as mobile ones, and do not predict GPU latency, which
+  follows the number of layers: ResNet-18, the most expensive model, is faster on the GPU than every
+  mobile architecture.
+- **Mapping the trade-off.** A multi-objective Optuna search over slim ResNets (validation errors vs
+  FLOPs, 50 screening trials) finds accuracy flat down to about 33 MFLOPs, a third of
+  MobileNetV3-Small, and dropping steeply below 20 MFLOPs. Its finalists are being confirmed with the
+  full protocol.
+- **Selection rules fixed in advance.** How one model is chosen for each deployment target (cloud GPU,
+  CPU server, edge) is written in [docs/model_selection.md](docs/model_selection.md), committed before
+  the search and the test evaluation, so the choice cannot be adapted to the results.
+
+
+## Limitations
+
+### Data
+
+- **Partly synthetic data.** The dataset authors generated part of the samples with a generative
+  adversarial network to balance the classes, and synthetic samples are not marked.
+- **Artificially balanced class distribution.** Most label combinations have exactly 1,000 samples.
+  Real production lines are dominated by normal wafers, so precision in production would be lower
+  than reported here, and decision thresholds would need to be recalibrated on real data.
+- **Near_Full and Random never co-occur with other defects.** The model has never seen them in
+  mixed patterns, so its behavior on such combinations is untested.
+- **Edge_Loc / Edge_Ring label ambiguity.** By definition, Edge_Ring is a defect along the whole wafer
+  edge and Edge_Loc a defect on part of it. A rule-based edge coverage measure (the share of the
+  circumference whose outermost band consists mostly of failed dies) separates the two labels well
+  overall (ROC AUC 0.987–0.996 for sector thresholds from 0.4 to 0.6), yet about 3% of Edge_Loc samples
+  cover nearly the entire edge, some of them completely. All 14 validation samples where the baseline
+  predicted Edge_Ring instead of Edge_Loc come from this group, in the top 4% of Edge_Loc coverage under
+  every threshold tested. In this region the labels contradict the class definitions, so part of the
+  remaining error reflects how the data was labeled rather than the model's capacity.
+
+### Evaluation
+
+- **Small rare-class evaluation sets.** After deduplication, Near_Full has 141 samples: 14 in
+  validation and 15 in test. A single test error changes Near_Full recall by about 6.7 percentage points.
+- **A single random split.** All splits come from the same source and the same distribution.
+  A split by time, production line or fab would give a more realistic estimate, but this
+  information is not available in the dataset.
+
+### Scope
+
+- **Fixed input format.** The model is trained on 52×52 maps from a single source; other die
+  layouts or resolutions would require retraining.
+- **No deployment evaluation.** Inference latency and robustness to distribution shift are out
+  of scope here and are covered by the follow-up deployment project.
+
+
 ## Project Structure
 
 <!-- TODO:  -->

@@ -1,0 +1,23 @@
+# Ablation: identical to wafer_baseline.yaml except for one setting, augment: true
+# (random D4 rotations and flips of the training images). Compared with the baseline over
+# several seeds with scripts/compare_runs.py, using the same evaluation protocol.
+
+experiment_name: wafer_defect
+split: wafer_defect_v2          # conf/split/wafer_defect_v2.yaml
+model: resnet18                 # conf/model/resnet18.yaml
+
+encoding: onehot
+augment: true
+pos_weight:
+  mode: none
+
+epochs: 30
+batch_size: 128
+learning_rate: 1.0e-3
+weight_decay: 1.0e-4
+scheduler: cosine
+monitor: val_macro_ap
+checkpoint: last
+
+seed: 42
+num_workers: 4
