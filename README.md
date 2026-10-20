@@ -136,40 +136,149 @@ The full account, with the reasoning behind each design decision, is in
   the search and the test evaluation, so the choice cannot be adapted to the results.
 
 
+
+Readme results limitations · MD
+## Results
+
+**Selected model: ShuffleNetV2 1.0x**, trained from scratch with augmentation and a learning rate of
+3e-3, for all three deployment targets (cloud GPU, CPU server, edge). It was chosen on the validation
+split by the rules in [docs/model_selection.md](docs/model_selection.md), committed before the test
+split was used (tag `selection-protocol`): among the candidates tied on accuracy, it has the highest
+GPU throughput and the lowest CPU and edge latency. One model serves all three targets.
+
+### Test results
+
+The single evaluation on the held-out test split (3,700 samples). Mean ± standard deviation over 3
+training seeds, with per-class thresholds tuned on the validation split. The 95% interval reflects the
+finite size of the test set (bootstrap over test samples).
+
+| Metric | ShuffleNetV2 1.0x |
+|---|---|
+| Misclassified samples (any label wrong) | 46.0 ± 1.7 of 3,700 (95% interval 34.3 to 58.7) |
+| Exact match (all 8 labels right) | 98.76% ± 0.05% |
+| Macro F1 | 0.9932 ± 0.0004 |
+| Macro average precision | 0.9995 |
+| Size | 1.26M parameters, 250 MFLOPs per image, 5.3 MB as ONNX |
+| Speed | GPU 2.31 ms per image and 7,336 images/s in batches of 256; CPU server 0.82 ms; edge proxy 1.43 ms |
+
+Speed measured on an RTX 5060 Ti (PyTorch FP32) and a Ryzen 5 9600X (ONNX Runtime, 6 threads for the
+CPU server, 1 thread for the edge proxy); see [reports/experiments/benchmark.md](reports/experiments/benchmark.md).
+
+Per class, on the test split (mean over seeds):
+
+| Class | Test samples | Precision | Recall | F1 |
+|---|---|---|---|---|
+| Center | 1,200 | 1.0000 | 1.0000 | 1.0000 |
+| Donut | 1,200 | 0.9997 | 1.0000 | 0.9999 |
+| Edge_Loc | 1,200 | 0.9986 | 0.9894 | 0.9940 |
+| Edge_Ring | 1,200 | 0.9947 | 0.9992 | 0.9970 |
+| Loc | 1,800 | 0.9989 | 0.9943 | 0.9966 |
+| Near_Full | 15 | 0.9375 | 1.0000 | 0.9677 |
+| Scratch | 1,800 | 0.9974 | 0.9920 | 0.9947 |
+| Random | 85 | 1.0000 | 0.9922 | 0.9961 |
+
+### Every candidate on the test set
+
+Evaluated with the same procedure for transparency; these results do not change the selection.
+The last column is the selected model's errors minus the candidate's, on identical resamples of the
+test set: an interval containing 0 means no detectable difference.
+
+| Candidate | MFLOPs | Test errors | 95% interval | ShuffleNetV2 minus candidate |
+|---|---|---|---|---|
+| **ShuffleNetV2 1.0x (selected)** | 250 | 46.0 ± 1.7 | 34.3 to 58.7 | |
+| EfficientNet-B0 | 646 | 42.7 ± 1.5 | 32.7 to 54.3 | +3.3 (−3.3 to +9.7) |
+| MobileNetV3-Large | 355 | 45.3 ± 4.0 | 34.3 to 57.3 | +0.7 (−6.0 to +7.7) |
+| ResNet-18 | 3,047 | 48.7 ± 3.1 | 37.0 to 61.3 | −2.7 (−9.3 to +4.3) |
+| MobileNetV3-Small | 94 | 49.3 ± 8.3 | 38.3 to 61.7 | −3.3 (−11.3 to +4.7) |
+| Slim ResNet, width 16, 2 blocks, small stem | 192 | 52.7 ± 1.5 | 40.7 to 66.0 | −6.7 (−13.3 to +0.3) |
+| Slim ResNet, width 32, 1 block, small stem | 349 | 59.7 ± 7.1 | 46.7 to 73.3 | −13.7 (−21.3 to −6.3) |
+| Slim ResNet, width 32, 1 block, standard stem | 33 | 61.0 ± 2.0 | 48.3 to 74.3 | −15.0 (−23.7 to −6.3) |
+| Slim ResNet, width 24, 1 block, standard stem | 20 | 70.0 ± 6.1 | 56.3 to 85.0 | −24.0 (−34.3 to −14.3) |
+| Slim ResNet, width 16, 2 blocks, standard stem | 18 | 76.3 ± 2.5 | 63.3 to 91.7 | −30.3 (−41.0 to −20.3) |
+
+### What the results show
+
+- **The validation conclusions hold on unseen data.** For every off-the-shelf candidate, test and
+  validation errors at the default threshold differ by 1 to 2. The project took many decisions on the
+  validation split (learning rates, a 50-trial search, the selection); none of them overfitted it.
+- **No off-the-shelf architecture differs detectably from the selected model**, from 94 to 3,047
+  MFLOPs, on the test set as on the validation set. Choosing among them by efficiency is justified.
+- **The slim ResNets trade accuracy for speed.** They are the fastest models on every target, but four
+  of the five are significantly less accurate than the selected model and the fifth nearly so.
+- **The remaining errors sit where the labels are ambiguous.** Edge_Loc has the lowest recall and
+  Edge_Ring the lowest precision: ring-like Edge_Loc samples are predicted as Edge_Ring, the label
+  conflict found by the error analysis ([docs/methodology.md](docs/methodology.md)).
+The deliverable is the seed-0 model of the selected configuration with its tuned thresholds, fixed in
+advance rather than picked as the best seed. Full results, with the commit of the evaluated code:
+[reports/final/test_evaluation.md](reports/final/test_evaluation.md).
+
+
 ## Limitations
 
 ### Data
 
-- **Partly synthetic data.** The dataset authors generated part of the samples with a generative
-  adversarial network to balance the classes, and synthetic samples are not marked.
-- **Artificially balanced class distribution.** Most label combinations have exactly 1,000 samples.
-  Real production lines are dominated by normal wafers, so precision in production would be lower
-  than reported here, and decision thresholds would need to be recalibrated on real data.
-- **Near_Full and Random never co-occur with other defects.** The model has never seen them in
-  mixed patterns, so its behavior on such combinations is untested.
-- **Edge_Loc / Edge_Ring label ambiguity.** By definition, Edge_Ring is a defect along the whole wafer
-  edge and Edge_Loc a defect on part of it. A rule-based edge coverage measure (the share of the
-  circumference whose outermost band consists mostly of failed dies) separates the two labels well
-  overall (ROC AUC 0.987–0.996 for sector thresholds from 0.4 to 0.6), yet about 3% of Edge_Loc samples
-  cover nearly the entire edge, some of them completely. All 14 validation samples where the baseline
-  predicted Edge_Ring instead of Edge_Loc come from this group, in the top 4% of Edge_Loc coverage under
-  every threshold tested. In this region the labels contradict the class definitions, so part of the
-  remaining error reflects how the data was labeled rather than the model's capacity.
-
+- **Partly synthetic data.** Many mixed-type maps in MixedWM38 were generated by a GAN. Results on maps
+  from a real production line may differ.
+- **Ambiguous labels between Edge_Loc and Edge_Ring.** About 3% of Edge_Loc samples cover nearly the
+  whole wafer edge, where the labels contradict the class definitions; the most frequent errors come
+  from this region. Accuracy there reflects how the data was labeled more than what the model learned.
+- **Artificial class balance.** The dataset is balanced by design: most defect classes have 1,200 to
+  1,800 test samples. On a production line, defective wafers are expected to be a minority, so
+  precision in production would differ from these figures.
+- **Rare classes are measured imprecisely.** Near_Full has 15 test samples and Random 85; a single
+  error moves their per-class metrics by several points (Near_Full's precision of 0.9375 is about one
+  false positive per seed). Near_Full and Random also never appear combined with other defects, so
+  such combinations are untested.
+- **Orientation invariance is assumed.** Training uses 90-degree rotations and flips, which assumes a
+  defect class does not depend on the wafer's orientation. This holds for the 8 classes here, but would
+  not for a defect defined relative to the notch or to equipment orientation.
+- **Fixed input format.** Models expect 52x52 maps with values 0, 1 and 2; other wafer sizes need
+  resizing or retraining.
 ### Evaluation
 
-- **Small rare-class evaluation sets.** After deduplication, Near_Full has 141 samples: 14 in
-  validation and 15 in test. A single test error changes Near_Full recall by about 6.7 percentage points.
-- **A single random split.** All splits come from the same source and the same distribution.
-  A split by time, production line or fab would give a more realistic estimate, but this
-  information is not available in the dataset.
+- **One split.** Every conclusion comes from a single train/validation/test split. Training randomness
+  is measured (3 seeds); variation across splits is not.
+- **A test set of 3,700 samples resolves about ±12 errors.** Differences of a few errors between
+  models, on either split, cannot be told apart from noise; the paired comparisons above narrow this to
+  about ±7.
+- **Three seeds estimate variance roughly.** MobileNetV3-Small had a standard deviation of 0.6 errors
+  across seeds on the validation split, but of 8.3 on the test split.
+- **Per-class threshold tuning did not help.** Tuned thresholds increased test errors for all ten
+  candidates, by 2.8 on average (by 0.3 for the selected model). Two likely reasons: thresholds were
+  chosen to maximize per-class F1 while the primary metric counts samples with any wrong label, and with
+  only 40 to 70 validation errors per model, each threshold followed a handful of samples. The thresholds
+  varied most across seeds for Edge_Loc and Edge_Ring, the classes with ambiguous labels. As the
+  protocol requires, the deliverable keeps its tuned thresholds; revisiting them needs new data, since
+  the test split has now been used.
+### Model selection
 
-### Scope
+- **The eligibility rule was too coarse.** A candidate was considered as accurate as the best one if
+  its mean validation errors were within 4, a margin based on training noise alone. It ignores the
+  sampling noise of the validation set, yet simply widening it would have admitted slim ResNets that
+  the test set shows to be less accurate. A paired comparison with the best candidate on the
+  validation split, as done on the test split, would have been the principled criterion.
+- **The selection is sensitive to that margin.** MobileNetV3-Small missed it by 0.13 errors. It is
+  faster than the selected model on every target and statistically indistinguishable from it on the
+  test set.
+- **The learning-rate check was incomplete.** It only covered candidates that would be selected, so a
+  candidate excluded because its learning rate did not suit it was never rechecked; MobileNetV3-Small
+  had 2.6 fewer errors in a single run at a higher rate.
+- **Tuning effort was unequal.** The slim ResNets were tuned in a 50-trial search; the off-the-shelf
+  architectures over three learning rates each.
+These flaws are reported rather than corrected: changing the rules after seeing the results is what
+the pre-registered protocol exists to prevent.
 
-- **Fixed input format.** The model is trained on 52×52 maps from a single source; other die
-  layouts or resolutions would require retraining.
-- **No deployment evaluation.** Inference latency and robustness to distribution shift are out
-  of scope here and are covered by the follow-up deployment project.
+### Efficiency and deployment
+
+- **One machine, one runtime per target.** Speeds come from one GPU and one CPU, with PyTorch FP32 on
+  the GPU and ONNX Runtime FP32 on the CPU. Deployment optimizations (TensorRT, reduced precision,
+  quantization, dynamic batching) were not evaluated and may change the ranking, especially on the GPU.
+- **Edge figures are a proxy.** They come from a single desktop CPU core, several times faster than
+  the ARM cores of typical edge devices: they rank models, they do not predict latency on a device.
+- **Model computation only.** GPU timings start with the input already on the GPU; preprocessing,
+  data transfer and serving overhead are not included.
+- **No production evaluation.** Behavior under data drift, on new defect types, or with real
+  production prevalence is untested.
 
 
 ## Project Structure
