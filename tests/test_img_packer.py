@@ -24,7 +24,7 @@ def mock_raw_dataset(tmp_path: Path):
     csv_path = tmp_path / "labels.csv"
     df = pd.DataFrame(
         {
-            "image_name": ["image_001.npy", "image_002.npy"],
+            "images": ["image_001.npy", "image_002.npy"],
             "defect_0": [1, 0],
             "defect_1": [1, 0],
         }
@@ -45,7 +45,8 @@ def test_pack_to_npz(mock_raw_dataset, tmp_path: Path):
         image_dir=image_dir,
         csv_path=csv_path,
         output_path=output_npz,
-        image_col="image_name",
+        image_col="images",
+        label_key="labels",
         output_format="npz",
     )
 
@@ -70,7 +71,8 @@ def test_pack_to_h5(mock_raw_dataset, tmp_path: Path):
         image_dir=image_dir,
         csv_path=csv_path,
         output_path=output_h5,
-        image_col="image_name",
+        image_col="images",
+        label_key="labels",
         output_format="h5",
     )
 

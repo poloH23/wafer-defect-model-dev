@@ -1,0 +1,11 @@
+# The number of outputs and input channel are NOT set here:
+# they are derived form the dataset config (num_classes) and the encoding (one-hot -> num_pixel_values channels)
+
+name: resnet18
+
+# ImageNet weight: Wafer maps are categorical maps, not photos
+# so whether pretraining helps is an empirical question for the ablation stage
+pretrained: false
+
+# 3x3 stride-1 first conv and no max pool, instead of the ImageNet stem shrinks the input 4x.
+small_input_stem: true

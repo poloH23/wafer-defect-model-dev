@@ -1,0 +1,10 @@
+# MobileNetV3-Small: depthwise separable convolutions and squeeze-and-excitation, designed for mobile CPUs.
+
+name: mobilenet_v3_small
+
+# Trained from scratch, like the ResNet-18 baseline, so the comparison is between architectures only
+pretrained: false
+
+# Remove the first two of the five stride-2 steps, so a 52x52 map reaches the classifier as 7x7,
+# the same as the small-input ResNet stem (see src/models/factory.py)
+small_input_stem: true

@@ -1,0 +1,26 @@
+# Architecture comparison: identical to wafer_augment.yaml (ResNet-18 with augmentation)
+# except for the model, mobilenet_v3_large.
+#
+# Learning rate: 1.0e-3 is the shared default. Each architecture is also run with seed 0 at
+# 3.0e-4 and 3.0e-3 (make lr-grid), so the comparison does not depend on one learning rate that
+# suits some architectures better than others.
+
+experiment_name: wafer_defect
+split: wafer_defect_v2        # conf/split/wafer_defect_v2.yaml
+model: mobilenet_v3_large     # conf/model/mobilenet_v3_large.yaml
+
+encoding: onehot
+augment: true
+pos_weight:
+  mode: none
+
+epochs: 30
+batch_size: 128
+learning_rate: 1.0e-3
+weight_decay: 1.0e-4
+scheduler: cosine
+monitor: val_macro_ap
+checkpoint: last
+
+seed: 42
+num_workers: 4

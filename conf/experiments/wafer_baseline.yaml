@@ -1,0 +1,26 @@
+# Baseline: the simplest standard setup. Its only jobs are to prove the pipeline works
+# end to end and to give a reference number. Ablations change ONE setting at a time from here.
+#
+# Evaluation protocol: every run trains for the full schedule and keeps the final epoch
+# (checkpoint: last, no early stopping). Configurations are compared over several seeds
+# with scripts/compare_runs.py, never on a single run.
+
+experiment_name: wafer_defect
+split: wafer_defect_v2          # conf/split/wafer_defect_v2.yaml
+model: resnet18                 # conf/model/resnet18.yaml
+
+encoding: onehot
+augment: false
+pos_weight:
+  mode: none
+
+epochs: 30
+batch_size: 128
+learning_rate: 1.0e-3
+weight_decay: 1.0e-4
+scheduler: cosine
+monitor: val_macro_ap
+checkpoint: last
+
+seed: 42
+num_workers: 4

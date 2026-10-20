@@ -1,0 +1,10 @@
+# EfficientNet-B0: the baseline of the EfficientNet family, scaled jointly in depth, width and resolution.
+
+name: efficientnet_b0
+
+# Trained from scratch, like the ResNet-18 baseline, so the comparison is between architectures only
+pretrained: false
+
+# Remove the first two of the five stride-2 steps, so a 52x52 map reaches the classifier as 7x7,
+# the same as the small-input ResNet stem (see src/models/factory.py)
+small_input_stem: true

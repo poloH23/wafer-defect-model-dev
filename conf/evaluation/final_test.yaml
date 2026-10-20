@@ -1,0 +1,25 @@
+# The single evaluation on the test split, as fixed in docs/model_selection.md ("Test evaluation").
+# Committed together with that section, before the test split is used for anything.
+#
+# selected: the configuration chosen on the validation split for all three deployment targets.
+# others: every other candidate at its pre-declared learning rate, evaluated with the same procedure
+# for transparency only. Their test results do not change the selection.
+
+selected: {experiment: wafer_shufflenet_v2_x1_0, overrides: learning_rate=0.003}
+
+others:
+  - {experiment: wafer_efficientnet_b0}
+  - {experiment: wafer_mobilenet_v3_large}
+  - {experiment: wafer_augment}               # ResNet-18
+  - {experiment: wafer_mobilenet_v3_small}
+  - {experiment: wafer_slim_resnet_v1_t029}
+  - {experiment: wafer_slim_resnet_v1_t036}
+  - {experiment: wafer_slim_resnet_v1_t010}
+  - {experiment: wafer_slim_resnet_v1_t046}
+  - {experiment: wafer_slim_resnet_v1_t015}
+
+seeds: [0, 1, 2]
+deliverable_seed: 0
+bootstrap_resamples: 2000
+bootstrap_seed: 0
+confidence_level: 0.95

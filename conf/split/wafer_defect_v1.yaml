@@ -1,0 +1,15 @@
+# Split version v1 of the wafer_defect dataset
+#
+# Once a split has been generated and used by any experiment, ever edit this file:
+# create a new version (e.g. wafer_defect_v2.yaml with version: v2) insdead,
+# so results from different splits are never mixed up.
+
+dataset: wafer_defect
+version: v1
+
+seed: 42
+val_ratio: 0.1
+test_ratio: 0.1
+
+# Label combination with fewer samples than this are merged into one "rare" stratum
+min_stratum_count: 10

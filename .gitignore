@@ -15,9 +15,22 @@ data/raw/*
 !data/raw/*.md
 !data/raw/.gitkeep
 docs/dev_ideas/
+docs/wafer_defect_desc/
 docs/others/
 !docs/.gitkeep
+temp/
 
+# MLflow
+mlflow.db
+mlruns/
+mlartifacts/
+
+# Optuna
+optuna.db
+
+# Hydra
+outputs/
+multirun/
 
 # ==========================================
 # For Python

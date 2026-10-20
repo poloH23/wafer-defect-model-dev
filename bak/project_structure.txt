@@ -1,0 +1,71 @@
+.
+├── .coverage
+├── .git
+├── .github
+│   └── workflows
+│       └── ci.yml
+├── .gitignore
+├── .pre-commit-config.yaml
+├── .vscode
+│   └── settings.json
+├── LICENSE
+├── Makefile
+├── README.md
+├── bak
+│   ├── README_temp.md
+│   └── project_structure.txt
+├── conf
+│   ├── config.yaml
+│   └── experiments
+│       └── .gitkeep
+├── data
+│   └── raw
+│       ├── README.md
+│       └── Wafer_Map_Datasets.npz
+├── docs
+│   ├── .gitkeep
+│   └── dev_ideas
+│       ├── project_design.md
+│       ├── project_instruction.md
+│       └── project_workflow.md
+├── experiments
+│   └── .gitkeep
+├── logs
+├── notebooks
+│   └── 01_eda_mixedwm38.ipynb
+├── pyproject.toml
+├── pytest.ini
+├── reports
+│   └── experiments
+│       └── .gitkeep
+├── requirement.in
+├── requirements-dev.in
+├── requirements-dev.txt
+├── requirements.in
+├── requirements.txt
+├── shell
+│   ├── gitkeep.sh
+│   ├── init_project.sh
+│   ├── manage_requirements.sh
+│   ├── setup_env.sh
+│   └── system_info.sh
+├── src
+│   ├── common
+│   │   ├── __init__.py
+│   │   ├── config_model_caps.py
+│   │   ├── config_proj.py
+│   │   ├── path.py
+│   │   └── utils.py
+│   ├── eda
+│   │   ├── __init__.py
+│   │   ├── img_packer.py
+│   │   ├── img_reader.py
+│   │   └── npz_analyzer.py
+│   └── pipelines
+│       ├── __init__.py
+│       └── eda_pipeline.py
+└── tests
+    ├── conftest.py
+    ├── test_img_packer.py
+    ├── test_img_reader.py
+    └── test_npz_analyzer.py

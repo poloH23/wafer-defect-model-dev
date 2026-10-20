@@ -1,13 +1,31 @@
-h5py==3.16.0
-matplotlib==3.11.2
-opencv-python==5.0.0.93
-numpy==2.5.3
-pandas==3.0.5
-pydantic==2.13.5
-pydantic_settings==2.15.0
-pytest==9.1.1
-python-dotenv==1.2.3
-PyYAML==6.0.3
-rawpy==0.27.1
+# Runtime dependencies: list only packages the code imports directly, without versions
+# Exact versions are resolved and locked in requirements.txt by: make requirements
+numpy
+pandas
+pyyaml
+pydantic
+pydantic-settings
+python-dotenv
+tqdm
+
+h5py
+opencv-python-headless
+rawpy
+matplotlib
+
+# torch is pinned on purpose: the CUDA runtime bundled with torch must stay compatible with
+# the GPU drive, so upgrade it should be a deliberate decision, not a side effect of recompiling
 torch==2.14.0
-tqdm==4.70.1
+torchvision
+torchmetrics
+scikit-learn
+scipy
+
+hydra-core
+optuna
+optuna-integration
+mlflow
+grad-cam
+onnx
+onnxruntime
+onnxscript

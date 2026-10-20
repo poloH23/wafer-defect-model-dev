@@ -2,6 +2,8 @@
         init requirements requirements-bootstrap requirements-refresh \
         conda-dev conda-export conda-custom \
         clean gitkeep-clean clean-zone \
+        eda split sanity-check train train-seed lr-grid compare benchmark search evaluate-test mlflow-ui \
+		test analyze-errors \
         docker-build docker-run docker-run-fastapi docker-run-flask \
         demo-run gitkeep-add system-info
 
@@ -46,6 +48,67 @@ gitkeep-add:  ## Add .gitkeep files in to empty directories
 
 gitkeep-clean:  ## Remove all .gitkeep files
 	bash shell/gitkeep.sh -c
+
+# === 📊 Data ===
+EDA_CONFIG ?= conf/eda/wafer_defect.yaml
+SPLIT_CONFIG ?= conf/split/wafer_defect_v1.yaml
+
+eda:  ## Run dataset EDA (EDA_CONFIG=conf/eda/wafer_defect.yaml)
+	python scripts/run_eda.py --config $(EDA_CONFIG)
+
+split:  ## Create a fixed train/val/test split (SPLIT_CONFIG=conf/split/wafer_defect_v1.yaml)
+	python scripts/run_split.py --config $(SPLIT_CONFIG)
+
+# === 🤖 Training ===
+TRAIN_CONFIG ?= conf/experiments/wafer_baseline.yaml
+
+sanity-check:  ## Overfit one batch to verify the training pipeline (TRAIN_CONFIG=...)
+	python scripts/train.py --config $(TRAIN_CONFIG) --sanity-check
+
+SEED ?=
+LR ?=
+LRS ?= 3.0e-4 1.0e-3 3.0e-3
+
+train:  ## Train a model and record the run in MLflow (TRAIN_CONFIG=..., optional SEED=..., LR=...)
+	python scripts/train.py --config $(TRAIN_CONFIG) $(if $(SEED),--seed $(SEED)) $(if $(LR),--learning-rate $(LR))
+
+SEEDS ?= 0 1 2
+
+train-seeds:  ## Train one config once per seed (TRAIN_CONFIG=..., SEEDS="0 1 2", optional LR=...)
+	for seed in $(SEEDS); do python scripts/train.py --config $(TRAIN_CONFIG) --seed $$seed $(if $(LR),--learning-rate $(LR)) || exit 1; done
+
+lr-grid:  ## One run with seed 0 per learning rate (TRAIN_CONFIG=..., LRS="3.0e-4 1.0e-3 3.0e-3")
+	for lr in $(LRS); do python scripts/train.py --config $(TRAIN_CONFIG) --seed 0 --learning-rate $$lr || exit 1; done
+
+compare:  ## Compare experiment configs over seeds (CONFIGS="a.yaml b.yaml", optional OUTPUT=...)
+	python scripts/compare_runs.py --configs $(CONFIGS) $(if $(OUTPUT),--output $(OUTPUT))
+
+analyze-errors:  ## Analyze validation errors of a run and attach them to it in MLflow (RUN_ID=...)
+	python scripts/analyze_errors.py --run-id $(RUN_ID)
+
+edge-coverage:  ## Edge_Loc vs Edge_Ring edge coverage analysis of a run (RUN_ID=...; run analyze-errors first)
+	python scripts/analyze_edge_coverage.py --run-id $(RUN_ID)
+
+BENCH_MODELS ?= resnet18 mobilenet_v3_small mobilenet_v3_large efficientnet_b0 shufflenet_v2_x1_0
+
+benchmark:  ## Measure size, latency and throughput of architectures on this machine (BENCH_MODELS="...")
+	python scripts/benchmark_models.py --dataset wafer_defect --models $(BENCH_MODELS) --output reports/experiments/benchmark.md
+
+SEARCH_CONFIG ?= conf/search/slim_resnet_v1.yaml
+
+search:  ## Multi-objective search (validation errors vs FLOPs) with Optuna; rerun to resume (SEARCH_CONFIG=...)
+	python scripts/search.py --config $(SEARCH_CONFIG)
+
+TRIALS ?=
+
+export-trials:  ## Export search trials as configs for confirmation runs (SEARCH_CONFIG=..., TRIALS="15 46 10")
+	python scripts/export_trial.py --config $(SEARCH_CONFIG) --trials $(TRIALS)
+
+evaluate-test:  ## The single evaluation on the test split (docs/model_selection.md); refuses to run twice
+	python scripts/evaluate_test.py --config conf/evaluation/final_test.yaml
+
+mlflow-ui: ## Open the local MLflow UI at http://127.0.0.1:5000
+	mlflow ui --backend-store-uri sqlite:///mlflow.db
 
 # === 🧪 Testing ===
 test:  ## Run pytest
