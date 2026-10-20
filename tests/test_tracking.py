@@ -6,7 +6,7 @@ import pytest
 from mlflow.tracking import MlflowClient
 
 from src.training import tracking
-from src.training.tracking import flatten_params, git_tags, resolve_tracking_uri, setup_experiment
+from src.training.tracking import committed_version, flatten_params, git_tags, resolve_tracking_uri, setup_experiment
 
 # ================= fixture: synthesised project root =================
 
@@ -92,3 +92,13 @@ def test_git_tags_reports_commit_and_dirty_state(project_root):
 
     (project_root / "a.txt").write_text("changed")
     assert git_tags()["git_dirty"] == "true"
+
+
+# ================= committed_version =================
+
+
+def test_committed_version_refuses_uncommitted_changes():
+    assert committed_version({"git_commit": "abc123", "git_dirty": "false"}) == "abc123"
+    assert committed_version({}).startswith("unknown")  # outside a git repository
+    with pytest.raises(RuntimeError, match="uncommitted changes"):
+        committed_version({"git_commit": "abc123", "git_dirty": "true"})

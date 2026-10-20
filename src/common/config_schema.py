@@ -234,6 +234,38 @@ def load_config[ConfigT: BaseModel](path: str | Path, model: type[ConfigT]) -> C
     return model.model_validate(data)
 
 
+class CandidateRef(StrictModel):
+    # conf/experiments/<experiment>.ysml
+    experiment: str
+    # The overrides tag of the candidate's runs, e.g. "learning_rate=0.003", or "none"
+    overrides: str
+
+
+class TestEvaluationConfig(StrictModel):
+    """The single evaluation on the test split (docs/model_selection.md, "Test evaluation")."""
+
+    selected: CandidateRef
+    # Evaluated with the same procedure for transparency; their results do not change the selection
+    others: list[CandidateRef] = []
+    seeds: list[int] = Field(default=[0, 1, 2], min_length=1)
+    # The model that is delivered, fixed in advance rather than picked as the best seed
+    deliverable_seed: int = 0
+    bootstrap_resamples: int = Field(default=2000, gt=0)
+    bootstrap_seed: int = 0
+    confidence_level: float = Field(default=0.95, gt=0, lt=1)
+
+    @model_validator(mode="after")
+    def check_consistency(self) -> Self:
+        if self.deliverable_seed not in self.seeds:
+            raise ValueError("deliverable_seed must be one of seeds")
+        if len(set(self.seeds)) != len(self.seeds):
+            raise ValueError("seeds must be unique")
+        candidates = [(c.experiment, c.overrides) for c in [self.selected, *self.others]]
+        if len(set(candidates)) != len(candidates):
+            raise ValueError("each candidate must appear once")
+        return self
+
+
 def named_config_path(group: str, name: str) -> Path:
     """Path of a named config, e.g. ("experiments", "wafer_augment") -> <root>/conf/experiments/wafer_augment.yaml."""
     return resolve_path(CONF_DIR / group / f"{name}.yaml")

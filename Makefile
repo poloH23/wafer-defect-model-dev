@@ -2,7 +2,8 @@
         init requirements requirements-bootstrap requirements-refresh \
         conda-dev conda-export conda-custom \
         clean gitkeep-clean clean-zone \
-        eda split sanity-check train train-seed lr-grid compare benchmark search mlflow-ui test analyze-errors \
+        eda split sanity-check train train-seed lr-grid compare benchmark search evaluate-test mlflow-ui \
+		test analyze-errors \
         docker-build docker-run docker-run-fastapi docker-run-flask \
         demo-run gitkeep-add system-info
 
@@ -102,6 +103,9 @@ TRIALS ?=
 
 export-trials:  ## Export search trials as configs for confirmation runs (SEARCH_CONFIG=..., TRIALS="15 46 10")
 	python scripts/export_trial.py --config $(SEARCH_CONFIG) --trials $(TRIALS)
+
+evaluate-test:  ## The single evaluation on the test split (docs/model_selection.md); refuses to run twice
+	python scripts/evaluate_test.py --config conf/evaluation/final_test.yaml
 
 mlflow-ui: ## Open the local MLflow UI at http://127.0.0.1:5000
 	mlflow ui --backend-store-uri sqlite:///mlflow.db

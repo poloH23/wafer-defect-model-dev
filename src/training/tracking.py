@@ -81,3 +81,13 @@ def git_tags() -> dict[str, str]:
     except (OSError, subprocess.CalledProcessError):
         return {}
     return {"git_commit": commit, "git_dirty": str(bool(status.strip())).lower()}
+
+
+def committed_version(tags: dict[str, str]) -> str:
+    """
+    The commit a result can be traced to. Refuses uncommitted changes: the result would then point
+    to a commit that does not contain the code and protocol that produced it.
+    """
+    if tags.get("git_dirty") == "true":
+        raise RuntimeError("The working tree has uncommitted changes: commit them first, so the result points to the exact code and protocol used")
+    return tags.get("git_commit", "unknown (not a git repository)")
