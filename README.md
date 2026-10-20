@@ -113,7 +113,6 @@ The full account, with the reasoning behind each design decision, is in
   of Edge_Loc coverage. Accuracy is limited by label quality, so the focus moved to efficiency.
 - **Capacity is not the bottleneck.** Five architectures from 94 to 3,047 MFLOPs reach the same
   accuracy within noise, each at a learning rate chosen by the same pre-declared rule:
-
   | Architecture | MFLOPs | Validation errors (3 seeds) |
   |---|---|---|
   | EfficientNet-B0 | 646 | 42.1 ± 2.0 |
@@ -121,23 +120,21 @@ The full account, with the reasoning behind each design decision, is in
   | MobileNetV3-Large | 355 | 43.9 ± 1.0 |
   | ResNet-18 | 3,047 | 44.1 ± 4.2 |
   | MobileNetV3-Small | 94 | 46.2 ± 0.2 |
-
 - **Compute is not speed.** Benchmarks on GPU and CPU (ONNX Runtime) show that FLOPs predict CPU
   latency within an architecture family but not across families, where ResNet-style convolutions run
   about twice as many FLOPs per millisecond as mobile ones, and do not predict GPU latency, which
   follows the number of layers: ResNet-18, the most expensive model, is faster on the GPU than every
   mobile architecture.
-- **Mapping the trade-off.** A multi-objective Optuna search over slim ResNets (validation errors vs
-  FLOPs, 50 screening trials) finds accuracy flat down to about 33 MFLOPs, a third of
-  MobileNetV3-Small, and dropping steeply below 20 MFLOPs. Its finalists are being confirmed with the
-  full protocol.
+- **Mapping the trade-off, then checking it.** A multi-objective Optuna search over slim ResNets
+  (validation errors vs FLOPs, 50 screening trials) suggested accuracy stays flat down to about 33
+  MFLOPs. Confirmation with the full protocol overturned this: the slim ResNets are the fastest models
+  on every target, but less accurate than off-the-shelf architectures at similar compute, so none was
+  eligible. A negative result, caught before it could drive the selection.
 - **Selection rules fixed in advance.** How one model is chosen for each deployment target (cloud GPU,
   CPU server, edge) is written in [docs/model_selection.md](docs/model_selection.md), committed before
   the search and the test evaluation, so the choice cannot be adapted to the results.
 
 
-
-Readme results limitations · MD
 ## Results
 
 **Selected model: ShuffleNetV2 1.0x**, trained from scratch with augmentation and a learning rate of
@@ -234,6 +231,7 @@ advance rather than picked as the best seed. Full results, with the commit of th
   not for a defect defined relative to the notch or to equipment orientation.
 - **Fixed input format.** Models expect 52x52 maps with values 0, 1 and 2; other wafer sizes need
   resizing or retraining.
+
 ### Evaluation
 
 - **One split.** Every conclusion comes from a single train/validation/test split. Training randomness
@@ -250,6 +248,7 @@ advance rather than picked as the best seed. Full results, with the commit of th
   varied most across seeds for Edge_Loc and Edge_Ring, the classes with ambiguous labels. As the
   protocol requires, the deliverable keeps its tuned thresholds; revisiting them needs new data, since
   the test split has now been used.
+
 ### Model selection
 
 - **The eligibility rule was too coarse.** A candidate was considered as accurate as the best one if
