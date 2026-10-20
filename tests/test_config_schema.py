@@ -6,10 +6,10 @@ from pydantic import ValidationError
 from src.common.config_schema import (
     DatasetConfig,
     EdaConfig,
+    EvaluationConfig,
     ModelConfig,
     SearchConfig,
     SplitConfig,
-    TestEvaluationConfig,
     TrainConfig,
     load_config,
     load_named_config,
@@ -73,6 +73,7 @@ GROUP_SCHEMAS = {
     "model": ModelConfig,
     "experiments": TrainConfig,
     "search": SearchConfig,
+    "evaluation": EvaluationConfig,
 }
 
 
@@ -90,6 +91,9 @@ def test_committed_config_is_valid(group, name):
         load_named_config("model", cfg.model, ModelConfig)
     if isinstance(cfg, SearchConfig):
         load_named_config("experiments", cfg.base_experiment, TrainConfig)
+    if isinstance(cfg, EvaluationConfig):
+        for candidate in [cfg.selected, *cfg.others]:
+            load_named_config("experiments", candidate.experiment, TrainConfig)
 
 
 TRAIN_YAML = """
@@ -164,8 +168,8 @@ def test_search_range_must_be_ordered(tmp_path):
 
 def test_test_evaluation_config_rejects_inconsistencies():
     selected = {"experiment": "a", "overrides": "none"}
-    assert TestEvaluationConfig(selected=selected).deliverable_seed == 0
+    assert EvaluationConfig(selected=selected).deliverable_seed == 0
     with pytest.raises(ValidationError, match="deliverable_seed"):
-        TestEvaluationConfig(selected=selected, seeds=[1, 2], deliverable_seed=0)
+        EvaluationConfig(selected=selected, seeds=[1, 2], deliverable_seed=0)
     with pytest.raises(ValidationError, match="appear once"):
-        TestEvaluationConfig(selected=selected, others=[selected])
+        EvaluationConfig(selected=selected, others=[selected])

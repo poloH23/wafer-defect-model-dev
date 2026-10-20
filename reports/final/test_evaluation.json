@@ -1,0 +1,4776 @@
+{
+  "git_commit": "3a78a43e5fd0878526702e654204deab5d8cfa38",
+  "config": {
+    "selected": {
+      "experiment": "wafer_shufflenet_v2_x1_0",
+      "overrides": "learning_rate=0.003"
+    },
+    "others": [
+      {
+        "experiment": "wafer_efficientnet_b0",
+        "overrides": "none"
+      },
+      {
+        "experiment": "wafer_mobilenet_v3_large",
+        "overrides": "none"
+      },
+      {
+        "experiment": "wafer_augment",
+        "overrides": "none"
+      },
+      {
+        "experiment": "wafer_mobilenet_v3_small",
+        "overrides": "none"
+      },
+      {
+        "experiment": "wafer_slim_resnet_v1_t029",
+        "overrides": "none"
+      },
+      {
+        "experiment": "wafer_slim_resnet_v1_t036",
+        "overrides": "none"
+      },
+      {
+        "experiment": "wafer_slim_resnet_v1_t010",
+        "overrides": "none"
+      },
+      {
+        "experiment": "wafer_slim_resnet_v1_t046",
+        "overrides": "none"
+      },
+      {
+        "experiment": "wafer_slim_resnet_v1_t015",
+        "overrides": "none"
+      }
+    ],
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "deliverable_seed": 0,
+    "bootstrap_resamples": 2000,
+    "bootstrap_seed": 0,
+    "confidence_level": 0.95
+  },
+  "n_test": 3700,
+  "summaries": [
+    {
+      "candidate": "wafer_shufflenet_v2_x1_0 (learning_rate=0.003)",
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "val_errors_default": {
+        "mean": 43.666666666666664,
+        "std": 2.516611478423583
+      },
+      "test_errors_default": {
+        "mean": 45.666666666666664,
+        "std": 2.0816659994661326
+      },
+      "test_errors_tuned": {
+        "mean": 46.0,
+        "std": 1.7320508075688772
+      },
+      "test_errors_tuned_ci": {
+        "errors": 46.0,
+        "ci_low": 34.333333333333336,
+        "ci_high": 58.674999999999955
+      },
+      "test_exact_match": {
+        "mean": 0.9875675675675676,
+        "std": 0.0004681218398834756
+      },
+      "test_macro_f1": {
+        "mean": 0.9932354998212096,
+        "std": 0.0003958247057205321
+      },
+      "test_macro_ap": {
+        "mean": 0.9994862156610568,
+        "std": 4.3377138444683e-05
+      }
+    },
+    {
+      "candidate": "wafer_efficientnet_b0",
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "val_errors_default": {
+        "mean": 42.0,
+        "std": 1.7320508075688772
+      },
+      "test_errors_default": {
+        "mean": 40.0,
+        "std": 1.0
+      },
+      "test_errors_tuned": {
+        "mean": 42.666666666666664,
+        "std": 1.5275252316519465
+      },
+      "test_errors_tuned_ci": {
+        "errors": 42.666666666666664,
+        "ci_low": 32.658333333333346,
+        "ci_high": 54.333333333333336
+      },
+      "test_exact_match": {
+        "mean": 0.9884684684684685,
+        "std": 0.0004128446572032246
+      },
+      "test_macro_f1": {
+        "mean": 0.9934457124690663,
+        "std": 0.0004217213414683462
+      },
+      "test_macro_ap": {
+        "mean": 0.9996687310020081,
+        "std": 7.766468885275197e-05
+      }
+    },
+    {
+      "candidate": "wafer_mobilenet_v3_large",
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "val_errors_default": {
+        "mean": 45.666666666666664,
+        "std": 2.309401076758503
+      },
+      "test_errors_default": {
+        "mean": 43.666666666666664,
+        "std": 2.8867513459481287
+      },
+      "test_errors_tuned": {
+        "mean": 45.333333333333336,
+        "std": 4.041451884327381
+      },
+      "test_errors_tuned_ci": {
+        "errors": 45.333333333333336,
+        "ci_low": 34.333333333333336,
+        "ci_high": 57.341666666666626
+      },
+      "test_exact_match": {
+        "mean": 0.9877477477477479,
+        "std": 0.001092284293061443
+      },
+      "test_macro_f1": {
+        "mean": 0.9962692828432168,
+        "std": 0.0029983277524054212
+      },
+      "test_macro_ap": {
+        "mean": 0.9997083538173931,
+        "std": 5.6542336762864755e-05
+      }
+    },
+    {
+      "candidate": "wafer_augment",
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "val_errors_default": {
+        "mean": 43.333333333333336,
+        "std": 4.932882862316248
+      },
+      "test_errors_default": {
+        "mean": 42.333333333333336,
+        "std": 2.0816659994661326
+      },
+      "test_errors_tuned": {
+        "mean": 48.666666666666664,
+        "std": 3.055050463303893
+      },
+      "test_errors_tuned_ci": {
+        "errors": 48.666666666666664,
+        "ci_low": 37.0,
+        "ci_high": 61.333333333333336
+      },
+      "test_exact_match": {
+        "mean": 0.9868468468468469,
+        "std": 0.0008256893144064492
+      },
+      "test_macro_f1": {
+        "mean": 0.9917110871088486,
+        "std": 0.0020735828655963494
+      },
+      "test_macro_ap": {
+        "mean": 0.9992554568474441,
+        "std": 0.0003161568860136101
+      }
+    },
+    {
+      "candidate": "wafer_mobilenet_v3_small",
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "val_errors_default": {
+        "mean": 46.333333333333336,
+        "std": 0.5773502691896258
+      },
+      "test_errors_default": {
+        "mean": 47.333333333333336,
+        "std": 7.637626158259733
+      },
+      "test_errors_tuned": {
+        "mean": 49.333333333333336,
+        "std": 8.326663997864532
+      },
+      "test_errors_tuned_ci": {
+        "errors": 49.333333333333336,
+        "ci_low": 38.32500000000002,
+        "ci_high": 61.674999999999955
+      },
+      "test_exact_match": {
+        "mean": 0.9866666666666667,
+        "std": 0.002250449729152553
+      },
+      "test_macro_f1": {
+        "mean": 0.9961721769534936,
+        "std": 0.002258067575725696
+      },
+      "test_macro_ap": {
+        "mean": 0.9996123579931228,
+        "std": 0.00011768490681651234
+      }
+    },
+    {
+      "candidate": "wafer_slim_resnet_v1_t029",
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "val_errors_default": {
+        "mean": 47.666666666666664,
+        "std": 2.0816659994661326
+      },
+      "test_errors_default": {
+        "mean": 49.333333333333336,
+        "std": 2.516611478423583
+      },
+      "test_errors_tuned": {
+        "mean": 52.666666666666664,
+        "std": 1.5275252316519465
+      },
+      "test_errors_tuned_ci": {
+        "errors": 52.666666666666664,
+        "ci_low": 40.666666666666664,
+        "ci_high": 66.0
+      },
+      "test_exact_match": {
+        "mean": 0.9857657657657658,
+        "std": 0.0004128446572032246
+      },
+      "test_macro_f1": {
+        "mean": 0.9930841501078227,
+        "std": 0.00035813413311233547
+      },
+      "test_macro_ap": {
+        "mean": 0.999220225118953,
+        "std": 0.0002833586565522994
+      }
+    },
+    {
+      "candidate": "wafer_slim_resnet_v1_t036",
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "val_errors_default": {
+        "mean": 54.0,
+        "std": 9.0
+      },
+      "test_errors_default": {
+        "mean": 56.333333333333336,
+        "std": 5.507570547286102
+      },
+      "test_errors_tuned": {
+        "mean": 59.666666666666664,
+        "std": 7.094598884597588
+      },
+      "test_errors_tuned_ci": {
+        "errors": 59.666666666666664,
+        "ci_low": 46.666666666666664,
+        "ci_high": 73.33333333333333
+      },
+      "test_exact_match": {
+        "mean": 0.9838738738738738,
+        "std": 0.0019174591579993884
+      },
+      "test_macro_f1": {
+        "mean": 0.9926161181648648,
+        "std": 0.00031251386015895805
+      },
+      "test_macro_ap": {
+        "mean": 0.9992345727974282,
+        "std": 0.00026491607908514606
+      }
+    },
+    {
+      "candidate": "wafer_slim_resnet_v1_t010",
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "val_errors_default": {
+        "mean": 57.333333333333336,
+        "std": 5.8594652770823155
+      },
+      "test_errors_default": {
+        "mean": 58.0,
+        "std": 2.6457513110645907
+      },
+      "test_errors_tuned": {
+        "mean": 61.0,
+        "std": 2.0
+      },
+      "test_errors_tuned_ci": {
+        "errors": 61.0,
+        "ci_low": 48.333333333333336,
+        "ci_high": 74.33333333333333
+      },
+      "test_exact_match": {
+        "mean": 0.9835135135135135,
+        "std": 0.0005405405405405905
+      },
+      "test_macro_f1": {
+        "mean": 0.9908989025688015,
+        "std": 0.0024799878237038338
+      },
+      "test_macro_ap": {
+        "mean": 0.9987356910368715,
+        "std": 0.0004847851009262159
+      }
+    },
+    {
+      "candidate": "wafer_slim_resnet_v1_t046",
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "val_errors_default": {
+        "mean": 63.0,
+        "std": 10.583005244258363
+      },
+      "test_errors_default": {
+        "mean": 69.66666666666667,
+        "std": 5.507570547286102
+      },
+      "test_errors_tuned": {
+        "mean": 70.0,
+        "std": 6.082762530298219
+      },
+      "test_errors_tuned_ci": {
+        "errors": 70.0,
+        "ci_low": 56.333333333333336,
+        "ci_high": 85.0
+      },
+      "test_exact_match": {
+        "mean": 0.981081081081081,
+        "std": 0.001643989873053556
+      },
+      "test_macro_f1": {
+        "mean": 0.9921689313245264,
+        "std": 0.0008638641030126862
+      },
+      "test_macro_ap": {
+        "mean": 0.9992800970339649,
+        "std": 0.00028222391424778556
+      }
+    },
+    {
+      "candidate": "wafer_slim_resnet_v1_t015",
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "val_errors_default": {
+        "mean": 71.33333333333333,
+        "std": 10.016652800877813
+      },
+      "test_errors_default": {
+        "mean": 71.66666666666667,
+        "std": 1.5275252316519468
+      },
+      "test_errors_tuned": {
+        "mean": 76.33333333333333,
+        "std": 2.5166114784235836
+      },
+      "test_errors_tuned_ci": {
+        "errors": 76.33333333333333,
+        "ci_low": 63.333333333333336,
+        "ci_high": 91.66666666666667
+      },
+      "test_exact_match": {
+        "mean": 0.9793693693693694,
+        "std": 0.0006801652644387994
+      },
+      "test_macro_f1": {
+        "mean": 0.9897920856182326,
+        "std": 0.0027694862791112014
+      },
+      "test_macro_ap": {
+        "mean": 0.9990858548987945,
+        "std": 0.0003084580451015584
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "other": "wafer_efficientnet_b0",
+      "difference": 3.3333333333333357,
+      "ci_low": -3.3333333333333286,
+      "ci_high": 9.67499999999996,
+      "share_a_fewer": 0.1535
+    },
+    {
+      "other": "wafer_mobilenet_v3_large",
+      "difference": 0.6666666666666643,
+      "ci_low": -6.0,
+      "ci_high": 7.666666666666671,
+      "share_a_fewer": 0.409
+    },
+    {
+      "other": "wafer_augment",
+      "difference": -2.6666666666666643,
+      "ci_low": -9.333333333333336,
+      "ci_high": 4.333333333333329,
+      "share_a_fewer": 0.766
+    },
+    {
+      "other": "wafer_mobilenet_v3_small",
+      "difference": -3.3333333333333357,
+      "ci_low": -11.333333333333336,
+      "ci_high": 4.674999999999959,
+      "share_a_fewer": 0.7735
+    },
+    {
+      "other": "wafer_slim_resnet_v1_t029",
+      "difference": -6.666666666666664,
+      "ci_low": -13.333333333333329,
+      "ci_high": 0.3333333333333286,
+      "share_a_fewer": 0.971
+    },
+    {
+      "other": "wafer_slim_resnet_v1_t036",
+      "difference": -13.666666666666664,
+      "ci_low": -21.333333333333336,
+      "ci_high": -6.333333333333336,
+      "share_a_fewer": 1.0
+    },
+    {
+      "other": "wafer_slim_resnet_v1_t010",
+      "difference": -15.0,
+      "ci_low": -23.666666666666664,
+      "ci_high": -6.325000000000041,
+      "share_a_fewer": 0.9995
+    },
+    {
+      "other": "wafer_slim_resnet_v1_t046",
+      "difference": -24.0,
+      "ci_low": -34.33333333333333,
+      "ci_high": -14.333333333333329,
+      "share_a_fewer": 1.0
+    },
+    {
+      "other": "wafer_slim_resnet_v1_t015",
+      "difference": -30.33333333333333,
+      "ci_low": -40.99999999999999,
+      "ci_high": -20.333333333333336,
+      "share_a_fewer": 1.0
+    }
+  ],
+  "runs": {
+    "wafer_shufflenet_v2_x1_0 (learning_rate=0.003)": {
+      "2": {
+        "run_id": "3c4730e879dc4ed5b6c4465e48b593a7",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.4,
+          "Edge_Ring": 0.5,
+          "Loc": 0.5,
+          "Near_Full": 0.5,
+          "Scratch": 0.3,
+          "Random": 0.5
+        },
+        "val_errors_default": 41,
+        "tuned": {
+          "macro_ap": 0.9994582113939592,
+          "macro_f1": 0.993139912721599,
+          "micro_f1": 0.996937212863706,
+          "exact_match": 0.9881081081081081,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9983193277310924,
+              "recall": 0.99,
+              "f1": 0.994142259414226,
+              "ap": 0.9981319372006814,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9958471760797342,
+              "recall": 0.9991666666666666,
+              "f1": 0.997504159733777,
+              "ap": 0.9986721124798257,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9983258928571429,
+              "recall": 0.9938888888888889,
+              "f1": 0.9961024498886414,
+              "ap": 0.9990602738855564,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9977678571428571,
+              "recall": 0.9933333333333333,
+              "f1": 0.9955456570155902,
+              "ap": 0.9998013675856102,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9994582113939592,
+          "macro_f1": 0.99315696507628,
+          "micro_f1": 0.9969368520263902,
+          "exact_match": 0.9881081081081081,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991589571068125,
+              "recall": 0.99,
+              "f1": 0.9945583926329008,
+              "ap": 0.9981319372006814,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9958471760797342,
+              "recall": 0.9991666666666666,
+              "f1": 0.997504159733777,
+              "ap": 0.9986721124798257,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9983258928571429,
+              "recall": 0.9938888888888889,
+              "f1": 0.9961024498886414,
+              "ap": 0.9990602738855564,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9977666108319375,
+              "recall": 0.9927777777777778,
+              "f1": 0.9952659426343636,
+              "ap": 0.9998013675856102,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        }
+      },
+      "1": {
+        "run_id": "5c4f5dbf80064553a6cd15b87e29064c",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.75,
+          "Edge_Ring": 0.3,
+          "Loc": 0.5,
+          "Near_Full": 0.5,
+          "Scratch": 0.4,
+          "Random": 0.45
+        },
+        "val_errors_default": 44,
+        "tuned": {
+          "macro_ap": 0.999536181622376,
+          "macro_f1": 0.9936703651052577,
+          "micro_f1": 0.9967012252591895,
+          "exact_match": 0.9872972972972973,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991582491582491,
+              "recall": 0.9891666666666666,
+              "f1": 0.9941373534338358,
+              "ap": 0.9983085857613875,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9941956882255389,
+              "recall": 0.9991666666666666,
+              "f1": 0.9966749792186201,
+              "ap": 0.9992666702409657,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9994416527079844,
+              "recall": 0.9944444444444445,
+              "f1": 0.9969367864104706,
+              "ap": 0.9988927286518463,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9966480446927374,
+              "recall": 0.9911111111111112,
+              "f1": 0.9938718662952646,
+              "ap": 0.9998214683248091,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.999536181622376,
+          "macro_f1": 0.9936524249920755,
+          "micro_f1": 0.9966417250927945,
+          "exact_match": 0.987027027027027,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991589571068125,
+              "recall": 0.99,
+              "f1": 0.9945583926329008,
+              "ap": 0.9983085857613875,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9941956882255389,
+              "recall": 0.9991666666666666,
+              "f1": 0.9966749792186201,
+              "ap": 0.9992666702409657,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9994416527079844,
+              "recall": 0.9944444444444445,
+              "f1": 0.9969367864104706,
+              "ap": 0.9988927286518463,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9972004479283315,
+              "recall": 0.9894444444444445,
+              "f1": 0.9933073061907418,
+              "ap": 0.9998214683248091,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        }
+      },
+      "0": {
+        "run_id": "176643c399f14d199631a45c01f3f427",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.8,
+          "Edge_Ring": 0.05,
+          "Loc": 0.4,
+          "Near_Full": 0.5,
+          "Scratch": 0.55,
+          "Random": 0.55
+        },
+        "val_errors_default": 46,
+        "tuned": {
+          "macro_ap": 0.9994642539668355,
+          "macro_f1": 0.992896221636772,
+          "micro_f1": 0.9966425163456442,
+          "exact_match": 0.9872972972972973,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 0.9991673605328892,
+              "recall": 1.0,
+              "f1": 0.9995835068721366,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9983179142136249,
+              "recall": 0.9891666666666666,
+              "f1": 0.9937212222687317,
+              "ap": 0.9978231908172108,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9941956882255389,
+              "recall": 0.9991666666666666,
+              "f1": 0.9966749792186201,
+              "ap": 0.9991396301289593,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988839285714286,
+              "recall": 0.9944444444444445,
+              "f1": 0.9966592427616926,
+              "ap": 0.9989191248165163,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9977641140301845,
+              "recall": 0.9916666666666667,
+              "f1": 0.994706046252438,
+              "ap": 0.9998320859719975,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9994642539668355,
+          "macro_f1": 0.9930194416801275,
+          "micro_f1": 0.9968197879858657,
+          "exact_match": 0.9878378378378379,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 0.9991673605328892,
+              "recall": 1.0,
+              "f1": 0.9995835068721366,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.99581589958159,
+              "recall": 0.9916666666666667,
+              "f1": 0.9937369519832986,
+              "ap": 0.9978231908172108,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9958437240232751,
+              "recall": 0.9983333333333333,
+              "f1": 0.9970869746150645,
+              "ap": 0.9991396301289593,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9994413407821229,
+              "recall": 0.9938888888888889,
+              "f1": 0.9966573816155989,
+              "ap": 0.9989191248165163,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9977666108319375,
+              "recall": 0.9927777777777778,
+              "f1": 0.9952659426343636,
+              "ap": 0.9998320859719975,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        }
+      }
+    },
+    "wafer_efficientnet_b0": {
+      "2": {
+        "run_id": "c71df2ab64e44d4ca0e96e229c010972",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.85,
+          "Edge_Ring": 0.2,
+          "Loc": 0.5,
+          "Near_Full": 0.55,
+          "Scratch": 0.5,
+          "Random": 0.4
+        },
+        "val_errors_default": 41,
+        "tuned": {
+          "macro_ap": 0.9995916139662633,
+          "macro_f1": 0.9931912698228905,
+          "micro_f1": 0.9969955817378497,
+          "exact_match": 0.9883783783783784,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 1.0,
+              "recall": 0.9891666666666666,
+              "f1": 0.9945538332635107,
+              "ap": 0.9983939885295009,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9950248756218906,
+              "recall": 1.0,
+              "f1": 0.9975062344139651,
+              "ap": 0.9994118370773739,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988839285714286,
+              "recall": 0.9944444444444445,
+              "f1": 0.9966592427616926,
+              "ap": 0.9991092802488922,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9977653631284916,
+              "recall": 0.9922222222222222,
+              "f1": 0.9949860724233983,
+              "ap": 0.9998178058743394,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9999999999999999,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9995916139662633,
+          "macro_f1": 0.9932967081387948,
+          "micro_f1": 0.997113742121694,
+          "exact_match": 0.9889189189189189,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991603694374476,
+              "recall": 0.9916666666666667,
+              "f1": 0.9953994144709327,
+              "ap": 0.9983939885295009,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9958471760797342,
+              "recall": 0.9991666666666666,
+              "f1": 0.997504159733777,
+              "ap": 0.9994118370773739,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988839285714286,
+              "recall": 0.9944444444444445,
+              "f1": 0.9966592427616926,
+              "ap": 0.9991092802488922,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9977653631284916,
+              "recall": 0.9922222222222222,
+              "f1": 0.9949860724233983,
+              "ap": 0.9998178058743394,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9999999999999999,
+              "support": 85
+            }
+          }
+        }
+      },
+      "1": {
+        "run_id": "8ef04397dc65468596444168e3373056",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.6,
+          "Edge_Ring": 0.1,
+          "Loc": 0.25,
+          "Near_Full": 0.25,
+          "Scratch": 0.15,
+          "Random": 0.5
+        },
+        "val_errors_default": 44,
+        "tuned": {
+          "macro_ap": 0.999746931997011,
+          "macro_f1": 0.9932133603021619,
+          "micro_f1": 0.9970581313250176,
+          "exact_match": 0.9881081081081081,
+          "per_class": {
+            "Center": {
+              "precision": 0.9991673605328892,
+              "recall": 1.0,
+              "f1": 0.9995835068721366,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9983235540653814,
+              "recall": 0.9925,
+              "f1": 0.9954032595068951,
+              "ap": 0.9992869177663215,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9941956882255389,
+              "recall": 0.9991666666666666,
+              "f1": 0.9966749792186201,
+              "ap": 0.999895301540144,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988851727982163,
+              "recall": 0.9955555555555555,
+              "f1": 0.9972175848636616,
+              "ap": 0.9990915128602695,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9944506104328524,
+              "recall": 0.9955555555555555,
+              "f1": 0.9950027762354248,
+              "ap": 0.9998385227149618,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.999863201094391,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.999746931997011,
+          "macro_f1": 0.9934019622721444,
+          "micro_f1": 0.9972909305064782,
+          "exact_match": 0.9894594594594595,
+          "per_class": {
+            "Center": {
+              "precision": 0.9991673605328892,
+              "recall": 1.0,
+              "f1": 0.9995835068721366,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.998324958123953,
+              "recall": 0.9933333333333333,
+              "f1": 0.9958228905597326,
+              "ap": 0.9992869177663215,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9966722129783694,
+              "recall": 0.9983333333333333,
+              "f1": 0.9975020815986678,
+              "ap": 0.999895301540144,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9994416527079844,
+              "recall": 0.9944444444444445,
+              "f1": 0.9969367864104706,
+              "ap": 0.9990915128602695,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9977678571428571,
+              "recall": 0.9933333333333333,
+              "f1": 0.9955456570155902,
+              "ap": 0.9998385227149618,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.999863201094391,
+              "support": 85
+            }
+          }
+        }
+      },
+      "0": {
+        "run_id": "0a6d20b24617433498f291f0304229fe",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.7,
+          "Edge_Ring": 0.25,
+          "Loc": 0.7,
+          "Near_Full": 0.15,
+          "Scratch": 0.45,
+          "Random": 0.5
+        },
+        "val_errors_default": 41,
+        "tuned": {
+          "macro_ap": 0.9996676470427501,
+          "macro_f1": 0.9939325072821463,
+          "micro_f1": 0.99711442200106,
+          "exact_match": 0.9889189189189189,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991589571068125,
+              "recall": 0.99,
+              "f1": 0.9945583926329008,
+              "ap": 0.9987156800404208,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9941956882255389,
+              "recall": 0.9991666666666666,
+              "f1": 0.9966749792186201,
+              "ap": 0.999615051308181,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 1.0,
+              "recall": 0.9927777777777778,
+              "f1": 0.9963758015054363,
+              "ap": 0.9991138556768012,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.996662958843159,
+              "recall": 0.9955555555555555,
+              "f1": 0.9961089494163424,
+              "ap": 0.9998965893165974,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 0.9999999999999999,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9996676470427501,
+          "macro_f1": 0.9980862878875295,
+          "micro_f1": 0.9972909305064782,
+          "exact_match": 0.9891891891891892,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991596638655462,
+              "recall": 0.9908333333333333,
+              "f1": 0.994979079497908,
+              "ap": 0.9987156800404208,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9958471760797342,
+              "recall": 0.9991666666666666,
+              "f1": 0.997504159733777,
+              "ap": 0.999615051308181,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988826815642458,
+              "recall": 0.9933333333333333,
+              "f1": 0.996100278551532,
+              "ap": 0.9991138556768012,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9972160356347439,
+              "recall": 0.995,
+              "f1": 0.9961067853170189,
+              "ap": 0.9998965893165974,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 0.9999999999999999,
+              "support": 85
+            }
+          }
+        }
+      }
+    },
+    "wafer_mobilenet_v3_large": {
+      "2": {
+        "run_id": "4b28ebc28bf94e83b839737cc7bb3abf",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.9,
+          "Edge_Ring": 0.15,
+          "Loc": 0.7,
+          "Near_Full": 0.25,
+          "Scratch": 0.5,
+          "Random": 0.5
+        },
+        "val_errors_default": 47,
+        "tuned": {
+          "macro_ap": 0.9996992327396828,
+          "macro_f1": 0.9928091546903328,
+          "micro_f1": 0.9964655984919887,
+          "exact_match": 0.9867567567567568,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 1.0,
+              "recall": 0.9883333333333333,
+              "f1": 0.9941324392288349,
+              "ap": 0.9990837905403404,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9933719966859983,
+              "recall": 0.9991666666666666,
+              "f1": 0.9962609056917324,
+              "ap": 0.9996723399183114,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988833054159687,
+              "recall": 0.9938888888888889,
+              "f1": 0.9963798384851016,
+              "ap": 0.9990834414830588,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.99609375,
+              "recall": 0.9916666666666667,
+              "f1": 0.9938752783964365,
+              "ap": 0.9997542899757512,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9999999999999998,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9996992327396828,
+          "macro_f1": 0.9930187681011415,
+          "micro_f1": 0.9967016138532219,
+          "exact_match": 0.9872972972972973,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9983221476510067,
+              "recall": 0.9916666666666667,
+              "f1": 0.9949832775919732,
+              "ap": 0.9990837905403404,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9958437240232751,
+              "recall": 0.9983333333333333,
+              "f1": 0.9970869746150645,
+              "ap": 0.9996723399183114,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988833054159687,
+              "recall": 0.9938888888888889,
+              "f1": 0.9963798384851016,
+              "ap": 0.9990834414830588,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.99609375,
+              "recall": 0.9916666666666667,
+              "f1": 0.9938752783964365,
+              "ap": 0.9997542899757512,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9999999999999998,
+              "support": 85
+            }
+          }
+        }
+      },
+      "1": {
+        "run_id": "47e017b8f4ba43999306cf8695ad1a64",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.35,
+          "Edge_Ring": 0.25,
+          "Loc": 0.9,
+          "Near_Full": 0.5,
+          "Scratch": 0.45,
+          "Random": 0.45
+        },
+        "val_errors_default": 43,
+        "tuned": {
+          "macro_ap": 0.9996569264977192,
+          "macro_f1": 0.9978963702958121,
+          "micro_f1": 0.9969973506034736,
+          "exact_match": 0.9875675675675676,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9966527196652719,
+              "recall": 0.9925,
+              "f1": 0.9945720250521921,
+              "ap": 0.998650823886153,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9950248756218906,
+              "recall": 1.0,
+              "f1": 0.9975062344139651,
+              "ap": 0.9995703767835841,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9994410285075461,
+              "recall": 0.9933333333333333,
+              "f1": 0.9963778211200892,
+              "ap": 0.9992112471603692,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 0.9999999999999999,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.996100278551532,
+              "recall": 0.9933333333333333,
+              "f1": 0.9947148817802504,
+              "ap": 0.9998229641516477,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 0.9999999999999999,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9996569264977192,
+          "macro_f1": 0.9980696901720356,
+          "micro_f1": 0.9972322006948943,
+          "exact_match": 0.9886486486486487,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991610738255033,
+              "recall": 0.9925,
+              "f1": 0.995819397993311,
+              "ap": 0.998650823886153,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9950207468879668,
+              "recall": 0.9991666666666666,
+              "f1": 0.9970893970893971,
+              "ap": 0.9995703767835841,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9994416527079844,
+              "recall": 0.9944444444444445,
+              "f1": 0.9969367864104706,
+              "ap": 0.9992112471603692,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 0.9999999999999999,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9966536530953709,
+              "recall": 0.9927777777777778,
+              "f1": 0.994711939883106,
+              "ap": 0.9998229641516477,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 0.9999999999999999,
+              "support": 85
+            }
+          }
+        }
+      },
+      "0": {
+        "run_id": "9776f665bedd45ffb4fee82f35a65fa4",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.85,
+          "Edge_Ring": 0.15,
+          "Loc": 0.7,
+          "Near_Full": 0.45,
+          "Scratch": 0.65,
+          "Random": 0.5
+        },
+        "val_errors_default": 47,
+        "tuned": {
+          "macro_ap": 0.9997689022147771,
+          "macro_f1": 0.9981023235435057,
+          "micro_f1": 0.9972308961291463,
+          "exact_match": 0.9889189189189189,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 1.0,
+              "recall": 0.9916666666666667,
+              "f1": 0.99581589958159,
+              "ap": 0.999059448441924,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.995850622406639,
+              "recall": 1.0,
+              "f1": 0.997920997920998,
+              "ap": 0.9999108374656849,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 1.0,
+              "recall": 0.995,
+              "f1": 0.9974937343358395,
+              "ap": 0.9993728807286213,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9972020145495244,
+              "recall": 0.99,
+              "f1": 0.9935879565096181,
+              "ap": 0.9998080510819863,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9997689022147771,
+          "macro_f1": 0.9980883837498205,
+          "micro_f1": 0.9972331783128274,
+          "exact_match": 0.9886486486486487,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9974916387959866,
+              "recall": 0.9941666666666666,
+              "f1": 0.9958263772954925,
+              "ap": 0.999059448441924,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9966722129783694,
+              "recall": 0.9983333333333333,
+              "f1": 0.9975020815986678,
+              "ap": 0.9999108374656849,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 1.0,
+              "recall": 0.9955555555555555,
+              "f1": 0.9977728285077951,
+              "ap": 0.9993728807286213,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9944351697273233,
+              "recall": 0.9927777777777778,
+              "f1": 0.9936057825966083,
+              "ap": 0.9998080510819863,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        }
+      }
+    },
+    "wafer_augment": {
+      "2": {
+        "run_id": "c55c9caf56414e35ad33a788c387bae8",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.35,
+          "Edge_Ring": 0.4,
+          "Loc": 0.4,
+          "Near_Full": 0.2,
+          "Scratch": 0.55,
+          "Random": 0.55
+        },
+        "val_errors_default": 41,
+        "tuned": {
+          "macro_ap": 0.9990459678965693,
+          "macro_f1": 0.9893245528759038,
+          "micro_f1": 0.9968190386427899,
+          "exact_match": 0.9875675675675676,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.998320738874895,
+              "recall": 0.9908333333333333,
+              "f1": 0.9945629443747386,
+              "ap": 0.9986980922137162,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9950207468879668,
+              "recall": 0.9991666666666666,
+              "f1": 0.9970893970893971,
+              "ap": 0.9988510436938034,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9983277591973244,
+              "recall": 0.995,
+              "f1": 0.996661101836394,
+              "ap": 0.9991308871702548,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.8823529411764706,
+              "recall": 1.0,
+              "f1": 0.9375,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9988795518207283,
+              "recall": 0.9905555555555555,
+              "f1": 0.9947001394700139,
+              "ap": 0.9998543867614464,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9990459678965693,
+          "macro_f1": 0.9931914854111435,
+          "micro_f1": 0.9969952277146056,
+          "exact_match": 0.9883783783783784,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991596638655462,
+              "recall": 0.9908333333333333,
+              "f1": 0.994979079497908,
+              "ap": 0.9986980922137162,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9950207468879668,
+              "recall": 0.9991666666666666,
+              "f1": 0.9970893970893971,
+              "ap": 0.9988510436938034,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988845510317903,
+              "recall": 0.995,
+              "f1": 0.9969384915112719,
+              "ap": 0.9991308871702548,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9988795518207283,
+              "recall": 0.9905555555555555,
+              "f1": 0.9947001394700139,
+              "ap": 0.9998543867614464,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        }
+      },
+      "1": {
+        "run_id": "2f528ff55c8d458597427e1401a6a974",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.6,
+          "Edge_Ring": 0.05,
+          "Loc": 0.5,
+          "Near_Full": 0.5,
+          "Scratch": 0.4,
+          "Random": 0.5
+        },
+        "val_errors_default": 40,
+        "tuned": {
+          "macro_ap": 0.9991012786294577,
+          "macro_f1": 0.9930719449969405,
+          "micro_f1": 0.9968788646133915,
+          "exact_match": 0.987027027027027,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9966499162479062,
+              "recall": 0.9916666666666667,
+              "f1": 0.9941520467836257,
+              "ap": 0.9986040135600576,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9933774834437086,
+              "recall": 1.0,
+              "f1": 0.9966777408637874,
+              "ap": 0.999317332380365,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9994410285075461,
+              "recall": 0.9933333333333333,
+              "f1": 0.9963778211200892,
+              "ap": 0.9991759918603734,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9983240223463687,
+              "recall": 0.9927777777777778,
+              "f1": 0.9955431754874652,
+              "ap": 0.9998795579015323,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9991012786294577,
+          "macro_f1": 0.9931921708748269,
+          "micro_f1": 0.9969952277146056,
+          "exact_match": 0.9881081081081081,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9966527196652719,
+              "recall": 0.9925,
+              "f1": 0.9945720250521921,
+              "ap": 0.9986040135600576,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9966722129783694,
+              "recall": 0.9983333333333333,
+              "f1": 0.9975020815986678,
+              "ap": 0.999317332380365,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9994410285075461,
+              "recall": 0.9933333333333333,
+              "f1": 0.9963778211200892,
+              "ap": 0.9991759918603734,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9988808058198098,
+              "recall": 0.9916666666666667,
+              "f1": 0.995260663507109,
+              "ap": 0.9998795579015323,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        }
+      },
+      "0": {
+        "run_id": "250f748d73924934abc8cc9b1cfce133",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.75,
+          "Edge_Ring": 0.2,
+          "Loc": 0.7,
+          "Near_Full": 0.35,
+          "Scratch": 0.85,
+          "Random": 0.65
+        },
+        "val_errors_default": 49,
+        "tuned": {
+          "macro_ap": 0.9996191240163054,
+          "macro_f1": 0.9927367634537012,
+          "micro_f1": 0.9963447706638369,
+          "exact_match": 0.985945945945946,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9983179142136249,
+              "recall": 0.9891666666666666,
+              "f1": 0.9937212222687317,
+              "ap": 0.998507532201382,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9941956882255389,
+              "recall": 0.9991666666666666,
+              "f1": 0.9966749792186201,
+              "ap": 0.9995144808257623,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988814317673378,
+              "recall": 0.9922222222222222,
+              "f1": 0.9955406911928651,
+              "ap": 0.9991309767053037,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 1.0,
+              "recall": 0.9883333333333333,
+              "f1": 0.9941324392288349,
+              "ap": 0.9998000023979946,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9996191240163054,
+          "macro_f1": 0.9933670786383582,
+          "micro_f1": 0.9972322006948943,
+          "exact_match": 0.9891891891891892,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9983235540653814,
+              "recall": 0.9925,
+              "f1": 0.9954032595068951,
+              "ap": 0.998507532201382,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9958471760797342,
+              "recall": 0.9991666666666666,
+              "f1": 0.997504159733777,
+              "ap": 0.9995144808257623,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988845510317903,
+              "recall": 0.995,
+              "f1": 0.9969384915112719,
+              "ap": 0.9991309767053037,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9977666108319375,
+              "recall": 0.9927777777777778,
+              "f1": 0.9952659426343636,
+              "ap": 0.9998000023979946,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        }
+      }
+    },
+    "wafer_mobilenet_v3_small": {
+      "2": {
+        "run_id": "ce4864f192cb438885e8dfcfc3649eb8",
+        "thresholds": {
+          "Center": 0.95,
+          "Donut": 0.5,
+          "Edge_Loc": 0.6,
+          "Edge_Ring": 0.15,
+          "Loc": 0.2,
+          "Near_Full": 0.3,
+          "Scratch": 0.2,
+          "Random": 0.75
+        },
+        "val_errors_default": 46,
+        "tuned": {
+          "macro_ap": 0.9996777922938758,
+          "macro_f1": 0.9967223100593581,
+          "micro_f1": 0.9962917181705809,
+          "exact_match": 0.9848648648648649,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991582491582491,
+              "recall": 0.9891666666666666,
+              "f1": 0.9941373534338358,
+              "ap": 0.9988920415415347,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9933774834437086,
+              "recall": 1.0,
+              "f1": 0.9966777408637874,
+              "ap": 0.9997998287886144,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9966573816155989,
+              "recall": 0.9938888888888889,
+              "f1": 0.9952712100139082,
+              "ap": 0.9990127165060807,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9938854919399667,
+              "recall": 0.9933333333333333,
+              "f1": 0.9936093359266462,
+              "ap": 0.9997177515147766,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9999999999999998,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9996777922938758,
+          "macro_f1": 0.9975446882638705,
+          "micro_f1": 0.9964639321074965,
+          "exact_match": 0.9854054054054054,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991589571068125,
+              "recall": 0.99,
+              "f1": 0.9945583926329008,
+              "ap": 0.9988920415415347,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9941956882255389,
+              "recall": 0.9991666666666666,
+              "f1": 0.9966749792186201,
+              "ap": 0.9997998287886144,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988820570150923,
+              "recall": 0.9927777777777778,
+              "f1": 0.9958205628308721,
+              "ap": 0.9990127165060807,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9977578475336323,
+              "recall": 0.9888888888888889,
+              "f1": 0.9933035714285714,
+              "ap": 0.9997177515147766,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 0.9999999999999998,
+              "support": 85
+            }
+          }
+        }
+      },
+      "1": {
+        "run_id": "7a62a9f6b23945f8a5cd4432ddc91e9d",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.5,
+          "Edge_Ring": 0.4,
+          "Loc": 0.25,
+          "Near_Full": 0.35,
+          "Scratch": 0.15,
+          "Random": 0.5
+        },
+        "val_errors_default": 46,
+        "tuned": {
+          "macro_ap": 0.9994764977309736,
+          "macro_f1": 0.9936898758523273,
+          "micro_f1": 0.9965854232897681,
+          "exact_match": 0.985945945945946,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991603694374476,
+              "recall": 0.9916666666666667,
+              "f1": 0.9953994144709327,
+              "ap": 0.9981026699926598,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9950248756218906,
+              "recall": 1.0,
+              "f1": 0.9975062344139651,
+              "ap": 0.9990355178163668,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9983268265476855,
+              "recall": 0.9944444444444445,
+              "f1": 0.9963818536042305,
+              "ap": 0.9990879545178898,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9938718662952646,
+              "recall": 0.9911111111111112,
+              "f1": 0.9924895688456189,
+              "ap": 0.9995858395208719,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9994764977309736,
+          "macro_f1": 0.9977891542033965,
+          "micro_f1": 0.9967595593000648,
+          "exact_match": 0.9867567567567568,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991603694374476,
+              "recall": 0.9916666666666667,
+              "f1": 0.9953994144709327,
+              "ap": 0.9981026699926598,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9950248756218906,
+              "recall": 1.0,
+              "f1": 0.9975062344139651,
+              "ap": 0.9990355178163668,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988826815642458,
+              "recall": 0.9933333333333333,
+              "f1": 0.996100278551532,
+              "ap": 0.9990879545178898,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9972004479283315,
+              "recall": 0.9894444444444445,
+              "f1": 0.9933073061907418,
+              "ap": 0.9995858395208719,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        }
+      },
+      "0": {
+        "run_id": "e2f46bf6ed9249659705015e6a3cd3c5",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.65,
+          "Edge_Ring": 0.15,
+          "Loc": 0.4,
+          "Near_Full": 0.4,
+          "Scratch": 0.45,
+          "Random": 0.35
+        },
+        "val_errors_default": 47,
+        "tuned": {
+          "macro_ap": 0.9996827839545187,
+          "macro_f1": 0.9981043449487952,
+          "micro_f1": 0.9972912495583559,
+          "exact_match": 0.9891891891891892,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 1.0,
+              "recall": 0.9916666666666667,
+              "f1": 0.99581589958159,
+              "ap": 0.9989167403315309,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9942004971002486,
+              "recall": 1.0,
+              "f1": 0.9970918155380141,
+              "ap": 0.9995907414255414,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9983277591973244,
+              "recall": 0.995,
+              "f1": 0.996661101836394,
+              "ap": 0.999230902877329,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9977666108319375,
+              "recall": 0.9927777777777778,
+              "f1": 0.9952659426343636,
+              "ap": 0.9997238870017485,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 0.9999999999999999,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9996827839545187,
+          "macro_f1": 0.998155272686897,
+          "micro_f1": 0.997349355009719,
+          "exact_match": 0.9894594594594595,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991603694374476,
+              "recall": 0.9916666666666667,
+              "f1": 0.9953994144709327,
+              "ap": 0.9989167403315309,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.995850622406639,
+              "recall": 1.0,
+              "f1": 0.997920997920998,
+              "ap": 0.9995907414255414,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988845510317903,
+              "recall": 0.995,
+              "f1": 0.9969384915112719,
+              "ap": 0.999230902877329,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9983221476510067,
+              "recall": 0.9916666666666667,
+              "f1": 0.9949832775919732,
+              "ap": 0.9997238870017485,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 0.9999999999999999,
+              "support": 85
+            }
+          }
+        }
+      }
+    },
+    "wafer_slim_resnet_v1_t029": {
+      "2": {
+        "run_id": "45b66526bc2f48558db1ed567f722613",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.5,
+          "Edge_Ring": 0.45,
+          "Loc": 0.35,
+          "Near_Full": 0.55,
+          "Scratch": 0.35,
+          "Random": 0.45
+        },
+        "val_errors_default": 47,
+        "tuned": {
+          "macro_ap": 0.99954445408974,
+          "macro_f1": 0.9934976869034438,
+          "micro_f1": 0.996349075491697,
+          "exact_match": 0.9854054054054054,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.998320738874895,
+              "recall": 0.9908333333333333,
+              "f1": 0.9945629443747386,
+              "ap": 0.9987916999855735,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9950207468879668,
+              "recall": 0.9991666666666666,
+              "f1": 0.9970893970893971,
+              "ap": 0.9989742125216187,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9966536530953709,
+              "recall": 0.9927777777777778,
+              "f1": 0.994711939883106,
+              "ap": 0.9988331430248627,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.99609375,
+              "recall": 0.9916666666666667,
+              "f1": 0.9938752783964365,
+              "ap": 0.9997565771858657,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.99954445408974,
+          "macro_f1": 0.9928264777932703,
+          "micro_f1": 0.9964064801178203,
+          "exact_match": 0.985945945945946,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.998320738874895,
+              "recall": 0.9908333333333333,
+              "f1": 0.9945629443747386,
+              "ap": 0.9987916999855735,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9950207468879668,
+              "recall": 0.9991666666666666,
+              "f1": 0.9970893970893971,
+              "ap": 0.9989742125216187,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9983240223463687,
+              "recall": 0.9927777777777778,
+              "f1": 0.9955431754874652,
+              "ap": 0.9988331430248627,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9966461710452766,
+              "recall": 0.9905555555555555,
+              "f1": 0.9935915296740039,
+              "ap": 0.9997565771858657,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        }
+      },
+      "1": {
+        "run_id": "c022ddb1796b4250913af92f3f9e99ad",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.85,
+          "Edge_Ring": 0.2,
+          "Loc": 0.35,
+          "Near_Full": 0.5,
+          "Scratch": 0.4,
+          "Random": 0.5
+        },
+        "val_errors_default": 46,
+        "tuned": {
+          "macro_ap": 0.9990200474082641,
+          "macro_f1": 0.9928766425883773,
+          "micro_f1": 0.9965222516946655,
+          "exact_match": 0.9862162162162162,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 1.0,
+              "recall": 0.9891666666666666,
+              "f1": 0.9945538332635107,
+              "ap": 0.9986762378570097,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9941956882255389,
+              "recall": 0.9991666666666666,
+              "f1": 0.9966749792186201,
+              "ap": 0.9990031760364644,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988820570150923,
+              "recall": 0.9927777777777778,
+              "f1": 0.9958205628308721,
+              "ap": 0.998966876745973,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9988782950084127,
+              "recall": 0.9894444444444445,
+              "f1": 0.994138989673458,
+              "ap": 0.9998175541989411,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9998632010943912,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9990200474082641,
+          "macro_f1": 0.9930851705624598,
+          "micro_f1": 0.9967576490007664,
+          "exact_match": 0.9872972972972973,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991603694374476,
+              "recall": 0.9916666666666667,
+              "f1": 0.9953994144709327,
+              "ap": 0.9986762378570097,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9958471760797342,
+              "recall": 0.9991666666666666,
+              "f1": 0.997504159733777,
+              "ap": 0.9990031760364644,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 1.0,
+              "recall": 0.9927777777777778,
+              "f1": 0.9963758015054363,
+              "ap": 0.998966876745973,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9988770353733858,
+              "recall": 0.9883333333333333,
+              "f1": 0.9935772130689752,
+              "ap": 0.9998175541989411,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9998632010943912,
+              "support": 85
+            }
+          }
+        }
+      },
+      "0": {
+        "run_id": "77d7d29b16044b5eab703214ddab7e28",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.55,
+          "Edge_Ring": 0.6,
+          "Loc": 0.25,
+          "Near_Full": 0.4,
+          "Scratch": 0.6,
+          "Random": 0.5
+        },
+        "val_errors_default": 50,
+        "tuned": {
+          "macro_ap": 0.9990961738588546,
+          "macro_f1": 0.9928781208316474,
+          "micro_f1": 0.9964651820431247,
+          "exact_match": 0.9856756756756757,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9983193277310924,
+              "recall": 0.99,
+              "f1": 0.994142259414226,
+              "ap": 0.9986539880704696,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9966749792186201,
+              "recall": 0.9991666666666666,
+              "f1": 0.997919267582189,
+              "ap": 0.9994108429661086,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9944444444444445,
+              "recall": 0.9944444444444445,
+              "f1": 0.9944444444444445,
+              "ap": 0.999062015700187,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 1.0,
+              "recall": 0.9894444444444445,
+              "f1": 0.9946942194917621,
+              "ap": 0.999809210800739,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0000000000000002,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9990961738588546,
+          "macro_f1": 0.9930704878379091,
+          "micro_f1": 0.9967603227896565,
+          "exact_match": 0.9867567567567568,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9983221476510067,
+              "recall": 0.9916666666666667,
+              "f1": 0.9949832775919732,
+              "ap": 0.9986539880704696,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9958471760797342,
+              "recall": 0.9991666666666666,
+              "f1": 0.997504159733777,
+              "ap": 0.9994108429661086,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9966573816155989,
+              "recall": 0.9938888888888889,
+              "f1": 0.9952712100139082,
+              "ap": 0.999062015700187,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9988801791713325,
+              "recall": 0.9911111111111112,
+              "f1": 0.9949804796430564,
+              "ap": 0.999809210800739,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0000000000000002,
+              "support": 85
+            }
+          }
+        }
+      }
+    },
+    "wafer_slim_resnet_v1_t036": {
+      "2": {
+        "run_id": "ff49a53392d543ad85788fe82a7e2512",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.4,
+          "Edge_Ring": 0.4,
+          "Loc": 0.55,
+          "Near_Full": 0.35,
+          "Scratch": 0.85,
+          "Random": 0.45
+        },
+        "val_errors_default": 63,
+        "tuned": {
+          "macro_ap": 0.999123738747837,
+          "macro_f1": 0.9923694725328809,
+          "micro_f1": 0.9956960084900655,
+          "exact_match": 0.9821621621621621,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 0.9999999999999999,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9966471081307627,
+              "recall": 0.9908333333333333,
+              "f1": 0.9937317175094025,
+              "ap": 0.9989651787327217,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9950207468879668,
+              "recall": 0.9991666666666666,
+              "f1": 0.9970893970893971,
+              "ap": 0.9993990691824571,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9977653631284916,
+              "recall": 0.9922222222222222,
+              "f1": 0.9949860724233983,
+              "ap": 0.9990663970335404,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9988719684151156,
+              "recall": 0.9838888888888889,
+              "f1": 0.9913238175202911,
+              "ap": 0.9997259317006437,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.999123738747837,
+          "macro_f1": 0.992756448142732,
+          "micro_f1": 0.9962886597938144,
+          "exact_match": 0.9848648648648649,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 0.9999999999999999,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9983193277310924,
+              "recall": 0.99,
+              "f1": 0.994142259414226,
+              "ap": 0.9989651787327217,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9958471760797342,
+              "recall": 0.9991666666666666,
+              "f1": 0.997504159733777,
+              "ap": 0.9993990691824571,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9966536530953709,
+              "recall": 0.9927777777777778,
+              "f1": 0.994711939883106,
+              "ap": 0.9990663970335404,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9972035794183445,
+              "recall": 0.9905555555555555,
+              "f1": 0.9938684503901896,
+              "ap": 0.9997259317006437,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        }
+      },
+      "1": {
+        "run_id": "2327fb0cb0ff44e78a2ab7ffa37c01c6",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.55,
+          "Edge_Ring": 0.3,
+          "Loc": 0.5,
+          "Near_Full": 0.4,
+          "Scratch": 0.45,
+          "Random": 0.7
+        },
+        "val_errors_default": 45,
+        "tuned": {
+          "macro_ap": 0.9995369055751564,
+          "macro_f1": 0.9925113196053592,
+          "micro_f1": 0.9959337615652072,
+          "exact_match": 0.9835135135135135,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9983179142136249,
+              "recall": 0.9891666666666666,
+              "f1": 0.9937212222687317,
+              "ap": 0.9986197134870413,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9950207468879668,
+              "recall": 0.9991666666666666,
+              "f1": 0.9970893970893971,
+              "ap": 0.9990067829543035,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9983230855226384,
+              "recall": 0.9922222222222222,
+              "f1": 0.995263304541655,
+              "ap": 0.9988983483461036,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.996080627099664,
+              "recall": 0.9883333333333333,
+              "f1": 0.9921918572225321,
+              "ap": 0.9997703998138029,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9995369055751564,
+          "macro_f1": 0.9924066540713907,
+          "micro_f1": 0.9958154063770849,
+          "exact_match": 0.9832432432432432,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9974789915966387,
+              "recall": 0.9891666666666666,
+              "f1": 0.9933054393305439,
+              "ap": 0.9986197134870413,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9950166112956811,
+              "recall": 0.9983333333333333,
+              "f1": 0.9966722129783694,
+              "ap": 0.9990067829543035,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9983230855226384,
+              "recall": 0.9922222222222222,
+              "f1": 0.995263304541655,
+              "ap": 0.9988983483461036,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9966367713004485,
+              "recall": 0.9877777777777778,
+              "f1": 0.9921875,
+              "ap": 0.9997703998138029,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        }
+      },
+      "0": {
+        "run_id": "43e0a0e837a546a19f6c5ffca974d6e6",
+        "thresholds": {
+          "Center": 0.95,
+          "Donut": 0.5,
+          "Edge_Loc": 0.65,
+          "Edge_Ring": 0.15,
+          "Loc": 0.45,
+          "Near_Full": 0.5,
+          "Scratch": 0.55,
+          "Random": 0.5
+        },
+        "val_errors_default": 54,
+        "tuned": {
+          "macro_ap": 0.9990430740692913,
+          "macro_f1": 0.9929675623563543,
+          "micro_f1": 0.9966440977332941,
+          "exact_match": 0.985945945945946,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9966499162479062,
+              "recall": 0.9916666666666667,
+              "f1": 0.9941520467836257,
+              "ap": 0.9989062282278515,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9950248756218906,
+              "recall": 1.0,
+              "f1": 0.9975062344139651,
+              "ap": 0.9990459706779333,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9972113775794758,
+              "recall": 0.9933333333333333,
+              "f1": 0.9952685777901475,
+              "ap": 0.9989182715154062,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9972098214285714,
+              "recall": 0.9927777777777778,
+              "f1": 0.994988864142539,
+              "ap": 0.9997775877054148,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9998632010943912,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9990430740692913,
+          "macro_f1": 0.9929320790484911,
+          "micro_f1": 0.9965842167255595,
+          "exact_match": 0.9862162162162162,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9966499162479062,
+              "recall": 0.9916666666666667,
+              "f1": 0.9941520467836257,
+              "ap": 0.9989062282278515,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9966722129783694,
+              "recall": 0.9983333333333333,
+              "f1": 0.9975020815986678,
+              "ap": 0.9990459706779333,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9972098214285714,
+              "recall": 0.9927777777777778,
+              "f1": 0.994988864142539,
+              "ap": 0.9989182715154062,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9972098214285714,
+              "recall": 0.9927777777777778,
+              "f1": 0.994988864142539,
+              "ap": 0.9997775877054148,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9998632010943912,
+              "support": 85
+            }
+          }
+        }
+      }
+    },
+    "wafer_slim_resnet_v1_t010": {
+      "2": {
+        "run_id": "18021bda16e141ee9c2c6f28a1c6bbb1",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.5,
+          "Edge_Ring": 0.3,
+          "Loc": 0.25,
+          "Near_Full": 0.9,
+          "Scratch": 0.5,
+          "Random": 0.2
+        },
+        "val_errors_default": 53,
+        "tuned": {
+          "macro_ap": 0.9981774864198033,
+          "macro_f1": 0.9924412644039189,
+          "micro_f1": 0.9959337615652072,
+          "exact_match": 0.9840540540540541,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.99915611814346,
+              "recall": 0.9866666666666667,
+              "f1": 0.9928721174004193,
+              "ap": 0.9981966109082818,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9925558312655087,
+              "recall": 1.0,
+              "f1": 0.9962640099626401,
+              "ap": 0.9975909440453531,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 1.0,
+              "recall": 0.9938888888888889,
+              "f1": 0.9969350794093063,
+              "ap": 0.9990491963237847,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9913888888888889,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9955207166853304,
+              "recall": 0.9877777777777778,
+              "f1": 0.9916341327384273,
+              "ap": 0.9994647042009074,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9997295469912104,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9981774864198033,
+          "macro_f1": 0.9924063192770867,
+          "micro_f1": 0.9958745874587459,
+          "exact_match": 0.9837837837837838,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.99915611814346,
+              "recall": 0.9866666666666667,
+              "f1": 0.9928721174004193,
+              "ap": 0.9981966109082818,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9925558312655087,
+              "recall": 1.0,
+              "f1": 0.9962640099626401,
+              "ap": 0.9975909440453531,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 1.0,
+              "recall": 0.9933333333333333,
+              "f1": 0.9966555183946488,
+              "ap": 0.9990491963237847,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9913888888888889,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9955207166853304,
+              "recall": 0.9877777777777778,
+              "f1": 0.9916341327384273,
+              "ap": 0.9994647042009074,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9997295469912104,
+              "support": 85
+            }
+          }
+        }
+      },
+      "1": {
+        "run_id": "59855712f36d41a2a7fe4d154ec2c36d",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.5,
+          "Edge_Ring": 0.2,
+          "Loc": 0.65,
+          "Near_Full": 0.6,
+          "Scratch": 0.35,
+          "Random": 0.35
+        },
+        "val_errors_default": 64,
+        "tuned": {
+          "macro_ap": 0.9990511567637385,
+          "macro_f1": 0.9922172621708067,
+          "micro_f1": 0.995640904806786,
+          "exact_match": 0.9829729729729729,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 0.9999999999999999,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991554054054054,
+              "recall": 0.9858333333333333,
+              "f1": 0.9924496644295302,
+              "ap": 0.9990989288327663,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.990916597853014,
+              "recall": 1.0,
+              "f1": 0.9954375777685608,
+              "ap": 0.9992504053203833,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988814317673378,
+              "recall": 0.9922222222222222,
+              "f1": 0.9955406911928651,
+              "ap": 0.9989234130983763,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9944227551589515,
+              "recall": 0.9905555555555555,
+              "f1": 0.9924853882549401,
+              "ap": 0.9994399724306571,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9998632010943912,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9990511567637385,
+          "macro_f1": 0.992336314253527,
+          "micro_f1": 0.9958154063770849,
+          "exact_match": 0.9840540540540541,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 0.9999999999999999,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991554054054054,
+              "recall": 0.9858333333333333,
+              "f1": 0.9924496644295302,
+              "ap": 0.9990989288327663,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9925496688741722,
+              "recall": 0.9991666666666666,
+              "f1": 0.9958471760797342,
+              "ap": 0.9992504053203833,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988826815642458,
+              "recall": 0.9933333333333333,
+              "f1": 0.996100278551532,
+              "ap": 0.9989234130983763,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9966386554621849,
+              "recall": 0.9883333333333333,
+              "f1": 0.9924686192468619,
+              "ap": 0.9994399724306571,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9998632010943912,
+              "support": 85
+            }
+          }
+        }
+      },
+      "0": {
+        "run_id": "d3cbb7adc7b346f58714c756b15e8bc0",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.6,
+          "Edge_Ring": 0.5,
+          "Loc": 0.2,
+          "Near_Full": 0.1,
+          "Scratch": 0.35,
+          "Random": 0.4
+        },
+        "val_errors_default": 55,
+        "tuned": {
+          "macro_ap": 0.9989784299270728,
+          "macro_f1": 0.988038181131679,
+          "micro_f1": 0.9958779884583677,
+          "exact_match": 0.9835135135135135,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991589571068125,
+              "recall": 0.99,
+              "f1": 0.9945583926329008,
+              "ap": 0.9983907637960164,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9941908713692946,
+              "recall": 0.9983333333333333,
+              "f1": 0.9962577962577963,
+              "ap": 0.9993768075407571,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9983268265476855,
+              "recall": 0.9944444444444445,
+              "f1": 0.9963818536042305,
+              "ap": 0.9988864631657062,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.8823529411764706,
+              "recall": 1.0,
+              "f1": 0.9375,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9933073061907418,
+              "recall": 0.9894444444444445,
+              "f1": 0.9913721124408572,
+              "ap": 0.9994768704863781,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 0.9882352941176471,
+              "recall": 0.9882352941176471,
+              "f1": 0.9882352941176471,
+              "ap": 0.9998632010943912,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9989784299270728,
+          "macro_f1": 0.9926866302443296,
+          "micro_f1": 0.996229083195852,
+          "exact_match": 0.9851351351351352,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.998320738874895,
+              "recall": 0.9908333333333333,
+              "f1": 0.9945629443747386,
+              "ap": 0.9983907637960164,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9941908713692946,
+              "recall": 0.9983333333333333,
+              "f1": 0.9962577962577963,
+              "ap": 0.9993768075407571,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9994416527079844,
+              "recall": 0.9944444444444445,
+              "f1": 0.9969367864104706,
+              "ap": 0.9988864631657062,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.996078431372549,
+              "recall": 0.9877777777777778,
+              "f1": 0.9919107391910739,
+              "ap": 0.9994768704863781,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9998632010943912,
+              "support": 85
+            }
+          }
+        }
+      }
+    },
+    "wafer_slim_resnet_v1_t046": {
+      "2": {
+        "run_id": "d101ccb80a874bf084c527456c86fcf9",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.45,
+          "Edge_Ring": 0.5,
+          "Loc": 0.2,
+          "Near_Full": 0.5,
+          "Scratch": 0.25,
+          "Random": 0.5
+        },
+        "val_errors_default": 67,
+        "tuned": {
+          "macro_ap": 0.9993881943919439,
+          "macro_f1": 0.9931660822409639,
+          "micro_f1": 0.9958183638612403,
+          "exact_match": 0.9829729729729729,
+          "per_class": {
+            "Center": {
+              "precision": 0.9991673605328892,
+              "recall": 1.0,
+              "f1": 0.9995835068721366,
+              "ap": 0.9999993061337775,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 1.0,
+              "recall": 0.9891666666666666,
+              "f1": 0.9945538332635107,
+              "ap": 0.9979105008609006,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9942004971002486,
+              "recall": 1.0,
+              "f1": 0.9970918155380141,
+              "ap": 0.9988488066524079,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988833054159687,
+              "recall": 0.9938888888888889,
+              "f1": 0.9963798384851016,
+              "ap": 0.9988526628715705,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9921875,
+              "recall": 0.9877777777777778,
+              "f1": 0.9899777282850779,
+              "ap": 0.9994942786168952,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9993881943919439,
+          "macro_f1": 0.993109658373333,
+          "micro_f1": 0.995756218318991,
+          "exact_match": 0.9827027027027027,
+          "per_class": {
+            "Center": {
+              "precision": 0.9991673605328892,
+              "recall": 1.0,
+              "f1": 0.9995835068721366,
+              "ap": 0.9999993061337775,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 1.0,
+              "recall": 0.9883333333333333,
+              "f1": 0.9941324392288349,
+              "ap": 0.9979105008609006,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9942004971002486,
+              "recall": 1.0,
+              "f1": 0.9970918155380141,
+              "ap": 0.9988488066524079,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9994410285075461,
+              "recall": 0.9933333333333333,
+              "f1": 0.9963778211200892,
+              "ap": 0.9988526628715705,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9949494949494949,
+              "recall": 0.985,
+              "f1": 0.9899497487437185,
+              "ap": 0.9994942786168952,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        }
+      },
+      "1": {
+        "run_id": "7ab2c52eb2934adc8f5dd7828fa461d0",
+        "thresholds": {
+          "Center": 0.55,
+          "Donut": 0.1,
+          "Edge_Loc": 0.3,
+          "Edge_Ring": 0.5,
+          "Loc": 0.7,
+          "Near_Full": 0.7,
+          "Scratch": 0.6,
+          "Random": 0.3
+        },
+        "val_errors_default": 71,
+        "tuned": {
+          "macro_ap": 0.9989598030570416,
+          "macro_f1": 0.9916473618266478,
+          "micro_f1": 0.9950483376562131,
+          "exact_match": 0.98,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9983150800336984,
+              "recall": 0.9875,
+              "f1": 0.9928780896522832,
+              "ap": 0.9982881427158631,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9925558312655087,
+              "recall": 1.0,
+              "f1": 0.9962640099626401,
+              "ap": 0.9998027522316565,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988814317673378,
+              "recall": 0.9922222222222222,
+              "f1": 0.9955406911928651,
+              "ap": 0.9985434462865984,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 1.0,
+              "recall": 0.9333333333333333,
+              "f1": 0.9655172413793104,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9943820224719101,
+              "recall": 0.9833333333333333,
+              "f1": 0.9888268156424581,
+              "ap": 0.9993475487944902,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 0.9883720930232558,
+              "recall": 1.0,
+              "f1": 0.9941520467836257,
+              "ap": 0.9998632010943911,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9989598030570416,
+          "macro_f1": 0.9920581297321494,
+          "micro_f1": 0.9952857984678845,
+          "exact_match": 0.981081081081081,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.99915611814346,
+              "recall": 0.9866666666666667,
+              "f1": 0.9928721174004193,
+              "ap": 0.9982881427158631,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9925558312655087,
+              "recall": 1.0,
+              "f1": 0.9962640099626401,
+              "ap": 0.9998027522316565,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9983240223463687,
+              "recall": 0.9927777777777778,
+              "f1": 0.9955431754874652,
+              "ap": 0.9985434462865984,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9938409854423292,
+              "recall": 0.9861111111111112,
+              "f1": 0.9899609592861126,
+              "ap": 0.9993475487944902,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9998632010943911,
+              "support": 85
+            }
+          }
+        }
+      },
+      "0": {
+        "run_id": "7607e1632dfb46c7b3ce7b6e3e2dcfc9",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.5,
+          "Edge_Ring": 0.5,
+          "Loc": 0.5,
+          "Near_Full": 0.5,
+          "Scratch": 0.55,
+          "Random": 0.5
+        },
+        "val_errors_default": 51,
+        "tuned": {
+          "macro_ap": 0.9994922936529089,
+          "macro_f1": 0.9916933499059677,
+          "micro_f1": 0.9948137670909948,
+          "exact_match": 0.9802702702702702,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9974747474747475,
+              "recall": 0.9875,
+              "f1": 0.992462311557789,
+              "ap": 0.9983799129117985,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9917149958574979,
+              "recall": 0.9975,
+              "f1": 0.9945990859991691,
+              "ap": 0.9995878491280716,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9983230855226384,
+              "recall": 0.9922222222222222,
+              "f1": 0.995263304541655,
+              "ap": 0.9986060766265739,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9938340807174888,
+              "recall": 0.985,
+              "f1": 0.9893973214285714,
+              "ap": 0.9993645105568267,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9994922936529089,
+          "macro_f1": 0.9916243735171342,
+          "micro_f1": 0.99469652327637,
+          "exact_match": 0.9797297297297297,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9974747474747475,
+              "recall": 0.9875,
+              "f1": 0.992462311557789,
+              "ap": 0.9983799129117985,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9917149958574979,
+              "recall": 0.9975,
+              "f1": 0.9945990859991691,
+              "ap": 0.9995878491280716,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9983230855226384,
+              "recall": 0.9922222222222222,
+              "f1": 0.995263304541655,
+              "ap": 0.9986060766265739,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9927211646136618,
+              "recall": 0.985,
+              "f1": 0.9888455103179029,
+              "ap": 0.9993645105568267,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        }
+      }
+    },
+    "wafer_slim_resnet_v1_t015": {
+      "2": {
+        "run_id": "3f6311108e7246f2ac5d74ec20cf6f01",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.35,
+          "Edge_Ring": 0.3,
+          "Loc": 0.15,
+          "Near_Full": 0.55,
+          "Scratch": 0.35,
+          "Random": 0.5
+        },
+        "val_errors_default": 72,
+        "tuned": {
+          "macro_ap": 0.9994143315729619,
+          "macro_f1": 0.9916081067296778,
+          "micro_f1": 0.9948168217693486,
+          "exact_match": 0.98,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9957841483979764,
+              "recall": 0.9841666666666666,
+              "f1": 0.9899413243922883,
+              "ap": 0.9985518994410907,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.990909090909091,
+              "recall": 0.9991666666666666,
+              "f1": 0.9950207468879668,
+              "ap": 0.9982626098472402,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988826815642458,
+              "recall": 0.9933333333333333,
+              "f1": 0.996100278551532,
+              "ap": 0.9989404109150617,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9921875,
+              "recall": 0.9877777777777778,
+              "f1": 0.9899777282850779,
+              "ap": 0.999559732380302,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9994143315729619,
+          "macro_f1": 0.9917259626896389,
+          "micro_f1": 0.9949310385476836,
+          "exact_match": 0.9805405405405405,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9974662162162162,
+              "recall": 0.9841666666666666,
+              "f1": 0.9907718120805369,
+              "ap": 0.9985518994410907,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9917287014061208,
+              "recall": 0.9991666666666666,
+              "f1": 0.9954337899543378,
+              "ap": 0.9982626098472402,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9994407158836689,
+              "recall": 0.9927777777777778,
+              "f1": 0.9960981047937569,
+              "ap": 0.9989404109150617,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 1.0,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9938375350140056,
+              "recall": 0.9855555555555555,
+              "f1": 0.9896792189679219,
+              "ap": 0.999559732380302,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 1.0,
+              "support": 85
+            }
+          }
+        }
+      },
+      "1": {
+        "run_id": "0c374a4942f940aa82897fe304e0c5b9",
+        "thresholds": {
+          "Center": 0.8,
+          "Donut": 0.5,
+          "Edge_Loc": 0.6,
+          "Edge_Ring": 0.25,
+          "Loc": 0.85,
+          "Near_Full": 0.2,
+          "Scratch": 0.5,
+          "Random": 0.3
+        },
+        "val_errors_default": 81,
+        "tuned": {
+          "macro_ap": 0.9990408795965705,
+          "macro_f1": 0.991163681331644,
+          "micro_f1": 0.9949262536873157,
+          "exact_match": 0.9794594594594594,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991568296795953,
+              "recall": 0.9875,
+              "f1": 0.9932942162615256,
+              "ap": 0.9988991589051391,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9925558312655087,
+              "recall": 1.0,
+              "f1": 0.9962640099626401,
+              "ap": 0.9996257188215518,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 1.0,
+              "recall": 0.9905555555555555,
+              "f1": 0.9952553725927993,
+              "ap": 0.9989342515547063,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9966120835686053,
+              "recall": 0.9805555555555555,
+              "f1": 0.9885186222346681,
+              "ap": 0.9993050271666231,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 0.9882352941176471,
+              "recall": 0.9882352941176471,
+              "f1": 0.9882352941176471,
+              "ap": 0.9997295469912102,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9990408795965705,
+          "macro_f1": 0.992122381885465,
+          "micro_f1": 0.9952819061099316,
+          "exact_match": 0.981081081081081,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9991582491582491,
+              "recall": 0.9891666666666666,
+              "f1": 0.9941373534338358,
+              "ap": 0.9988991589051391,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9933774834437086,
+              "recall": 1.0,
+              "f1": 0.9966777408637874,
+              "ap": 0.9996257188215518,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9988820570150923,
+              "recall": 0.9927777777777778,
+              "f1": 0.9958205628308721,
+              "ap": 0.9989342515547063,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9375,
+              "recall": 1.0,
+              "f1": 0.967741935483871,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9966120835686053,
+              "recall": 0.9805555555555555,
+              "f1": 0.9885186222346681,
+              "ap": 0.9993050271666231,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 1.0,
+              "recall": 0.9882352941176471,
+              "f1": 0.9940828402366864,
+              "ap": 0.9997295469912102,
+              "support": 85
+            }
+          }
+        }
+      },
+      "0": {
+        "run_id": "cb23474cf063417d8e910229f2a2d0d6",
+        "thresholds": {
+          "Center": 0.5,
+          "Donut": 0.5,
+          "Edge_Loc": 0.35,
+          "Edge_Ring": 0.65,
+          "Loc": 0.3,
+          "Near_Full": 0.5,
+          "Scratch": 0.75,
+          "Random": 0.15
+        },
+        "val_errors_default": 61,
+        "tuned": {
+          "macro_ap": 0.9988023535268515,
+          "macro_f1": 0.9866044687933763,
+          "micro_f1": 0.9945748319377286,
+          "exact_match": 0.9786486486486486,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9933054393305439,
+              "recall": 0.9891666666666666,
+              "f1": 0.9912317327766179,
+              "ap": 0.9985600123321998,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9950083194675541,
+              "recall": 0.9966666666666667,
+              "f1": 0.9958368026644463,
+              "ap": 0.9980876127702556,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9977641140301845,
+              "recall": 0.9916666666666667,
+              "f1": 0.994706046252438,
+              "ap": 0.9989281060176551,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9333333333333333,
+              "recall": 0.9333333333333333,
+              "f1": 0.9333333333333333,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9977401129943503,
+              "recall": 0.9811111111111112,
+              "f1": 0.9893557422969188,
+              "ap": 0.9991465626669778,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 0.9770114942528736,
+              "recall": 1.0,
+              "f1": 0.9883720930232558,
+              "ap": 0.9998632010943912,
+              "support": 85
+            }
+          }
+        },
+        "default": {
+          "macro_ap": 0.9988023535268515,
+          "macro_f1": 0.9876461513697005,
+          "micro_f1": 0.9951098803982796,
+          "exact_match": 0.9802702702702702,
+          "per_class": {
+            "Center": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Donut": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "ap": 1.0,
+              "support": 1200
+            },
+            "Edge_Loc": {
+              "precision": 0.9949706621961442,
+              "recall": 0.9891666666666666,
+              "f1": 0.9920601755119097,
+              "ap": 0.9985600123321998,
+              "support": 1200
+            },
+            "Edge_Ring": {
+              "precision": 0.9941860465116279,
+              "recall": 0.9975,
+              "f1": 0.9958402662229617,
+              "ap": 0.9980876127702556,
+              "support": 1200
+            },
+            "Loc": {
+              "precision": 0.9983221476510067,
+              "recall": 0.9916666666666667,
+              "f1": 0.9949832775919732,
+              "ap": 0.9989281060176551,
+              "support": 1800
+            },
+            "Near_Full": {
+              "precision": 0.9333333333333333,
+              "recall": 0.9333333333333333,
+              "f1": 0.9333333333333333,
+              "ap": 0.9958333333333333,
+              "support": 15
+            },
+            "Scratch": {
+              "precision": 0.9944040290990487,
+              "recall": 0.9872222222222222,
+              "f1": 0.9908001115137999,
+              "ap": 0.9991465626669778,
+              "support": 1800
+            },
+            "Random": {
+              "precision": 0.9883720930232558,
+              "recall": 1.0,
+              "f1": 0.9941520467836257,
+              "ap": 0.9998632010943912,
+              "support": 85
+            }
+          }
+        }
+      }
+    }
+  }
+}
