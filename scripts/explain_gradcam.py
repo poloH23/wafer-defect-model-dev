@@ -36,17 +36,21 @@ from torch.utils.data import DataLoader
 from src.common.config_schema import ModelConfig, resolve_path
 from src.data.dataset import DiscreteMapDataset
 from src.data.split import load_split
-from src.evaluation.edge_coverage import edge_coverage
+from src.evaluation.edge_coverage import angular_sectors, edge_band, edge_coverage, edge_sector_failures
 from src.evaluation.explain import (
     CLASS_REGIONS,
     DIRECTION_CLASSES,
     DIRECTION_TOLERANCE,
+    EDGE_CATEGORIES,
     angular_error,
+    cam_sector_profile,
     cam_target_layer,
+    category_ratios,
     compute_cams,
     localization_ratio,
     pointing_hit,
     rank_correlation,
+    sector_categories,
     wafer_regions,
 )
 from src.evaluation.run_context import download_checkpoint, load_clean_arrays, load_run_context
@@ -99,6 +103,85 @@ def fmt(value: float, spec: str) -> str:
 def nanmean(values: list[float]) -> float:
     finite = [v for v in values if not math.isnan(v)]
     return float(np.mean(finite)) if finite else math.nan
+
+
+def edge_profile_diagnostic(positions: np.ndarray, trained: np.ndarray, randomized: np.ndarray, maps: np.ndarray) -> dict[str, Any]:
+    """
+    Where along the edge the heatmaps of a partial-edge class put their mass: on its failed sectors,
+    where failed and intact parts meet, or on the intact part. Only samples with both failed and
+    intact sectors are usable; a full ring or an edge without failed sectors has no such contrast.
+    """
+    samples, coverages = [], []
+    ratios: dict[str, dict[str, list[float]]] = {"trained": {k: [] for k in EDGE_CATEGORIES}, "random": {k: [] for k in EDGE_CATEGORIES}}
+    preferred: dict[str, list[str]] = {"trained": [], "random": []}
+    sector_shares: dict[str, list[float]] = {k: [] for k in EDGE_CATEGORIES}
+    for k, p in enumerate(positions):
+        result = edge_sector_failures(maps[p])
+        if result is None or result[0].all() or not result[0].any():
+            continue
+        categories = sector_categories(result[0])
+        coverages.append(float(result[0].mean()))
+        for kind in EDGE_CATEGORIES:
+            sector_shares[kind].append(float((categories == kind).mean()))
+        for model_kind, heatmap in (("trained", trained[k]), ("random", randomized[k])):
+            profile = cam_sector_profile(heatmap, maps[p])
+            if profile is None:
+                continue
+            sample_ratios = category_ratios(profile, categories)
+            for kind in EDGE_CATEGORIES:
+                ratios[model_kind][kind].append(sample_ratios[kind])
+            present = {kind: value for kind, value in sample_ratios.items() if not math.isnan(value)}
+            preferred[model_kind].append(max(present, key=present.get))
+        samples.append(int(k))
+    summary: dict[str, Any] = {
+        "usable_samples": len(samples),
+        "sample_positions": samples,
+        "median_edge_coverage": float(np.median(coverages)) if coverages else math.nan,
+        "sector_share": {kind: nanmean(values) for kind, values in sector_shares.items()},
+    }
+    for model_kind in ("trained", "random"):
+        summary[model_kind] = {
+            "mean_ratio": {kind: nanmean(values) for kind, values in ratios[model_kind].items()},
+            "preferred_share": {kind: float(np.mean([p == kind for p in preferred[model_kind]])) if preferred[model_kind] else math.nan for kind in EDGE_CATEGORIES},
+            "samples_with_heatmap": len(preferred[model_kind]),
+        }
+    return summary
+
+
+def plot_edge_profiles(path: Path, chosen: list[int], positions: np.ndarray, heatmaps: np.ndarray, maps: np.ndarray, indices: np.ndarray, name: str) -> None:
+    """Per sample: the map with its failed edge sectors in red, the heatmap, and both along the angle."""
+    figure, axes = plt.subplots(len(chosen), 3, figsize=(9.6, 2.4 * len(chosen)), squeeze=False)
+    centers = np.arange(36) * 10 - 175
+    for row, k in enumerate(chosen):
+        image = maps[positions[k]]
+        failed, _ = edge_sector_failures(image)
+        wafer = image != 0
+        band = edge_band(wafer, 2)
+        ys, xs = np.nonzero(band)
+        sectors = angular_sectors(ys, xs, tuple(np.argwhere(wafer).mean(axis=0)))
+        marked = np.zeros(image.shape, dtype=bool)
+        marked[ys[failed[sectors]], xs[failed[sectors]]] = True
+        axes[row][0].imshow(image, cmap="gray_r", vmin=0, vmax=2)
+        axes[row][0].imshow(np.ma.masked_where(~marked, marked), cmap="autumn", alpha=0.8)
+        axes[row][0].set_title(f"{name} #{indices[positions[k]]}: failed edge sectors in red", fontsize=8)
+        axes[row][0].axis("off")
+        overlay(axes[row][1], image, heatmaps[k], "Grad-CAM")
+        profile = cam_sector_profile(heatmaps[k], image)
+        ax = axes[row][2]
+        for center, is_failed in zip(centers, failed, strict=True):
+            if is_failed:
+                ax.axvspan(center - 5, center + 5, color="tab:red", alpha=0.25, linewidth=0)
+        if profile is not None:
+            ax.plot(centers, profile, color="tab:blue")
+        ax.set_xlim(-180, 180)
+        ax.set_xticks([-180, -90, 0, 90, 180])
+        ax.set_xlabel("angle from center (0 = right, 90 = down)", fontsize=7)
+        ax.set_ylabel("heatmap mass share", fontsize=7)
+        ax.tick_params(labelsize=7)
+        ax.set_title("red: failed sectors; blue: heatmap", fontsize=8)
+    figure.tight_layout()
+    figure.savefig(path, dpi=120)
+    plt.close(figure)
 
 
 def main() -> None:
@@ -168,8 +251,9 @@ def main() -> None:
             }
         )
 
-    # 1b. Direction, for defects on part of the edge
+    # 1b. Direction, for defects on part of the edge, and where along the edge the heatmaps sit
     direction: list[dict[str, Any]] = []
+    edge_profiles: list[dict[str, Any]] = []
     for name in DIRECTION_CLASSES:
         if name not in names:
             continue
@@ -181,6 +265,9 @@ def main() -> None:
         randomized = cams(random_model, random_layer, inputs[positions], [c] * positions.size, device)
         errors = [angular_error(trained[k], maps[p]) for k, p in enumerate(positions)]
         random_errors = [angular_error(randomized[k], maps[p]) for k, p in enumerate(positions)]
+        along_edge = edge_profile_diagnostic(positions, trained, randomized, maps)
+        along_edge["class"] = name
+        edge_profiles.append(along_edge)
 
         def within(values: list[float]) -> float:
             finite = [v for v in values if not math.isnan(v)]
@@ -201,8 +288,21 @@ def main() -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     examples_path = output.with_name(output.stem + "_examples.png")
     confusions_path = output.with_name(output.stem + "_edge_confusions.png")
-    for stale in (examples_path, confusions_path):  # a figure from an earlier run must not pass for this one
+    profiles_path = output.with_name(output.stem + "_edge_profiles.png")
+    for stale in (examples_path, confusions_path, profiles_path):  # a figure from an earlier run must not pass for this one
         stale.unlink(missing_ok=True)
+
+    # 1c. Edge profiles of a few random usable samples
+    for row in edge_profiles:
+        c = names.index(row["class"])
+        positions = np.flatnonzero(single_correct & (y_true[:, c] == 1))
+        usable = row["sample_positions"]
+        if usable:
+            # A generator of its own, so that adding this figure leaves the examples drawn for the other figures unchanged
+            profile_rng = np.random.default_rng([args.seed, 1])
+            chosen = sorted(profile_rng.choice(usable, size=min(args.examples + 2, len(usable)), replace=False).tolist())
+            heatmaps = cams(model, layer, inputs[positions[chosen]], [c] * len(chosen), device)
+            plot_edge_profiles(profiles_path, list(range(len(chosen))), positions[chosen], heatmaps, maps, indices, row["class"])
 
     # 2. Examples for every class
     figure, axes = plt.subplots(len(names), args.examples, figsize=(2.0 * args.examples, 2.1 * len(names)), squeeze=False)
@@ -246,7 +346,7 @@ def main() -> None:
         "# Grad-CAM analysis",
         "",
         f"Model: MLflow run {args.run_id} ({model_cfg.name}); {split_name} split; decisions at {thresholds_source}. "
-        f"Heatmaps from the last convolutional block (7x7, upsampled to the input size). Code: commit '{code_version}'.",
+        f"Heatmaps from the last convolutional block (7x7, upsampled to the input size). Code: commit `{code_version}`.",
         "",
         "## Localization",
         "",
@@ -291,6 +391,32 @@ def main() -> None:
                 f"| {row['class']} | {row['samples']} | {fmt(row['median_error_trained'], '.0f')} | {fmt(row['within_tolerance_trained'], '.0%')} | "
                 f"{fmt(row['median_error_random'], '.0f')} | {fmt(row['within_tolerance_random'], '.0%')} |"
             )
+    for row in edge_profiles:
+        shares = row["sector_share"]
+        lines += [
+            "",
+            f"## Where along the edge the {row['class']} heatmaps fall",
+            "",
+            "The 36 edge sectors of each map are failed (most of their dies failed, as in the edge coverage) or intact; a sector",
+            "next to one of the other kind is a boundary, where failed and intact parts of the edge meet. For each kind: its share",
+            "of the heatmap mass (beyond 0.4 of the radius) divided by its share of the sectors, so 1 means no preference. A",
+            "heatmap pointing at the defect favors failed sectors; at the ends of the failed arc, boundaries; at the part of the",
+            f"edge that did not fail, intact sectors. {row['usable_samples']} usable samples (both failed and intact sectors; median",
+            f"edge coverage {row['median_edge_coverage']:.2f}); on average {shares['defect']:.0%} of sectors are failed, {shares['boundary']:.0%}",
+            f"boundaries and {shares['intact']:.0%} intact.",
+            "",
+            "| Model | Samples with a heatmap | Ratio, failed | Ratio, boundary | Ratio, intact | Most favored: failed | boundary | intact |",
+            "|---|---|---|---|---|---|---|---|",
+        ]
+        for model_kind, label_text in (("trained", "Trained"), ("random", "Random weights")):
+            stats = row[model_kind]
+            mean, favored = stats["mean_ratio"], stats["preferred_share"]
+            lines.append(
+                f"| {label_text} | {stats['samples_with_heatmap']} | {fmt(mean['defect'], '.2f')} | {fmt(mean['boundary'], '.2f')} | {fmt(mean['intact'], '.2f')} | "
+                f"{fmt(favored['defect'], '.0%')} | {fmt(favored['boundary'], '.0%')} | {fmt(favored['intact'], '.0%')} |"
+            )
+        if profiles_path.exists():
+            lines += ["", f"![Edge profiles]({profiles_path.name})"]
     lines += ["", "## Examples", "", f"![Grad-CAM examples]({examples_path.name})", ""]
     if confusions:
         lines += [
@@ -316,7 +442,7 @@ def main() -> None:
 
     with mlflow.start_run(run_id=args.run_id):
         mlflow.log_dict(details, "explain/gradcam.json")
-        for path in (examples_path, confusions_path):
+        for path in (examples_path, confusions_path, profiles_path):
             if path.exists():
                 mlflow.log_artifact(str(path), artifact_path="explain")
     print("\n".join(lines))
