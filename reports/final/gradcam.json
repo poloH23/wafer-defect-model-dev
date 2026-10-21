@@ -1,7 +1,7 @@
 {
   "run_id": "176643c399f14d199631a45c01f3f427",
   "split": "val",
-  "git_commit": "d54d948645195aeb6e3d484e9ba7486d79d3ad83",
+  "git_commit": "d60eec00a6ed6829496ffe8c6442a4587536f5a8",
   "thresholds": {
     "Center": 0.5,
     "Donut": 0.5,

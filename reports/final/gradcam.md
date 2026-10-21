@@ -1,6 +1,6 @@
 # Grad-CAM analysis
 
-Model: MLflow run 176643c399f14d199631a45c01f3f427 (shufflenet_v2_x1_0); validation split; decisions at the run's tuned thresholds, as delivered. Heatmaps from the last convolutional block (7x7, upsampled to the input size). Code: commit 'd54d948645195aeb6e3d484e9ba7486d79d3ad83'.
+Model: MLflow run 176643c399f14d199631a45c01f3f427 (shufflenet_v2_x1_0); validation split; decisions at the run's tuned thresholds, as delivered. Heatmaps from the last convolutional block (7x7, upsampled to the input size). Code: commit `d60eec00a6ed6829496ffe8c6442a4587536f5a8`.
 
 ## Localization
 
@@ -28,6 +28,23 @@ because a 7x7 heatmap resolves it well but radius only to about one cell, its pe
 | Class | Samples | Median angle, trained | Within 45 degrees, trained | Median angle, random weights | Within 45 degrees, random weights |
 |---|---|---|---|---|---|
 | Edge_Loc | 100 | 162 | 25% | 92 | 27% |
+
+## Where along the edge the Edge_Loc heatmaps fall
+
+The 36 edge sectors of each map are failed (most of their dies failed, as in the edge coverage) or intact; a sector
+next to one of the other kind is a boundary, where failed and intact parts of the edge meet. For each kind: its share
+of the heatmap mass (beyond 0.4 of the radius) divided by its share of the sectors, so 1 means no preference. A
+heatmap pointing at the defect favors failed sectors; at the ends of the failed arc, boundaries; at the part of the
+edge that did not fail, intact sectors. 100 usable samples (both failed and intact sectors; median
+edge coverage 0.56); on average 43% of sectors are failed, 21%
+boundaries and 36% intact.
+
+| Model | Samples with a heatmap | Ratio, failed | Ratio, boundary | Ratio, intact | Most favored: failed | boundary | intact |
+|---|---|---|---|---|---|---|---|
+| Trained | 100 | 0.34 | 2.00 | 1.78 | 3% | 66% | 31% |
+| Random weights | 100 | 1.06 | 1.03 | 1.04 | 37% | 28% | 35% |
+
+![Edge profiles](gradcam_edge_profiles.png)
 
 ## Examples
 
