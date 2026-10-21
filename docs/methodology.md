@@ -14,6 +14,8 @@ The project moved through one question at a time. Each answer shaped the next ex
    survive confirmation
 6. Does the choice hold on unseen data? → yes, and the test evaluation exposed two flaws of the
    selection protocol
+7. What does the selected model look at? → compact defects where they are; for Edge_Loc, the places
+   where the edge stops failing, which also explains the label confusion found in step 2
 
 ## 1. Data and evaluation protocol
 
@@ -58,6 +60,7 @@ share of the circumference whose outermost band consists mostly of failed dies.
   4% of Edge_Loc coverage, inside the typical range of Edge_Ring. Three of them cover the entire edge.
 - Prediction probabilities show the model is confident in these decisions: it follows the class
   definitions, and the labels contradict them in that region.
+
 About a third of the remaining errors are of this kind. This is the evidence behind the project's
 central decision: accuracy is limited by label quality, so beyond a point, effort goes into
 efficiency rather than into more accuracy.
@@ -261,6 +264,7 @@ validation split; the full report is `reports/final/test_evaluation.md`. The sel
   2.8 on average. They maximized per-class F1 while the primary metric counts samples with any wrong
   label, and with 40 to 70 validation errors per model, each threshold followed a handful of samples:
   for the selected model, the Edge_Ring threshold ranged from 0.05 to 0.50 across seeds.
+
 ### Lessons for the next selection protocol
 
 The test evaluation exposed two flaws. They are reported, not corrected, since changing the rules
@@ -279,3 +283,113 @@ after seeing the results would defeat the protocol; the next protocol should avo
 - **Align threshold tuning with the primary metric, and require it to beat noise.** Tune thresholds to
   minimize the samples with any wrong label, and keep 0.5 unless the tuned thresholds improve on it by
   more than validation noise.
+
+## 9. What the model looks at
+
+`scripts/explain_gradcam.py` computes Grad-CAM heatmaps of the delivered model (ShuffleNetV2, seed 0)
+on the validation split, from its last convolutional block: 7x7, upsampled to the 52x52 map. The
+analysis is descriptive and changes nothing in the model. Full report: `reports/final/gradcam.md`.
+
+### Design: heatmaps are evidence only with a control
+
+A heatmap that looks plausible proves little: some saliency methods produce nearly the same maps for
+a trained network and for one with random weights, because they reflect the input's structure rather
+than what the network learned (Adebayo et al., 2018, *Sanity Checks for Saliency Maps*). Every
+measurement is therefore repeated on the same architecture with random weights, and examples are
+drawn at random with a fixed seed rather than picked for how they look.
+
+- **Localization.** Center, Donut and the edge classes lie in a known zone by definition. The wafer is
+  split into three concentric zones (center up to 0.3 of the radius, ring to 0.7, edge beyond), and two
+  measures are taken on every correctly classified single-defect sample: how often the heatmap's peak
+  falls in the class's zone (the pointing game, whose chance level is the zone's share of the wafer),
+  and the zone's share of the heatmap mass relative to its share of the area.
+- **Direction.** For Edge_Loc, a defect on part of the edge: the angle between where the heatmap
+  points and where the edge's failed dies lie, seen from the center.
+
+### Calibrating the instrument before using it
+
+The measures were first run on synthetic wafers, where the defect positions are known. The first
+version used a 5-pixel edge band and reported no focus for Edge_Loc heatmaps that visibly sat on the
+defect: at 7x7, a heatmap resolves direction well but radius only to about one cell, and its peak sits
+one cell inward of an edge defect. The edge zone was widened to one cell and the direction measure
+added, both before any real data was measured. Adjusting a measure until a result looks right would
+distort the evidence; fixing it against a known answer is calibration.
+
+### Results
+
+- **The randomization check passes for every class.** Trained and random-weight heatmaps are nearly
+  uncorrelated (rank correlation 0.01 to 0.16): the maps reflect what the model learned.
+- **Center is localized precisely.** The heatmap's peak is in the center zone for all 100 samples
+  (random weights: 8%, chance: 9%), with 3.49 times the mass that area alone would give (random: 0.92).
+- **Compact defects look right in the examples.** Scratch heatmaps follow the scratch line, Loc
+  heatmaps cover the local cluster, Near_Full heatmaps most of the wafer.
+- **Global patterns give diffuse heatmaps.** Edge_Ring and Random heatmaps spread over the wafer; a
+  7x7 Grad-CAM localizes compact evidence, not a pattern spread along the whole edge.
+- **One zone was wrong.** Only 4% of Donut peaks fall in the ring zone, below chance, although Donut
+  heatmaps carry more mass in the middle of the wafer than area alone would give (1.49, random: 1.03).
+  The maps suggest why: the donuts visible in the figures lie at about 0.2 to 0.35 of the radius,
+  mostly inside the center zone. The zone came from an assumed geometry rather than from the data; it was not redefined
+  after seeing the heatmaps, which would have fitted the measure to the result.
+- **The random-weight control has a bias of its own.** Its peaks fall in the edge zone for 12% of
+  Edge_Loc samples, far below the 51% the area would give, likely because zero padding weakens the
+  outermost cells.
+  For edge classes, the control is a better baseline than the nominal chance level.
+
+### Why Edge_Loc heatmaps pointed the wrong way
+
+The direction measure contradicted its calibration: on synthetic wafers, Edge_Loc heatmaps pointed at
+the defect (median angle 12 degrees, all four samples within 45); on the real model, the median angle was 162
+degrees and 25% fell within 45, the chance level. A diagnostic was designed to tell whether the
+measure or the model was responsible.
+
+**Method.** The edge is split into the 36 sectors of the edge coverage, each failed (most of its dies
+failed) or intact. A sector next to one of the other kind is a boundary, where failed and intact parts
+of the edge meet. For each kind of sector, the heatmap's share of mass is divided by the kind's share
+of the sectors, so 1 means no preference. The measure does not average directions, so it holds for
+wide defects and for heatmaps with several peaks. On synthetic wafers it found what was known: a
+ratio of 3.39 for failed sectors, the favorite of all four samples.
+
+**Predictions, written down before the real model was measured.** Failed sectors favored: the
+heatmaps point at the defect and only the direction measure failed. Boundaries favored: they mark the
+ends of the failed arc. Intact sectors favored: the model checks where the edge did not fail. No kind
+clearly above the random-weight control: Grad-CAM cannot localize along the edge of real wafers.
+
+**Result**, on 100 Edge_Loc samples whose failed arcs cover a median 56% of the edge:
+
+| Model | Failed | Boundary | Intact | Favored most: failed / boundary / intact |
+|---|---|---|---|---|
+| Trained | 0.34 | 2.00 | 1.78 | 3% / 66% / 31% |
+| Random weights | 1.06 | 1.03 | 1.04 | 37% / 28% / 35% |
+
+The control shows no preference, so the pattern is learned. The heatmaps avoid the failed arc and
+concentrate where it ends and on the edge that did not fail. In the profile figure, a wafer whose
+edge fails all around except one gap has its heatmap peak in the gap; one with a wider gap, at both
+of its ends.
+
+**Interpretation.** What separates Edge_Loc from Edge_Ring is whether the edge fails all around. With
+arcs covering half the edge, the decisive evidence for a *partial* edge defect is where the failure
+stops, and that is what the model learned, a reason an expert would recognize. It accounts for every
+earlier observation:
+
+- **The 162-degree angle**: the mass sits at the ends of the arc and on the intact side, opposite the
+  failed arc's mean direction.
+- **The calibration's different answer**: the synthetic Edge_Loc arcs were narrow (70 degrees, a fifth
+  of the edge), so the presence of a failed arc was the best evidence there. What a model looks at depends on what
+  separates the classes in its data; the calibration showed the instrument can detect a preference for
+  the defect, and on the real model it detected a different one.
+- **The label confusion of section 2**: three of the 9 Edge_Loc samples predicted as Edge_Ring have an
+  edge coverage of 1.00, an edge that fails all around and offers no place where the failure stops. Two
+  of them have an empty Edge_Loc heatmap; the third keeps a small spot, perhaps where a sector is only
+  partly failed. This is consistent with the mechanism, but the confused samples were not measured with
+  the diagnostic, so it is supporting evidence, not proof.
+
+### Lessons
+
+- **Calibrate an instrument on known answers before using it**, and do not expect it to return the
+  same answer afterwards: its job is to detect what is there.
+- **List every possible outcome in advance, including "no conclusion".** Reading the result then means
+  matching a row of a table, not building an explanation after the fact.
+- **Derive geometric priors from the data**, such as each class's radial distribution of failed dies,
+  rather than from an assumed shape.
+- **Compare with an empirical control, not only a nominal chance level**: the random-weight model
+  revealed a border bias that the area-based chance level ignores.

@@ -133,7 +133,11 @@ The full account, with the reasoning behind each design decision, is in
 - **Selection rules fixed in advance.** How one model is chosen for each deployment target (cloud GPU,
   CPU server, edge) is written in [docs/model_selection.md](docs/model_selection.md), committed before
   the search and the test evaluation, so the choice cannot be adapted to the results.
-
+- **Explaining the model, with a control.** Grad-CAM heatmaps of the selected model are checked against
+  the same architecture with random weights, and the measurements were calibrated on synthetic wafers
+  with known defect positions before measuring the real model. Edge_Loc heatmaps first seemed to point
+  away from the defect; a diagnostic, with its possible outcomes written down in advance, showed why:
+  they mark where the edge stops failing, the evidence that separates a partial edge defect from a ring.
 
 ## Results
 
@@ -141,7 +145,25 @@ The full account, with the reasoning behind each design decision, is in
 3e-3, for all three deployment targets (cloud GPU, CPU server, edge). It was chosen on the validation
 split by the rules in [docs/model_selection.md](docs/model_selection.md), committed before the test
 split was used (tag `selection-protocol`): among the candidates tied on accuracy, it has the highest
-GPU throughput and the lowest CPU and edge latency. One model serves all three targets.
+GPU throughput and the lowest CPU and edge latency. One model serves all three targets.`
+
+### What the model looks at
+
+Grad-CAM heatmaps of the delivered model on the validation split, each measurement compared with the
+same architecture with random weights ([reports/final/gradcam.md](reports/final/gradcam.md);
+[docs/methodology.md](docs/methodology.md), section 9):
+
+- **The heatmaps reflect what the model learned**: they are nearly uncorrelated with those of a model
+  with random weights (rank correlation 0.01 to 0.16).
+- **Compact defects are localized**: the peak of every Center heatmap lies in the center of the wafer
+  (8% for random weights), and in the randomly drawn examples, Scratch heatmaps follow the scratch
+  line and Loc heatmaps cover the cluster.
+- **Edge_Loc is recognized by where the edge stops failing.** The heatmaps avoid the failed part of the
+  edge (0.34 times the mass its size would give) and concentrate where the failure ends and on the edge
+  that did not fail (2.00 and 1.78; random weights: about 1 everywhere). Telling a partial edge defect
+  from a ring is exactly a question of where the failure stops. It is consistent with the label
+  confusion: an edge that fails almost all around offers almost no such place, and the Edge_Loc maps
+  predicted as Edge_Ring are precisely those.
 
 ### Test results
 
@@ -278,6 +300,20 @@ the pre-registered protocol exists to prevent.
   data transfer and serving overhead are not included.
 - **No production evaluation.** Behavior under data drift, on new defect types, or with real
   production prevalence is untested.
+
+### Explainability
+
+- **Coarse heatmaps.** Grad-CAM from the last convolutional block is 7x7: it resolves direction around
+  the wafer but radius only to about one cell, and spreads patterns that extend along the whole edge,
+  such as Edge_Ring and Random, into diffuse maps that localize nothing.
+- **Mixed defects blur the attribution.** On maps with several defects, a class's heatmap may highlight
+  another defect; heatmaps of the confused Edge_Loc samples do not show why each one was confused.
+- **One assumed zone was wrong.** The Donut zone came from an assumed geometry, and the donuts appear
+  to lie closer to the center than assumed, so its pointing result cannot be interpreted. Zones should be
+  derived from the data.
+- **One model, one split.** The analysis covers the delivered model (seed 0) on the validation split.
+  It describes how this model decides; it does not show that other seeds or architectures decide the
+  same way.
 
 
 ## Project Structure
