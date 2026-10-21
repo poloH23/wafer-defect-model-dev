@@ -4,7 +4,19 @@ import numpy as np
 import pytest
 import torch
 
-from src.evaluation.explain import angular_error, cam_target_layer, compute_cams, localization_ratio, pointing_hit, rank_correlation, wafer_regions
+from src.evaluation.edge_coverage import edge_sector_failures
+from src.evaluation.explain import (
+    angular_error,
+    cam_sector_profile,
+    cam_target_layer,
+    category_ratios,
+    compute_cams,
+    localization_ratio,
+    pointing_hit,
+    rank_correlation,
+    sector_categories,
+    wafer_regions,
+)
 from src.models.factory import SUPPORTED_MODELS, build_model
 
 SIZE = 52
@@ -81,3 +93,29 @@ def test_angular_error_measures_where_the_heatmap_points_along_the_edge():
     assert angular_error(toward, image) < 15
     assert angular_error(away, image) > 165
     assert math.isnan(angular_error(np.zeros((SIZE, SIZE)), image))
+
+
+def test_sector_categories_find_where_failed_and_intact_meet():
+    failed = np.zeros(36, dtype=bool)
+    failed[10:20] = True
+    categories = sector_categories(failed)
+    assert categories[15] == "defect" and categories[30] == "intact"
+    assert categories[9] == categories[10] == categories[19] == categories[20] == "boundary"
+    assert set(sector_categories(np.ones(36, dtype=bool))) == {"defect"}  # a full ring has no boundary
+
+
+def test_category_ratios_tell_where_the_heatmap_sits_along_the_edge():
+    image = wafer()
+    yy, xx = np.mgrid[:SIZE, :SIZE]
+    angles = np.degrees(np.arctan2(yy - 25.5, xx - 25.5))
+    image[wafer_regions(image)["edge"] & (np.abs(angles) < 60)] = 2  # failed arc on the right, -60 to +60 degrees
+    failed, _ = edge_sector_failures(image)
+    categories = sector_categories(failed)
+
+    on_defect = np.exp(-((yy - 25.5) ** 2 + (xx - 46) ** 2) / 30.0)  # heatmap in the middle of the arc
+    on_intact = np.exp(-((yy - 25.5) ** 2 + (xx - 5) ** 2) / 30.0)  # on the opposite, intact side
+    ratios_defect = category_ratios(cam_sector_profile(on_defect, image), categories)
+    ratios_intact = category_ratios(cam_sector_profile(on_intact, image), categories)
+    assert max(ratios_defect, key=ratios_defect.get) == "defect"
+    assert max(ratios_intact, key=ratios_intact.get) == "intact"
+    assert cam_sector_profile(np.zeros((SIZE, SIZE)), image) is None

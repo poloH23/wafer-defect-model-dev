@@ -25,6 +25,8 @@ from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from scipy.stats import spearmanr
 from torch import nn
 
+from src.evaluation.edge_coverage import angular_sectors
+
 # Three concentric zones that partition the wafer, as fractions of its radius: center up to 0.3,
 # ring from 0.3 to 0.7, edge beyond. The edge zone is about 7 pixels wide on a 52x52 map, one cell of
 # a 7x7 heatmap: a thinner zone would count as unfocused a heatmap that is on the defect but, at that
@@ -33,6 +35,10 @@ CENTER_RADIUS = 0.3
 EDGE_RADIUS = 0.7
 # The zone each class lies in by definition; the other classes have no fixed position
 CLASS_REGIONS = {"Center": "center", "Donut": "ring", "Edge_Loc": "edge", "Edge_Ring": "edge"}
+# Angular profile of a heatmap along the edge: its mass in each of 36 sectors, over the part of the
+# wafer beyond 0.4 of the radius, which holds an edge defect's heatmap even one cell inward
+PROFILE_INNER_RADIUS = 0.4
+EDGE_CATEGORIES = ("defect", "boundary", "intact")
 # Classes whose defect has a direction from the wafer's center: a part of the edge
 DIRECTION_CLASSES = ("Edge_Loc",)
 # A random direction falls within this many degrees of the defect's direction 25% of the time
@@ -119,6 +125,39 @@ def angular_error(cam: np.ndarray, image: np.ndarray, fail_value: int = 2) -> fl
         return math.nan
     difference = (cam_direction - defect_direction + math.pi) % (2 * math.pi) - math.pi
     return abs(math.degrees(difference))
+
+
+def cam_sector_profile(cam: np.ndarray, image: np.ndarray, num_sectors: int = 36, empty_value: int = 0) -> np.ndarray | None:
+    """
+    Share of the heatmap mass in each angular sector (same sectors as the edge coverage), over the
+    wafer beyond PROFILE_INNER_RADIUS of its radius. None for a heatmap without mass there.
+    """
+    wafer = image != empty_value
+    center = tuple(np.argwhere(wafer).mean(axis=0))
+    radius = math.sqrt(wafer.sum() / math.pi)
+    yy, xx = np.mgrid[: image.shape[0], : image.shape[1]]
+    outer = wafer & (np.hypot(yy - center[0], xx - center[1]) / radius > PROFILE_INNER_RADIUS)
+    ys, xs = np.nonzero(outer)
+    mass = np.bincount(angular_sectors(ys, xs, center, num_sectors), weights=cam[ys, xs], minlength=num_sectors)
+    return mass / mass.sum() if mass.sum() > 0 else None
+
+
+def sector_categories(failed: np.ndarray) -> np.ndarray:
+    """
+    Kind of each edge sector, on a circle: "boundary" next to a sector of the other kind (where failed
+    and intact parts of the edge meet), otherwise "defect" (failed) or "intact".
+    """
+    differs = (failed != np.roll(failed, 1)) | (failed != np.roll(failed, -1))
+    return np.where(differs, "boundary", np.where(failed, "defect", "intact"))
+
+
+def category_ratios(profile: np.ndarray, categories: np.ndarray) -> dict[str, float]:
+    """For each kind of sector: its share of the heatmap mass divided by its share of the sectors (1 = no preference; NaN if absent)."""
+    ratios = {}
+    for kind in EDGE_CATEGORIES:
+        members = categories == kind
+        ratios[kind] = float(profile[members].sum() / members.mean()) if members.any() else math.nan
+    return ratios
 
 
 def rank_correlation(a: np.ndarray, b: np.ndarray, mask: np.ndarray) -> float:
