@@ -6,10 +6,7 @@
 # Customized Options
 # ==========================================
 *Zone.Identifier*
-logs/*
-!logs/.gitkeep
-results/*
-!results/.gitkeep
+
 # bak/*.yml
 data/raw/*
 !data/raw/*.md
@@ -18,6 +15,10 @@ docs/dev_ideas/
 docs/wafer_defect_desc/
 docs/others/
 !docs/.gitkeep
+logs/*
+!logs/.gitkeep
+models/*
+!models/.gitkeep
 temp/
 
 # MLflow

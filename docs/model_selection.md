@@ -1,5 +1,7 @@
 # Model Selection Protocol
 
+> Languadge : *[繁體中文](zh-TW/model_selection.md)*
+
 This document fixes how the final model of each deployment target is chosen. It is committed before
 the custom-architecture search and before any evaluation on the test split, so that the choice
 cannot be adapted to results seen afterwards. The commit history is the record of that order.

@@ -1,5 +1,7 @@
 # Wafer Defect Classification Model Development Project
 
+> Languadge : *[繁體中文](README.zh-TW.md)*
+
 <!-- TODO: Briefly describe this project -->
 
 [![CI](https://github.com/poloH23/wefer-defect-model-dev/actions/workflows/ci.yml/badge.svg)](https://github.com/poloH23/wefer-defect-model-dev/actions/workflows/ci.yml)
@@ -232,6 +234,80 @@ advance rather than picked as the best seed. Full results, with the commit of th
 [reports/final/test_evaluation.md](reports/final/test_evaluation.md).
 
 
+## Using the delivered model
+
+The delivered model is a single, self-contained ONNX file of 5.3 MB. It takes raw wafer maps and
+returns one probability per defect class; the class names, the decision thresholds and the model's
+provenance are in its metadata. Its [model card](reports/final/model_card.md) documents the
+input and output contract, the performance and the limitations.
+
+### Getting the model
+
+- **From the GitHub release** [v1.0.0](../../releases/tag/v1.0.0): download
+  `wafer_defect_classifier.onnx` and check that its SHA-256 matches the one in the model card:
+```bash
+  sha256sum wafer_defect_classifier.onnx
+  # bc39e046c7d687fc70f5bc89d4778e16ba8478ffd11f19a4a690b0eddfea924d
+```
+
+- **From the MLflow model registry**, on the machine where it was trained, by alias rather than by
+  file path:
+```python
+  import mlflow
+
+  model_dir = mlflow.artifacts.download_artifacts("models:/wafer-defect-classifier@champion")
+  # model_dir/model.onnx
+```
+
+  The alias `champion` points to the version in use. Moving it to a newer version updates every
+  consumer without changing their code.
+
+### Running inference
+
+The reference implementation needs NumPy and ONNX Runtime only:
+
+```python
+import numpy as np
+
+from src.inference.classifier import WaferDefectClassifier
+
+classifier = WaferDefectClassifier("wafer_defect_classifier.onnx")
+
+# uint8 maps shaped (N, 52, 52): 0 outside the wafer, 1 pass, 2 fail
+maps = np.load("wafer_maps.npy")
+
+labels = classifier.predict_labels(maps)  # e.g. [["Center", "Scratch"], []]
+probabilities = classifier.predict_proba(maps)  # (N, 8), in the order of classifier.spec.class_names
+```
+
+- `predict_labels` and `predict` apply the per-class thresholds stored in the file; `predict_proba`
+  returns the probabilities, for an application that needs its own thresholds.
+- Pixel values out of range are handled as in training, imputed from their neighbors.
+- A single map shaped (52, 52) is accepted as well.
+
+### Without this repository
+
+The file works with any ONNX Runtime binding (C++, C#, Java, JavaScript, ...):
+
+- Input `wafer_map`: uint8, shape (N, 52, 52). Output `probabilities`: float32, shape (N, 8).
+- The metadata holds `class_names` and `thresholds` as JSON lists, in the order of the outputs; a class
+  is present when its probability reaches its threshold.
+- `format_version` identifies the metadata layout: refuse a version you do not know.
+`src/inference/classifier.py` is the executable specification of this contract.
+
+
+### Reproducing the export
+
+```bash
+make export-onnx RUN_ID=176643c399f14d199631a45c01f3f427
+```
+
+It exports the model from its MLflow run, checks the ONNX file against PyTorch on the validation split
+(largest probability difference 1.2e-6, no map with a different decision), registers it and writes
+the model card. Running it again registers a new version with a new SHA-256, since the file records
+the commit it was exported from; the delivered file is version 1.
+
+
 ## Limitations
 
 ### Data
@@ -319,6 +395,7 @@ the pre-registered protocol exists to prevent.
 ## Project Structure
 
 <!-- TODO:  -->
+
 
 ## License
 
