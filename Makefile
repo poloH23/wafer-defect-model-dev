@@ -34,9 +34,6 @@ CONTAINER ?= $(IMAGE)-container
 # === 📘 Help ===
 .PHONY: help
 
-# === 📘 Help ===
-.PHONY: help
-
 help:  ## Show the commands by section
 	@awk 'BEGIN { FS = ":.*## " } \
 	  /^# === / { title = $$0; gsub(/^# === | ===$$/, "", title); printf "\n%s\n", title; next } \
