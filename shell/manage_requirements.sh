@@ -15,7 +15,7 @@ set -euo pipefail
 ensure_dev_tools() {
     if ! command -v pip-compile >/dev/null 2>&1 || ! command -v pipreqs >/dev/null 2>&1; then
        echo ">>> pip-compile / pipreqs is not yet installed, bootstrapping from 'requirements-dev.in' first"
-       pip install -r requirments-dev.in
+       pip install -r requirements-dev.in
     fi
 }
 
@@ -28,11 +28,11 @@ bootstrap() {
 
 compile_lock() {
     ensure_dev_tools
-    echo ">>> Recompile requirements.txt (requirements.in + requirements-dev.in, resolved together)"
-    pip-compile requirements.in requirements-dev.in -o requirements-dev.txt
-    echo ">>> Recompile requirements-dev.txt"
-    pip-compile -c requirements-dev.txt requirements.in -o requirements.txt
-    echo ">>> requirments.txt / requirements.txt have been updated"
+    echo ">>> Recompile requirements-dev.txt (requirements.in + requirements-dev.in, resolved together)"
+    pip-compile requirements.in requirements-dev.in -o requirements-dev.txt --constraint constraints.txt
+    echo ">>> Recompile requirements.txt (constrained by requirements-dev.txt, so both pin the same versions)"
+    pip-compile -c requirements-dev.txt requirements.in -o requirements.txt --constraint constraints.txt
+    echo ">>> requirements-dev.txt / requirements.txt have been updated"
 }
 
 case "${1:-}" in

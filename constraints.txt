@@ -1,0 +1,8 @@
+# Security floors: minimum versions the lock files may never go below. Applied to every pip-compile
+# run (shell/manage_requirements.sh), so a recompile cannot fall back to a vulnerable version, and
+# each floor shows up in the lock files as "via -c constraints.txt".
+#
+# eMudhra / emSign CA incident, 2026-10-20:
+# https://discuss.python.org/t/information-for-python-users-regarding-emudhra-emsign-ca-certificate-security-incident/109576
+certifi>=2026.10.19  # its CA bundle no longer trusts the compromised CA (GHSA-6q48-6c7w-9gw2)
+virtualenv>=21.14.13  # seeds new environments, such as pre-commit's hook environments, with pip 26.2.2
