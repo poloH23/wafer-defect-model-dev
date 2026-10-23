@@ -2,7 +2,8 @@
         init requirements requirements-bootstrap requirements-refresh \
         conda-dev conda-export conda-custom \
         clean gitkeep-clean clean-zone \
-        eda split sanity-check train train-seed lr-grid compare benchmark search evaluate-test gradcam mlflow-ui \
+        eda split sanity-check train train-seed lr-grid compare benchmark search \
+		evaluate-test gradcam export-onnx mlflow-ui \
 		test analyze-errors \
         docker-build docker-run docker-run-fastapi docker-run-flask \
         demo-run gitkeep-add system-info
@@ -109,6 +110,9 @@ evaluate-test:  ## The single evaluation on the test split (docs/model_selection
 
 gradcam:  ## Grad-CAM analysis of a model on the validation split (RUN_ID=..., e.g. the deliverable)
 	python scripts/explain_gradcam.py --run-id $(RUN_ID)
+
+export-onnx:  ## Export, verify and register the delivered model, and write its model card (RUN_ID=...)
+	python scripts/export_onnx.py --run-id ${RUN_ID}
 
 mlflow-ui: ## Open the local MLflow UI at http://127.0.0.1:5000
 	mlflow ui --backend-store-uri sqlite:///mlflow.db
