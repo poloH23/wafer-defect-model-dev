@@ -8,8 +8,9 @@ aiohappyeyeballs==2.7.1
     # via
     #   -c requirements-dev.txt
     #   aiohttp
-aiohttp==3.14.3
+aiohttp==3.14.5
     # via
+    #   -c constraints.txt
     #   -c requirements-dev.txt
     #   mlflow
 aiosignal==1.4.0
@@ -152,8 +153,9 @@ gitdb==4.0.12
     # via
     #   -c requirements-dev.txt
     #   gitpython
-gitpython==3.1.62
+gitpython==3.2.1
     # via
+    #   -c constraints.txt
     #   -c requirements-dev.txt
     #   mlflow-skinny
 google-auth==2.58.0
@@ -401,24 +403,25 @@ opencv-python-headless==5.0.0.93
     #   -c requirements-dev.txt
     #   -r requirements.in
     #   grad-cam
-opentelemetry-api==1.44.0
+opentelemetry-api==1.45.1
     # via
+    #   -c constraints.txt
     #   -c requirements-dev.txt
     #   mlflow-skinny
     #   mlflow-tracing
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
-opentelemetry-proto==1.44.0
+opentelemetry-proto==1.45.1
     # via
     #   -c requirements-dev.txt
     #   mlflow-skinny
     #   mlflow-tracing
-opentelemetry-sdk==1.44.0
+opentelemetry-sdk==1.45.1
     # via
     #   -c requirements-dev.txt
     #   mlflow-skinny
     #   mlflow-tracing
-opentelemetry-semantic-conventions==0.65b0
+opentelemetry-semantic-conventions==0.66b1
     # via
     #   -c requirements-dev.txt
     #   opentelemetry-sdk
@@ -449,8 +452,9 @@ pandas==3.0.5
     #   -c requirements-dev.txt
     #   -r requirements.in
     #   mlflow
-pillow==12.3.0
+pillow==13.0.0
     # via
+    #   -c constraints.txt
     #   -c requirements-dev.txt
     #   grad-cam
     #   matplotlib
@@ -662,8 +666,9 @@ wcwidth==0.9.1
     # via
     #   -c requirements-dev.txt
     #   prettytable
-werkzeug==3.1.8
+werkzeug==3.1.9
     # via
+    #   -c constraints.txt
     #   -c requirements-dev.txt
     #   flask
     #   flask-cors
