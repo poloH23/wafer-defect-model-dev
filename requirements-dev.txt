@@ -6,8 +6,10 @@
 #
 aiohappyeyeballs==2.7.1
     # via aiohttp
-aiohttp==3.14.3
-    # via mlflow
+aiohttp==3.14.5
+    # via
+    #   -c constraints.txt
+    #   mlflow
 aiosignal==1.4.0
     # via aiohttp
 alembic==1.20.0
@@ -141,8 +143,10 @@ fsspec==2026.7.0
     # via torch
 gitdb==4.0.12
     # via gitpython
-gitpython==3.1.62
-    # via mlflow-skinny
+gitpython==3.2.1
+    # via
+    #   -c constraints.txt
+    #   mlflow-skinny
 google-auth==2.58.0
     # via databricks-sdk
 grad-cam==1.5.7
@@ -352,21 +356,22 @@ opencv-python-headless==5.0.0.93
     # via
     #   -r requirements.in
     #   grad-cam
-opentelemetry-api==1.44.0
+opentelemetry-api==1.45.1
     # via
+    #   -c constraints.txt
     #   mlflow-skinny
     #   mlflow-tracing
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
-opentelemetry-proto==1.44.0
+opentelemetry-proto==1.45.1
     # via
     #   mlflow-skinny
     #   mlflow-tracing
-opentelemetry-sdk==1.44.0
+opentelemetry-sdk==1.45.1
     # via
     #   mlflow-skinny
     #   mlflow-tracing
-opentelemetry-semantic-conventions==0.65b0
+opentelemetry-semantic-conventions==0.66b1
     # via opentelemetry-sdk
 optuna==5.0.0
     # via
@@ -409,8 +414,9 @@ pexpect==4.9.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-pillow==12.3.0
+pillow==13.0.0
     # via
+    #   -c constraints.txt
     #   grad-cam
     #   matplotlib
     #   torchvision
@@ -600,8 +606,10 @@ torchvision==0.29.0
     # via
     #   -r requirements.in
     #   grad-cam
-tornado==6.5.8
-    # via jupyter-client
+tornado==6.6
+    # via
+    #   -c constraints.txt
+    #   jupyter-client
 tqdm==4.70.1
     # via
     #   -r requirements.in
@@ -671,8 +679,9 @@ webencodings==0.6.1
     # via
     #   bleach
     #   tinycss2
-werkzeug==3.1.8
+werkzeug==3.1.9
     # via
+    #   -c constraints.txt
     #   flask
     #   flask-cors
 wheel==0.48.0
