@@ -1,5 +1,7 @@
 # Model card: wafer defect classifier
 
+> Languadge : *[繁體中文](../../docs/zh-TW/model_card.md)*
+
 ## Model
 
 - **Architecture**: shufflenet_v2_x1_0, trained from scratch on MixedWM38 with rotation and flip augmentation.
