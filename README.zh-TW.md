@@ -55,22 +55,22 @@
   並保留最後一個 epoch 的模型，每個設定以 3 個隨機種子比較。先前保留最佳 epoch 並提前停止的做法，會讓分數
   偏高，訓練之間的雜訊也大了六倍。準確度指標是誤判的樣本數：macro 平均精確度在約 0.998 就飽和了，已無法
   分出模型的高下。
-- **先理解錯誤，再追求改善：** 以規則量測缺陷沿晶圓邊緣分佈的程度，發現最常見的混淆 (Edge_Loc 與 Edge_Ring)
+- **先理解錯誤，再追求改善：** 以規則量測缺陷沿晶圓邊緣分佈的程度，發現最常見的混淆（Edge_Loc 與 Edge_Ring）
   來自與類別定義互相矛盾的標籤：baseline 的每一筆這類錯誤，都落在 Edge_Loc 覆蓋率最高的 4% 之中。準確度
   受限於標籤品質，因此重心轉向效率。
 - **模型容量不是瓶頸：** 從 94 到 3,047 MFLOPs 的五個架構，在雜訊範圍內準確度相同，每個架構的學習率都依照
   相同的事先規則選出：
-  | 架構 | MFLOPs | 驗證集錯誤數 (3 個 seed) |
+  | 架構 | MFLOPs | 驗證集錯誤數（3 個 seed） |
   |---|---|---|
   | EfficientNet-B0 | 646 | 42.1 ± 2.0 |
   | ShuffleNetV2 1.0x | 250 | 43.1 ± 2.1 |
   | MobileNetV3-Large | 355 | 43.9 ± 1.0 |
   | ResNet-18 | 3,047 | 44.1 ± 4.2 |
   | MobileNetV3-Small | 94 | 46.2 ± 0.2 |
-- **運算量不等於速度：** 在 GPU 與 CPU (ONNX Runtime)上的實測顯示，FLOPs 能預測同一架構家族內的 CPU 延遲，
-  跨家族則不精確 (ResNet 式的卷積每毫秒完成的運算量約為行動裝置架構的兩倍)，也無法預測 GPU 延遲：GPU 延遲
+- **運算量不等於速度：** 在 GPU 與 CPU（ONNX Runtime）上的實測顯示，FLOPs 能預測同一架構家族內的 CPU 延遲，
+  跨家族則不精確（ResNet 式的卷積每毫秒完成的運算量約為行動裝置架構的兩倍），也無法預測 GPU 延遲：GPU 延遲
   取決於層數，運算量最大的 ResNet-18 在 GPU 上反而比每一個行動裝置架構都快。
-- **描繪取捨，再加以確認：** 以 Optuna 對精簡版 ResNet 做多目標搜尋 (驗證集錯誤數對 FLOPs，50 個篩選 trial)，
+- **描繪取捨，再加以確認：** 以 Optuna 對精簡版 ResNet 做多目標搜尋（驗證集錯誤數對 FLOPs，50 個篩選 trial），
   篩選結果顯示準確度一直持平到約 33 MFLOPs。以完整流程確認後推翻了這個結論：精簡版 ResNet 在每個目標上都是
   最快的模型，但在相近的運算量下不如現成架構準確，因此沒有任何一個符合資格。這是一個負面結果，在它影響選擇
   之前就被發現。
@@ -88,21 +88,21 @@ CPU 伺服器、邊緣)。它依照 [模型選擇規則](docs/zh-TW/model_select
 
 ### 測試結果
 
-在保留的測試集 (3,700 張)上的唯一一次評估。數字為 3 個訓練 seed 的平均 ± 標準差，各類別的閾值在驗證集上
-調整。95% 區間反映的是測試集大小有限所造成的不確定性 (對測試樣本做 bootstrap 重抽樣)。
+在保留的測試集（3,700 張）上的唯一一次評估。數字為 3 個訓練 seed 的平均 ± 標準差，各類別的閾值在驗證集上
+調整。95% 區間反映的是測試集大小有限所造成的不確定性（對測試樣本做 bootstrap 重抽樣）。
 
 | 指標 | ShuffleNetV2 1.0x |
 |---|---|
-| 誤判的晶圓圖 (任何標籤錯誤) | 3,700 張中 46.0 ± 1.7 張 (95% 區間 34.3 至 58.7) |
-| 完全正確率 (8 個標籤全對) | 98.76% ± 0.05% |
+| 誤判的晶圓圖（任何標籤錯誤） | 3,700 張中 46.0 ± 1.7 張（95% 區間 34.3 至 58.7） |
+| 完全正確率（8 個標籤全對） | 98.76% ± 0.05% |
 | Macro F1 | 0.9932 ± 0.0004 |
 | Macro 平均精確度 | 0.9995 |
 | 模型大小 | 1.26M 個參數，每張 250 MFLOPs，ONNX 檔 5.3 MB |
 | 速度 | GPU 每張 2.31 ms，每批 256 張時每秒 7,336 張；CPU 伺服器 0.82 ms；邊緣代理 1.43 ms |
 
-速度在 RTX 5060 Ti (PyTorch FP32) 與 Ryzen 5 9600X (ONNX Runtime；CPU 伺服器 6 個執行緒、邊緣代理 1 個執行緒) 上量測，見 [reports/experiments/benchmark.md](reports/experiments/benchmark.md)。
+速度在 RTX 5060 Ti（PyTorch FP32）與 Ryzen 5 9600X（ONNX Runtime；CPU 伺服器 6 個執行緒、邊緣代理 1 個執行緒）上量測，見 [reports/experiments/benchmark.md](reports/experiments/benchmark.md)。
 
-各類別在測試集上的表現 (seed 平均)：
+各類別在測試集上的表現（seed 平均）：
 
 | 類別 | 測試張數 | 精確率 | 召回率 | F1 |
 |---|---|---|---|---|
@@ -122,21 +122,21 @@ CPU 伺服器、邊緣)。它依照 [模型選擇規則](docs/zh-TW/model_select
 
 | 候選 | MFLOPs | 測試錯誤數 | 95% 區間 | ShuffleNetV2 減去該候選 |
 |---|---|---|---|---|
-| **ShuffleNetV2 1.0x (被選中) ** | 250 | 46.0 ± 1.7 | 34.3 至 58.7 | |
-| EfficientNet-B0 | 646 | 42.7 ± 1.5 | 32.7 至 54.3 | +3.3 (−3.3 至 +9.7) |
-| MobileNetV3-Large | 355 | 45.3 ± 4.0 | 34.3 至 57.3 | +0.7 (−6.0 至 +7.7) |
-| ResNet-18 | 3,047 | 48.7 ± 3.1 | 37.0 至 61.3 | −2.7 (−9.3 至 +4.3) |
-| MobileNetV3-Small | 94 | 49.3 ± 8.3 | 38.3 至 61.7 | −3.3 (−11.3 至 +4.7) |
-| 精簡版 ResNet，寬度 16、2 個區塊、小尺寸 stem | 192 | 52.7 ± 1.5 | 40.7 至 66.0 | −6.7 (−13.3 至 +0.3) |
-| 精簡版 ResNet，寬度 32、1 個區塊、小尺寸 stem | 349 | 59.7 ± 7.1 | 46.7 至 73.3 | −13.7 (−21.3 至 −6.3) |
-| 精簡版 ResNet，寬度 32、1 個區塊、標準 stem | 33 | 61.0 ± 2.0 | 48.3 至 74.3 | −15.0 (−23.7 至 −6.3) |
-| 精簡版 ResNet，寬度 24、1 個區塊、標準 stem | 20 | 70.0 ± 6.1 | 56.3 至 85.0 | −24.0 (−34.3 至 −14.3) |
-| 精簡版 ResNet，寬度 16、2 個區塊、標準 stem | 18 | 76.3 ± 2.5 | 63.3 至 91.7 | −30.3 (−41.0 至 −20.3) |
+| **ShuffleNetV2 1.0x（被選中）** | 250 | 46.0 ± 1.7 | 34.3 至 58.7 | |
+| EfficientNet-B0 | 646 | 42.7 ± 1.5 | 32.7 至 54.3 | +3.3（−3.3 至 +9.7） |
+| MobileNetV3-Large | 355 | 45.3 ± 4.0 | 34.3 至 57.3 | +0.7（−6.0 至 +7.7） |
+| ResNet-18 | 3,047 | 48.7 ± 3.1 | 37.0 至 61.3 | −2.7（−9.3 至 +4.3） |
+| MobileNetV3-Small | 94 | 49.3 ± 8.3 | 38.3 至 61.7 | −3.3（−11.3 至 +4.7） |
+| 精簡版 ResNet，寬度 16、2 個區塊、小尺寸 stem | 192 | 52.7 ± 1.5 | 40.7 至 66.0 | −6.7（−13.3 至 +0.3） |
+| 精簡版 ResNet，寬度 32、1 個區塊、小尺寸 stem | 349 | 59.7 ± 7.1 | 46.7 至 73.3 | −13.7（−21.3 至 −6.3） |
+| 精簡版 ResNet，寬度 32、1 個區塊、標準 stem | 33 | 61.0 ± 2.0 | 48.3 至 74.3 | −15.0（−23.7 至 −6.3） |
+| 精簡版 ResNet，寬度 24、1 個區塊、標準 stem | 20 | 70.0 ± 6.1 | 56.3 至 85.0 | −24.0（−34.3 至 −14.3） |
+| 精簡版 ResNet，寬度 16、2 個區塊、標準 stem | 18 | 76.3 ± 2.5 | 63.3 至 91.7 | −30.3（−41.0 至 −20.3） |
 
 ### 結果代表的意義
 
-- **驗證集上的結論在新資料上成立。** 每個現成架構在測試集與驗證集上的錯誤數 (預設閾值下) 只差 1 到 2 筆。
-  專案在驗證集上做了許多決策 (學習率、50 個 trial 的搜尋、模型選擇)，沒有任何一個對驗證集過度擬合。
+- **驗證集上的結論在新資料上成立。** 每個現成架構在測試集與驗證集上的錯誤數（預設閾值下）只差 1 到 2 筆。
+  專案在驗證集上做了許多決策（學習率、50 個 trial 的搜尋、模型選擇），沒有任何一個對驗證集過度擬合。
 - **沒有任何現成架構與被選中的模型有可偵測的差異**，從 94 到 3,047 MFLOPs 皆然，在測試集上與在驗證集上
   一樣。因此在它們之中依效率選擇是合理的。
 - **精簡版 ResNet 以準確度換取速度。** 它們在每個目標上都是最快的模型，但五個中有四個顯著不如被選中的模型
@@ -237,10 +237,10 @@ commit；交付的檔案是版本 1。
 - **人為平衡的類別分佈：** 資料集是刻意平衡的：大多數缺陷類別在測試集中有 1,200 到 1,800 張。在產線上，
   有缺陷的晶圓預期只佔少數，因此實際的精確率會與這裡的數字不同。
 - **稀有類別的量測不夠精確：** Near_Full 在測試集中只有 15 張、Random 只有 85 張；一筆錯誤就會讓它們的數字
-  變動好幾個百分點 (Near_Full 0.9375 的精確率，約等於每個 seed 一筆誤報)。Near_Full 與 Random 也從未與其他
+  變動好幾個百分點（Near_Full 0.9375 的精確率，約等於每個 seed 一筆誤報）。Near_Full 與 Random 也從未與其他
   缺陷同時出現，因此這類組合沒有被測試過。
 - **假設缺陷與方向無關：** 訓練時使用 90 度旋轉與翻轉，這假設缺陷類別不受晶圓方向影響。對這 8 個類別成立，
-  但對以缺口 (notch)或設備方向定義的缺陷則不成立。
+  但對以缺口（notch）或設備方向定義的缺陷則不成立。
 - **固定的輸入格式：** 模型預期 52×52、數值為 0、1、2 的晶圓圖；其他尺寸需要縮放或重新訓練。
 
 ### 評估
@@ -290,7 +290,7 @@ commit；交付的檔案是版本 1。
 
 ## 開發環境與指令
 
-需要 Python 3.12。建立環境並完成初始化 (安裝依賴、pre-commit hooks、基本檢查)：
+需要 Python 3.12。建立環境並完成初始化（安裝依賴、pre-commit hooks、基本檢查）：
 
 ```bash
 make conda-dev   # 從 bak/environment.yml 建立 conda 環境並初始化
@@ -298,13 +298,18 @@ make conda-dev   # 從 bak/environment.yml 建立 conda 環境並初始化
 make init
 ```
 
-資料檔 `data/raw/Wafer_Map_Datasets.npz` 不在 git 中，取得方式見 `data/` 資料夾內的說明。
+**資料**：資料集不包含在本 repo 中。請從作者的 repo [Junliangwangdhu/WaferMap](https://github.com/Junliangwangdhu/WaferMap)
+下載 MixedWM38，解壓縮後把 `Wafer_Map_Datasets.npz` 放在 `data/raw/Wafer_Map_Datasets.npz`。固定的資料切分已提交在
+`data/splits/`，每次訓練都會比對資料檔的雜湊值。資料集出自 J. Wang 等人，〈Deformable Convolutional Networks for
+Efficient Mixed-Type Wafer Defect Pattern Recognition〉，*IEEE Transactions on Semiconductor Manufacturing*，2020，
+使用時須遵守作者的條款。
 
 執行 `make` 會依照工作流程列出所有指令，常用的有：
 
 | 階段 | 指令 | 用途 |
 |---|---|---|
-| 程式品質 | `make lint`、`make test` | pre-commit 檢查、含覆蓋率的測試 |
+| 程式品質與資安 | `make lint`、`make test`、`make audit` | pre-commit 檢查、含覆蓋率的測試、檢查依賴套件的已知漏洞 |
+| 依賴管理 | `make requirements` | 從 `.in` 檔重新產生鎖定檔；`UPGRADE="套件 ..."` 可釋放指定套件的版本鎖定 |
 | 資料 | `make eda`、`make split` | 資料集探索、建立固定的資料切分 |
 | 訓練 | `make sanity-check`、`make train`、`make train-seeds` | 健全性檢查、訓練、多個 seed 的訓練 |
 | 實驗與分析 | `make compare`、`make benchmark`、`make search` | 跨 seed 比較設定、效能量測、多目標搜尋 |
@@ -312,6 +317,10 @@ make init
 | 追蹤 | `make mlflow-ui` | 開啟本機的 MLflow 介面 |
 
 可調整的參數與預設值列在 Makefile 的開頭，例如 `make train TRAIN_CONFIG=conf/experiments/wafer_augment.yaml SEED=1`。
+
+**依賴管理與資安**：`constraints.txt` 記錄資安要求的最低版本，每次產生鎖定檔都會強制套用；`requirements-pip.txt`
+以雜湊值鎖定 pip 本身，即使連線被攔截也能安全安裝。CI 除了每次 push 執行 pre-commit 檢查與測試，也會以 pip-audit
+檢查鎖定檔中的已知漏洞，並且每週一自動執行一次，因為鎖定檔即使沒有變更，也可能因為新公布的漏洞而變得不安全。
 
 
 ## 文件導覽
@@ -321,5 +330,43 @@ make init
 | [docs/zh-TW/methodology.md](docs/zh-TW/methodology.md) | 完整的方法說明：每個實驗的設計、結果與教訓 |
 | [docs/zh-TW/model_selection.md](docs/zh-TW/model_selection.md) | 預先登記的模型選擇規則、選擇結果與測試評估流程 |
 | [docs/zh-TW/model_card.md](docs/zh-TW/model_card.md) | 交付模型的 model card |
-| [reports/final/](reports/final/) | 測試評估、Grad-CAM 分析與 model card 的原始報告 (英文，由程式產生) |
-| [reports/experiments/](reports/experiments/) | 各階段實驗的比較表格與效能量測 (英文，由程式產生) |
+| [reports/final/](reports/final/) | 測試評估、Grad-CAM 分析與 model card 的原始報告（英文，由程式產生） |
+| [reports/experiments/](reports/experiments/) | 各階段實驗的比較表格與效能量測（英文，由程式產生） |
+
+中文文件是英文文件的翻譯；兩者若有出入，以英文為準。由程式產生的報告保留英文原樣，不另行翻譯，以確保報告中的
+數字與產生它們的程式完全一致。
+
+
+## 專案結構
+
+```
+├── conf/                   # YAML 設定：資料集、切分、模型、實驗、搜尋、評估
+├── data/
+│   ├── raw/                # MixedWM38（不在 git 中，見「開發環境與指令」）
+│   └── splits/             # 固定的資料切分索引（v1、v2）
+├── docs/                   # 方法說明與模型選擇規則；zh-TW/ 為中文版
+├── reports/
+│   ├── experiments/        # 實驗比較、效能量測、搜尋結果（由程式產生）
+│   └── final/              # 測試評估、Grad-CAM、model card（由程式產生）
+├── scripts/                # 命令列進入點，透過 Makefile 執行
+├── src/
+│   ├── common/             # 設定檔結構、路徑、雜湊
+│   ├── data/               # 載入、清理、切分、轉換
+│   ├── eda/                # 資料探索與繪圖
+│   ├── models/             # 模型建立、運算量分析、效能量測、ONNX 匯出
+│   ├── training/           # 訓練流程、指標、MLflow 追蹤、搜尋
+│   ├── evaluation/         # 錯誤分析、閾值、bootstrap、Grad-CAM、model card
+│   └── inference/          # 參考推論實作，只需要 NumPy 與 ONNX Runtime
+├── tests/                  # pytest 測試
+├── shell/                  # 環境與依賴管理的腳本
+├── bak/environment.yml     # conda 環境
+├── constraints.txt         # 鎖定檔的資安最低版本
+├── requirements*.in / .txt # 直接依賴與鎖定檔
+├── requirements-pip.txt    # 以雜湊值鎖定的 pip
+└── Makefile                # 所有指令：執行 `make` 即可列出
+```
+
+
+## 授權
+
+本專案以 [Apache License 2.0](LICENSE) 授權。MixedWM38 資料集不包含在本 repo 中，使用時須遵守其作者的條款。
