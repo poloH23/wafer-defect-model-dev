@@ -119,8 +119,9 @@ fastapi==0.141.1
     # via
     #   -c requirements-dev.txt
     #   mlflow-skinny
-filelock==3.32.6
+filelock==4.2.4
     # via
+    #   -c constraints.txt
     #   -c requirements-dev.txt
     #   torch
 flask==3.1.3
@@ -257,15 +258,16 @@ ml-dtypes==0.6.0
     #   onnx
     #   onnx-ir
     #   onnxscript
-mlflow==3.16.1
+mlflow==3.17.2
     # via
+    #   -c constraints.txt
     #   -c requirements-dev.txt
     #   -r requirements.in
-mlflow-skinny==3.16.1
+mlflow-skinny==3.17.2
     # via
     #   -c requirements-dev.txt
     #   mlflow
-mlflow-tracing==3.16.1
+mlflow-tracing==3.17.2
     # via
     #   -c requirements-dev.txt
     #   mlflow
