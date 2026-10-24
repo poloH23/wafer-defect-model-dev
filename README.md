@@ -2,13 +2,26 @@
 
 > Languadge : *[繁體中文](README.zh-TW.md)*
 
-<!-- TODO: Briefly describe this project -->
+Multi-label classification of semiconductor wafer maps (MixedWM38, 8 defect types), from data quality
+checks to a deployable model: an evaluation protocol that measures its own noise, an error analysis
+that traced the remaining errors to ambiguous labels, architecture comparison and multi-objective
+search, efficiency benchmarks for three deployment targets, Grad-CAM explainability checked against a
+control, and a verified, self-contained ONNX model. A follow-up project builds an inference service on
+the delivered model.
+
+- **98.76% of 3,700 held-out test maps** get all 8 labels right (46.0 ± 1.7 errors).
+- **One model, ShuffleNetV2 1.0x, for three targets**: cloud GPU, CPU server (0.82 ms per map) and edge.
+- **Selection rules committed before the test set was used**; negative results and the rules' flaws are
+  reported, not hidden.
+- **Delivered as one ONNX file** ([release v1.0.0](../../releases/tag/v1.0.0)) with a model card,
+  verified against PyTorch on every validation map.
 
 [![CI](https://github.com/poloH23/wefer-defect-model-dev/actions/workflows/ci.yml/badge.svg)](https://github.com/poloH23/wefer-defect-model-dev/actions/workflows/ci.yml)
+[![Dependency audit](https://github.com/poloH23/wefer-defect-model-dev/actions/workflows/audit.yml/badge.svg)](https://github.com/poloH23/wefer-defect-model-dev/actions/workflows/audit.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
-## Conda Environment Construction
+## Setup
 
 ### Prerequisites
 
@@ -18,8 +31,8 @@
 ### Quick Start
 
 ```bash
-git clone https://github.com/poloH23/wefer-defect-model-dev.git
-cd wefer-defect-model-dev
+git clone https://github.com/poloH23/wafer-defect-model-dev.git
+cd wafer-defect-model-dev
 make conda-dev
 conda activate torch
 ```
@@ -28,9 +41,19 @@ conda activate torch
 
 1. Create a clean conda environment based on `bak/environment.yml` (locking only the Python version).
 2. Install all runtime dependencies (`requirements.txt`) and development dependencies (`requirements-dev.txt`) in the new environment.
-3. Install pre-commit Git hook
+3. Install the pre-commit Git hooks.
 4. Perform a baseline check on the entire project.
 
+### Data
+
+The dataset is not included in this repository. Download MixedWM38 from its authors' repository,
+[Junliangwangdhu/WaferMap](https://github.com/Junliangwangdhu/WaferMap), unzip it, and place
+`Wafer_Map_Datasets.npz` at `data/raw/Wafer_Map_Datasets.npz`. The fixed splits are committed under
+`data/splits/`, and every run checks the data file's hash against them.
+
+The dataset comes from J. Wang et al., "Deformable Convolutional Networks for Efficient Mixed-Type
+Wafer Defect Pattern Recognition", *IEEE Transactions on Semiconductor Manufacturing*, 2020; it is
+subject to its authors' terms.
 
 ### Verification
 
@@ -43,20 +66,26 @@ Try running `git commit` and verify that the pre-commit hook automatically trigg
 
 ## Commands
 
-Run `make help` to view the full list (grouped by category and with descriptions).
+Run `make` (or `make help`) to list every command by workflow stage. Variables and their defaults are
+at the top of the Makefile, e.g. `make train TRAIN_CONFIG=conf/experiments/wafer_augment.yaml SEED=1`.
 
-|Command|Instruction|
-|---|---|
-|`make conda-dev`|Create conda environmnet and perform the initialization (**Recommended for initial setup**)|
-|`make conda-custom ENV=myenv`|Create a standalone conda environment with a specified name (functionally identical, but allows for a custom environment name)|
-|`make init`|Install dependencies and set up hooks in the **currently active** environment (without creating a new conda environment)|
-|`make test`|Execute the test suite and display coverage|
-|`make code-format`|Use Ruff to format code and automatically fix linting issues|
-|`make lint`|Run all pre-commit checks|
-|`make requirments`|Re-lock the versions in `requirements.txt` / `requirements-dev.txt` based on the `.in` files|
-|`make requirments-bootstrap`|Scan the source code for import statements and regenerate `requirements.in`|
-|`make requirments-refresh`|Combine the two steps above into a single operation (rescan + re-lock version)|
-|`make clean`|Delete cache files (such as `__pycache__`, `.pytest_cache`, etc.—files that are safe and reproducible)|
+| Stage | Command | Purpose |
+|---|---|---|
+| Setup | `make conda-dev` | Create the conda environment and initialize the project (**recommended for initial setup**) |
+| | `make conda-custom ENV=myenv` | The same, with a custom environment name |
+| | `make init` | Install dependencies and hooks in the **currently active** environment |
+| Quality and security | `make lint`, `make code-format` | Run all pre-commit checks; format code and fix lint issues with Ruff |
+| | `make test` | Run the test suite with coverage |
+| | `make audit` | Check the lock files against known vulnerabilities (pip-audit) |
+| Dependencies | `make requirements` | Re-lock `requirements.txt` / `requirements-dev.txt` from the `.in` files |
+| | `make requirements-bootstrap` | Rescan the source code's imports to regenerate `requirements.in` |
+| | `make requirements-refresh` | Both steps above in one |
+| Data | `make eda`, `make split` | Explore the dataset; create a fixed split |
+| Training | `make sanity-check`, `make train`, `make train-seeds` | Overfit one batch; train one run; train over seeds |
+| Experiments | `make compare`, `make benchmark`, `make search` | Compare configs over seeds; measure speed; multi-objective search |
+| Final evaluation | `make evaluate-test`, `make gradcam`, `make export-onnx` | Test evaluation; Grad-CAM analysis; export and register the model |
+| Tracking | `make mlflow-ui` | Open the local MLflow UI |
+| Maintenance | `make clean` | Delete caches (`__pycache__`, `.pytest_cache`, ...), all safe to regenerate |
 
 
 ## Dependency Package Management
@@ -64,38 +93,52 @@ Run `make help` to view the full list (grouped by category and with descriptions
 This project uses `pip-tools` to split dependency declarations into two levels:
 - **`requirements.in` / `requirements-dev.in`**: Manually maintained lists of "direct" dependencies, listing only the packages actually used by the code.
 - **`requirements.txt` / `requirements-dev.txt`**: Generated via `make requirements` after automatically resolving and locking versions; **do not edit manually**, and ensure both files are committed to version control.
-
 When adding a new dependency:
 
 1. Modify the corresponding `.in` file (or run `make requirements-bootstrap` to rescan the source code).
 2. Run `make requirements` to re-lock the versions.
 3. Commit both the modified `.in` and `.txt` files.
-
 For some packages, the import name differs from the PyPI package name (e.g., `import cv2` corresponds to `opencv-python-headless`); since automated scanning tools may not always accurately identify these cases, it is recommended to verify the contents of `requirements.in` after adding them.
+
+### Security
+
+- **`constraints.txt`** holds security floors, minimum versions applied to every recompile, so the lock
+  files can never fall back to a known vulnerable version. Each floor names its advisory.
+- **`requirements-pip.txt`** installs pip itself from a URL pinned by SHA-256, safe even if the
+  connection were intercepted (`make pip-bootstrap`, run first by `make init`).
+- **`make audit`** checks the lock files against known vulnerabilities; CI runs it on every push and
+  every week.
+- pip-compile keeps existing pins. To meet a new floor for packages that pin each other exactly, such
+  as MLflow's or OpenTelemetry's, release them together: `make requirements UPGRADE="mlflow mlflow-skinny mlflow-tracing"`.
 
 
 ## Continuous Integration
 
-Every push or pull request triggers GitHub Actions (defined in `.github/workflows/ci.yml`), which includes:
+Every push or pull request triggers two GitHub Actions workflows:
 
-- **pre-commit checks**: Uses the same configuration as the local `.pre-commit-config.yaml`, thereby avoiding discrepancies where local checks pass but CI fails.
-- **Test suite**: Executes pytest and generates a coverage report.
+- **CI** (`.github/workflows/ci.yml`):
+  - **pre-commit checks**: Uses the same configuration as the local `.pre-commit-config.yaml`, thereby avoiding discrepancies where local checks pass but CI fails.
+  - **Test suite**: Executes pytest and generates a coverage report. The CI machine has no GPU, so it installs the CPU build of the pinned PyTorch version.
+- **Dependency audit** (`.github/workflows/audit.yml`): checks the lock files against known
+  vulnerabilities, also every Monday, since a lock file that does not change can become vulnerable
+  when a new advisory is published.
 
 
 ## Data Qality Findings
 
-Issues found in the official dataset, and how they are handeled. The raw file is never modified:
-every rule below is applied in code and configured under 'conf/'.
+Issues found in the official dataset, and how they are handled. The raw file is never modified:
+every rule below is applied in code and configured under `conf/`.
 
 - **Extra duplicate images.** 1,024 images are byte-for-byte copies of another image with the same labels.
   1,000 of them form a complete second copy of the Center+Edge_Loc+Scratch combination, which explains
   why the documentation lists 2,000 samples for that combination and 1,000 for every other one. The
   remaining 24 belong to Random (16) and Near_Full (8). A first random split left 157 validation and
   174 test images with an identical copy in the training split, inflating the validation scores.
-  Split 'v2' keeps a single copy of each image, and every reported result uses it.
+  Split `v2` keeps a single copy of each image, and every reported result uses it.
 - **Undocumented pixel values.** The documentation lists three pixel values (0 = empty, 1 = pass,
   2 = fail), but the file contains 214 pixels with the value 3 in 105 images, all labeled Random (97)
-  or Near_Full (8): the two classes whose labels the authors corrected after release.
+  or Near_Full (8): the two classes whose labels the authors corrected after release. They are imputed
+  in memory with the most common valid value among their neighbors (194 become fail, 20 pass).
 
 
 ## Methodology
@@ -141,13 +184,14 @@ The full account, with the reasoning behind each design decision, is in
   away from the defect; a diagnostic, with its possible outcomes written down in advance, showed why:
   they mark where the edge stops failing, the evidence that separates a partial edge defect from a ring.
 
+
 ## Results
 
 **Selected model: ShuffleNetV2 1.0x**, trained from scratch with augmentation and a learning rate of
 3e-3, for all three deployment targets (cloud GPU, CPU server, edge). It was chosen on the validation
 split by the rules in [docs/model_selection.md](docs/model_selection.md), committed before the test
 split was used (tag `selection-protocol`): among the candidates tied on accuracy, it has the highest
-GPU throughput and the lowest CPU and edge latency. One model serves all three targets.`
+GPU throughput and the lowest CPU and edge latency.
 
 ### What the model looks at
 
@@ -229,6 +273,7 @@ test set: an interval containing 0 means no detectable difference.
 - **The remaining errors sit where the labels are ambiguous.** Edge_Loc has the lowest recall and
   Edge_Ring the lowest precision: ring-like Edge_Loc samples are predicted as Edge_Ring, the label
   conflict found by the error analysis ([docs/methodology.md](docs/methodology.md)).
+
 The deliverable is the seed-0 model of the selected configuration with its tuned thresholds, fixed in
 advance rather than picked as the best seed. Full results, with the commit of the evaluated code:
 [reports/final/test_evaluation.md](reports/final/test_evaluation.md).
@@ -294,7 +339,6 @@ The file works with any ONNX Runtime binding (C++, C#, Java, JavaScript, ...):
   is present when its probability reaches its threshold.
 - `format_version` identifies the metadata layout: refuse a version you do not know.
 `src/inference/classifier.py` is the executable specification of this contract.
-
 
 ### Reproducing the export
 
@@ -392,11 +436,48 @@ the pre-registered protocol exists to prevent.
   same way.
 
 
+## Documentation
+
+| Document | Contents |
+|---|---|
+| [docs/methodology.md](docs/methodology.md) | How the models were developed and evaluated, and why |
+| [docs/model_selection.md](docs/model_selection.md) | The pre-registered selection rules, the selection and the test evaluation protocol |
+| [reports/final/](reports/final/) | Test evaluation, Grad-CAM analysis and model card (generated) |
+| [reports/experiments/](reports/experiments/) | Comparisons, benchmarks and search results (generated) |
+| [docs/zh-TW/](docs/zh-TW/) | Traditional Chinese versions of the documents above |
+
+
 ## Project Structure
 
-<!-- TODO:  -->
+```
+├── conf/                   # YAML configs: dataset, split, models, experiments, search, evaluation
+├── data/
+│   ├── raw/                # MixedWM38 (not in git, see Setup)
+│   └── splits/             # the fixed split indices (v1, v2)
+├── docs/                   # methodology and selection rules; zh-TW/ holds the Chinese versions
+├── reports/
+│   ├── experiments/        # comparisons, benchmarks, search results (generated)
+│   └── final/              # test evaluation, Grad-CAM, model card (generated)
+├── scripts/                # command-line entry points, run through the Makefile
+├── src/
+│   ├── common/             # config schema, paths, hashing
+│   ├── data/               # loading, cleaning, splitting, transforms
+│   ├── eda/                # exploratory analysis and plots
+│   ├── models/             # model factory, profiling, benchmarks, ONNX export
+│   ├── training/           # training pipeline, metrics, MLflow tracking, search
+│   ├── evaluation/         # error analysis, thresholds, bootstrap, Grad-CAM, model card
+│   └── inference/          # reference inference, NumPy and ONNX Runtime only
+├── tests/                  # pytest suite
+├── shell/                  # environment and dependency scripts
+├── bak/environment.yml     # conda environment
+├── constraints.txt         # security floors for the lock files
+├── requirements*.in / .txt # direct dependencies and lock files
+├── requirements-pip.txt    # pip, pinned by hash
+└── Makefile                # every command: run `make` to list them
+```
 
 
 ## License
 
-This project is licensed under the [Apache License 2.0](LICENSE)
+This project is licensed under the [Apache License 2.0](LICENSE). The MixedWM38 dataset is not part of
+this repository and remains subject to its authors' terms.

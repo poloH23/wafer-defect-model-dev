@@ -13,6 +13,7 @@
 set -euo pipefail
 
 echo ">>> [1/4] Install dependencies (requirements-dev.txt: a superset that already includes requirements.txt)"
+pip install -r requirements-pip.txt
 pip install -r requirements-dev.txt
 
 echo ">>> [2/4] Install the project in editable mode (makes 'src' importable anywhere)"
