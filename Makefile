@@ -34,9 +34,6 @@ CONTAINER ?= $(IMAGE)-container
 # === 📘 Help ===
 .PHONY: help
 
-# === 📘 Help ===
-.PHONY: help
-
 help:  ## Show the commands by section
 	@awk 'BEGIN { FS = ":.*## " } \
 	  /^# === / { title = $$0; gsub(/^# === | ===$$/, "", title); printf "\n%s\n", title; next } \
@@ -74,8 +71,8 @@ git-init-hook:  ## Install the pre-commit hooks, so that every commit is checked
 # === 📦 Dependencies ===
 .PHONY: requirements requirements-bootstrap requirements-refresh
 
-requirements:  ## Recompile requirements.txt and requirements-dev.txt from the .in files (pip-compile)
-	bash shell/manage_requirements.sh compile
+requirements:  ## Recompile the lock files from the .in files (pip-compile); UPGRADE="pkg ..." releases those pins
+	bash shell/manage_requirements.sh compile $(foreach p,$(UPGRADE),--upgrade-package $(p))
 
 requirements-bootstrap:  ## Rescan source imports to refresh requirements.in (overwrites it)
 	bash shell/manage_requirements.sh bootstrap
