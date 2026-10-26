@@ -14,7 +14,7 @@ rawpy
 matplotlib
 
 # torch is pinned on purpose: the CUDA runtime bundled with torch must stay compatible with
-# the GPU drive, so upgrade it should be a deliberate decision, not a side effect of recompiling
+# the GPU driver, so upgrade it should be a deliberate decision, not a side effect of recompiling
 torch==2.14.0
 torchvision
 torchmetrics
