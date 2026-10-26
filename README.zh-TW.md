@@ -226,6 +226,9 @@ make export-onnx RUN_ID=176643c399f14d199631a45c01f3f427
 不同)，通過後註冊並產生 model card。重新執行會註冊一個新的版本，SHA-256 也會不同，因為檔案記錄了匯出時的
 commit；交付的檔案是版本 1。
 
+上面的 run id 是原本那台機器 MLflow 裡的交付 run，不在 repo 中。在新 clone 的環境裡，請先依
+`conf/evaluation/final_test.yaml` 指定的設定（含 overrides）與交付用 seed 訓練，再傳入那次 run 的 id。
+
 
 ## 限制
 
@@ -290,13 +293,29 @@ commit；交付的檔案是版本 1。
 
 ## 開發環境與指令
 
-需要 Python 3.12。建立環境並完成初始化（安裝依賴、pre-commit hooks、基本檢查）：
+需要 Linux x86_64 或 Windows 的 WSL2（鎖定檔固定的是 Linux 版套件，包含 NVIDIA 的 CUDA 函式庫）、conda（建議
+Miniforge；Miniconda、Anaconda 也可以，環境一律從 conda-forge 建立，Python 3.12 會自動裝好）、GNU Make 與 Git。
+訓練可以使用 NVIDIA GPU；沒有的話 PyTorch 會在 CPU 上執行，速度較慢，但足以執行測試與健全性檢查。
 
 ```bash
-make conda-dev   # 從 bak/environment.yml 建立 conda 環境並初始化
-# 或在已啟用的環境中：
-make init
+git clone https://github.com/poloH23/wafer-defect-model-dev.git
+cd wafer-defect-model-dev
+make conda-dev          # 沒有 NVIDIA GPU：make conda-dev TORCH=cpu
+conda activate wafer-defect-model-dev
 ```
+
+`make conda-dev` 會依序完成：
+
+1. 從 conda-forge 建立名為 `wafer-defect-model-dev` 的 conda 環境（`ENV=...` 可改名），裡面只有 Python 3.12 與 pip。
+   同名環境已存在時會沿用，`FORCE=1` 則重新建立。
+2. 從固定雜湊值的網址安裝 pip，再安裝開發用鎖定檔（`requirements-dev.txt`，已包含 `requirements.txt`）。
+   `TORCH=cpu` 會改裝同版本 PyTorch 的 CPU 版，下載量是幾百 MB，而不是約 4 GB 的 CUDA 函式庫。
+3. 以 editable 模式安裝本專案，讓 `src` 在任何目錄（scripts、tests、notebooks）都能 import。
+4. 安裝 pre-commit hooks。
+5. 對整個專案做一次基本檢查。
+
+第 2、3 步是 `shell/install_deps.sh`，CI 也執行同一支腳本（`TORCH=cpu`），所以每次 push 都會驗證這套安裝流程。
+已經在啟用中的環境裡時，`make init` 會執行第 2 到 5 步。
 
 **資料**：資料集不包含在本 repo 中。請從作者的 repo [Junliangwangdhu/WaferMap](https://github.com/Junliangwangdhu/WaferMap)
 下載 MixedWM38，解壓縮後把 `Wafer_Map_Datasets.npz` 放在 `data/raw/Wafer_Map_Datasets.npz`。固定的資料切分已提交在
@@ -304,12 +323,14 @@ make init
 Efficient Mixed-Type Wafer Defect Pattern Recognition〉，*IEEE Transactions on Semiconductor Manufacturing*，2020，
 使用時須遵守作者的條款。
 
+確認環境：執行 `make test`；放好資料集後，`make sanity-check` 會以單一 batch 過擬合來檢查訓練流程。
+
 執行 `make` 會依照工作流程列出所有指令，常用的有：
 
 | 階段 | 指令 | 用途 |
 |---|---|---|
-| 程式品質與資安 | `make lint`、`make test`、`make audit` | pre-commit 檢查、含覆蓋率的測試、檢查依賴套件的已知漏洞 |
-| 依賴管理 | `make requirements` | 從 `.in` 檔重新產生鎖定檔；`UPGRADE="套件 ..."` 可釋放指定套件的版本鎖定 |
+| 程式品質與資安 | `make lint`、`make typecheck`、`make test`、`make audit` | pre-commit 檢查、mypy 型別檢查、含覆蓋率的測試、檢查依賴套件的已知漏洞 |
+| 依賴管理 | `make requirements`、`make requirements-check` | 從 `.in` 檔重新產生鎖定檔（`UPGRADE="套件 ..."` 可釋放指定套件的版本鎖定）；比對程式的 import 與 `requirements.in`（唯讀，不修改任何檔案） |
 | 資料 | `make eda`、`make split` | 資料集探索、建立固定的資料切分 |
 | 訓練 | `make sanity-check`、`make train`、`make train-seeds` | 健全性檢查、訓練、多個 seed 的訓練 |
 | 實驗與分析 | `make compare`、`make benchmark`、`make search` | 跨 seed 比較設定、效能量測、多目標搜尋 |
@@ -317,6 +338,10 @@ Efficient Mixed-Type Wafer Defect Pattern Recognition〉，*IEEE Transactions on
 | 追蹤 | `make mlflow-ui` | 開啟本機的 MLflow 介面 |
 
 可調整的參數與預設值列在 Makefile 的開頭，例如 `make train TRAIN_CONFIG=conf/experiments/wafer_augment.yaml SEED=1`。
+
+有些步驟需要不在 git 裡的結果。需要 `RUN_ID` 的指令（`analyze-errors`、`edge-coverage`、`gradcam`、`export-onnx`）
+讀取的是本機 MLflow 裡的 run（`mlruns/` 與它的資料庫只存在於訓練的那台機器）：請先訓練，再從 `make mlflow-ui`
+找到 run。`make evaluate-test` 是本專案唯一一次的測試集評估，不會執行第二次；結果已提交在 `reports/final/`。
 
 **依賴管理與資安**：`constraints.txt` 記錄資安要求的最低版本，每次產生鎖定檔都會強制套用；`requirements-pip.txt`
 以雜湊值鎖定 pip 本身，即使連線被攔截也能安全安裝。CI 除了每次 push 執行 pre-commit 檢查與測試，也會以 pip-audit
@@ -345,6 +370,7 @@ Efficient Mixed-Type Wafer Defect Pattern Recognition〉，*IEEE Transactions on
 │   ├── raw/                # MixedWM38（不在 git 中，見「開發環境與指令」）
 │   └── splits/             # 固定的資料切分索引（v1、v2）
 ├── docs/                   # 方法說明與模型選擇規則；zh-TW/ 為中文版
+├── notebooks/              # 資料探索 notebook（輸出由 nbstripout 清除）
 ├── reports/
 │   ├── experiments/        # 實驗比較、效能量測、搜尋結果（由程式產生）
 │   └── final/              # 測試評估、Grad-CAM、model card（由程式產生）
@@ -358,8 +384,7 @@ Efficient Mixed-Type Wafer Defect Pattern Recognition〉，*IEEE Transactions on
 │   ├── evaluation/         # 錯誤分析、閾值、bootstrap、Grad-CAM、model card
 │   └── inference/          # 參考推論實作，只需要 NumPy 與 ONNX Runtime
 ├── tests/                  # pytest 測試
-├── shell/                  # 環境與依賴管理的腳本
-├── bak/environment.yml     # conda 環境
+├── shell/                  # 建立環境（setup_env、install_deps、init_project）與依賴管理的腳本
 ├── constraints.txt         # 鎖定檔的資安最低版本
 ├── requirements*.in / .txt # 直接依賴與鎖定檔
 ├── requirements-pip.txt    # 以雜湊值鎖定的 pip

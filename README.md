@@ -1,6 +1,6 @@
 # Wafer Defect Classification Model Development Project
 
-> Languadge : *[繁體中文](README.zh-TW.md)*
+> Language : *[繁體中文](README.zh-TW.md)*
 
 Multi-label classification of semiconductor wafer maps (MixedWM38, 8 defect types), from data quality
 checks to a deployable model: an evaluation protocol that measures its own noise, an error analysis
@@ -16,8 +16,8 @@ the delivered model.
 - **Delivered as one ONNX file** ([release v1.0.0](../../releases/tag/v1.0.0)) with a model card,
   verified against PyTorch on every validation map.
 
-[![CI](https://github.com/poloH23/wefer-defect-model-dev/actions/workflows/ci.yml/badge.svg)](https://github.com/poloH23/wefer-defect-model-dev/actions/workflows/ci.yml)
-[![Dependency audit](https://github.com/poloH23/wefer-defect-model-dev/actions/workflows/audit.yml/badge.svg)](https://github.com/poloH23/wefer-defect-model-dev/actions/workflows/audit.yml)
+[![CI](https://github.com/poloH23/wafer-defect-model-dev/actions/workflows/ci.yml/badge.svg)](https://github.com/poloH23/wafer-defect-model-dev/actions/workflows/ci.yml)
+[![Dependency audit](https://github.com/poloH23/wafer-defect-model-dev/actions/workflows/audit.yml/badge.svg)](https://github.com/poloH23/wafer-defect-model-dev/actions/workflows/audit.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
@@ -25,24 +25,36 @@ the delivered model.
 
 ### Prerequisites
 
-- Miniconda or Anaconda
-- Python 3.12 (Automatically set up by running `make conda-dev`; no separate manual installation is required.)
+- Linux x86_64, or WSL2 on Windows: the lock files pin Linux builds, including NVIDIA's CUDA libraries.
+- conda: Miniforge is recommended; Miniconda and Anaconda work too, since the environment is created
+  from conda-forge either way. Python 3.12 is installed into it automatically.
+- GNU Make and Git.
+- Optional: an NVIDIA GPU for training. Without one, PyTorch runs on the CPU: slower, but enough for the
+  tests and the sanity check.
 
 ### Quick Start
 
 ```bash
 git clone https://github.com/poloH23/wafer-defect-model-dev.git
 cd wafer-defect-model-dev
-make conda-dev
-conda activate torch
+make conda-dev          # without an NVIDIA GPU: make conda-dev TORCH=cpu
+conda activate wafer-defect-model-dev
 ```
 
 `make conda-dev` executes the following steps in order, so there is no need to run them manually one by one:
 
-1. Create a clean conda environment based on `bak/environment.yml` (locking only the Python version).
-2. Install all runtime dependencies (`requirements.txt`) and development dependencies (`requirements-dev.txt`) in the new environment.
-3. Install the pre-commit Git hooks.
-4. Perform a baseline check on the entire project.
+1. Create a conda environment named `wafer-defect-model-dev` (`ENV=...` to change it) with only Python 3.12
+   and pip, from conda-forge. An existing environment of that name is reused; `FORCE=1` rebuilds it.
+2. Install pip from its hash-pinned URL, then the development lock file (`requirements-dev.txt`, which
+   includes `requirements.txt`). `TORCH=cpu` installs the CPU builds of the pinned PyTorch versions
+   instead: a few hundred MB rather than about 4 GB of CUDA libraries.
+3. Install the project itself in editable mode, so that `src` is importable from any directory
+   (scripts, tests, notebooks).
+4. Install the pre-commit Git hooks.
+5. Perform a baseline check on the entire project.
+
+Steps 2 and 3 are `shell/install_deps.sh`, which CI runs too (with `TORCH=cpu`), so every push also tests
+this setup. In an environment that is already active, `make init` runs steps 2 to 5.
 
 ### Data
 
@@ -59,6 +71,7 @@ subject to its authors' terms.
 
 ```bash
 make test
+make sanity-check   # once the dataset is in place: overfits one batch to check the training pipeline
 ```
 
 Try running `git commit` and verify that the pre-commit hook automatically triggers formatting and linting checks.
@@ -71,21 +84,26 @@ at the top of the Makefile, e.g. `make train TRAIN_CONFIG=conf/experiments/wafer
 
 | Stage | Command | Purpose |
 |---|---|---|
-| Setup | `make conda-dev` | Create the conda environment and initialize the project (**recommended for initial setup**) |
-| | `make conda-custom ENV=myenv` | The same, with a custom environment name |
-| | `make init` | Install dependencies and hooks in the **currently active** environment |
+| Setup | `make conda-dev` | Create (or reuse) the conda environment and initialize the project (**recommended for initial setup**); `ENV=...`, `TORCH=cpu`, `FORCE=1` |
+| | `make init` | Install dependencies, the project and the hooks in the **currently active** environment (`TORCH=cpu` works here too) |
 | Quality and security | `make lint`, `make code-format` | Run all pre-commit checks; format code and fix lint issues with Ruff |
+| | `make typecheck` | Type-check `src` and `scripts` with mypy |
 | | `make test` | Run the test suite with coverage |
 | | `make audit` | Check the lock files against known vulnerabilities (pip-audit) |
 | Dependencies | `make requirements` | Re-lock `requirements.txt` / `requirements-dev.txt` from the `.in` files |
-| | `make requirements-bootstrap` | Rescan the source code's imports to regenerate `requirements.in` |
-| | `make requirements-refresh` | Both steps above in one |
+| | `make requirements-check` | Compare the code's imports with `requirements.in`; read-only, it changes no file |
 | Data | `make eda`, `make split` | Explore the dataset; create a fixed split |
 | Training | `make sanity-check`, `make train`, `make train-seeds` | Overfit one batch; train one run; train over seeds |
 | Experiments | `make compare`, `make benchmark`, `make search` | Compare configs over seeds; measure speed; multi-objective search |
 | Final evaluation | `make evaluate-test`, `make gradcam`, `make export-onnx` | Test evaluation; Grad-CAM analysis; export and register the model |
 | Tracking | `make mlflow-ui` | Open the local MLflow UI |
 | Maintenance | `make clean` | Delete caches (`__pycache__`, `.pytest_cache`, ...), all safe to regenerate |
+
+Some steps need results that are not in git. The commands that take a `RUN_ID` (`analyze-errors`,
+`edge-coverage`, `gradcam`, `export-onnx`) read a run from your local MLflow store (`mlruns/` and its
+database stay on the machine that trained): train first, then find the run in `make mlflow-ui`.
+`make evaluate-test` is the project's single test evaluation and refuses to run twice; its results are
+committed in `reports/final/`.
 
 
 ## Dependency Package Management
@@ -95,17 +113,17 @@ This project uses `pip-tools` to split dependency declarations into two levels:
 - **`requirements.txt` / `requirements-dev.txt`**: Generated via `make requirements` after automatically resolving and locking versions; **do not edit manually**, and ensure both files are committed to version control.
 When adding a new dependency:
 
-1. Modify the corresponding `.in` file (or run `make requirements-bootstrap` to rescan the source code).
+1. Add it to the corresponding `.in` file (`make requirements-check` lists the imports that `requirements.in` does not declare).
 2. Run `make requirements` to re-lock the versions.
 3. Commit both the modified `.in` and `.txt` files.
-For some packages, the import name differs from the PyPI package name (e.g., `import cv2` corresponds to `opencv-python-headless`); since automated scanning tools may not always accurately identify these cases, it is recommended to verify the contents of `requirements.in` after adding them.
+For some packages, the import name differs from the PyPI package name (e.g., `import cv2` corresponds to `opencv-python-headless`), and import scanners guess these mappings; this is why `make requirements-check` only reports, and `requirements.in` is always edited by hand.
 
 ### Security
 
 - **`constraints.txt`** holds security floors, minimum versions applied to every recompile, so the lock
   files can never fall back to a known vulnerable version. Each floor names its advisory.
 - **`requirements-pip.txt`** installs pip itself from a URL pinned by SHA-256, safe even if the
-  connection were intercepted (`make pip-bootstrap`, run first by `make init`).
+  connection were intercepted (`make pip-bootstrap`; every install runs it first, in `shell/install_deps.sh`).
 - **`make audit`** checks the lock files against known vulnerabilities; CI runs it on every push and
   every week.
 - pip-compile keeps existing pins. To meet a new floor for packages that pin each other exactly, such
@@ -118,13 +136,13 @@ Every push or pull request triggers two GitHub Actions workflows:
 
 - **CI** (`.github/workflows/ci.yml`):
   - **pre-commit checks**: Uses the same configuration as the local `.pre-commit-config.yaml`, thereby avoiding discrepancies where local checks pass but CI fails.
-  - **Test suite**: Executes pytest and generates a coverage report. The CI machine has no GPU, so it installs the CPU build of the pinned PyTorch version.
+  - **Test suite**: Installs the dependencies with the same script as the local setup (`shell/install_deps.sh`), with `TORCH=cpu` since the CI machine has no GPU, then executes pytest and generates a coverage report.
 - **Dependency audit** (`.github/workflows/audit.yml`): checks the lock files against known
   vulnerabilities, also every Monday, since a lock file that does not change can become vulnerable
   when a new advisory is published.
 
 
-## Data Qality Findings
+## Data Quality Findings
 
 Issues found in the official dataset, and how they are handled. The raw file is never modified:
 every rule below is applied in code and configured under `conf/`.
@@ -351,6 +369,10 @@ It exports the model from its MLflow run, checks the ONNX file against PyTorch o
 the model card. Running it again registers a new version with a new SHA-256, since the file records
 the commit it was exported from; the delivered file is version 1.
 
+The run id above is the delivered run in the original MLflow store, which is not part of the
+repository. On a fresh clone, first train the configuration (with its overrides) and the deliverable
+seed named in `conf/evaluation/final_test.yaml`, then pass the id of that run.
+
 
 ## Limitations
 
@@ -455,6 +477,7 @@ the pre-registered protocol exists to prevent.
 │   ├── raw/                # MixedWM38 (not in git, see Setup)
 │   └── splits/             # the fixed split indices (v1, v2)
 ├── docs/                   # methodology and selection rules; zh-TW/ holds the Chinese versions
+├── notebooks/              # exploratory notebook (outputs stripped by nbstripout)
 ├── reports/
 │   ├── experiments/        # comparisons, benchmarks, search results (generated)
 │   └── final/              # test evaluation, Grad-CAM, model card (generated)
@@ -468,8 +491,7 @@ the pre-registered protocol exists to prevent.
 │   ├── evaluation/         # error analysis, thresholds, bootstrap, Grad-CAM, model card
 │   └── inference/          # reference inference, NumPy and ONNX Runtime only
 ├── tests/                  # pytest suite
-├── shell/                  # environment and dependency scripts
-├── bak/environment.yml     # conda environment
+├── shell/                  # environment setup (setup_env, install_deps, init_project) and dependency scripts
 ├── constraints.txt         # security floors for the lock files
 ├── requirements*.in / .txt # direct dependencies and lock files
 ├── requirements-pip.txt    # pip, pinned by hash
