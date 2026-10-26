@@ -1,6 +1,6 @@
 # Installation:
 #   pip install pre-commit
-#   pre-commit install          # it will be triggered automatically after every subsquent "git commit"
+#   pre-commit install          # it will be triggered automatically after every subsequent "git commit"
 #   pre-commit run --all-files  # First, examine all the code to identify existing issues (this needs to be done during the initialization)
 #
 # Version Upgrade:
@@ -25,17 +25,18 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.7
     hooks:
-      - id: ruff
+      - id: ruff-check
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
 
-  # nbstripout: automatically clearn execution outputs, ids, and metadata from .ipynb files
+  # nbstripout: automatically clean execution outputs, ids, and metadata from .ipynb files
   - repo: https://github.com/kynan/nbstripout
     rev: 0.9.1
     hooks:
       - id: nbstripout
 
-  # Type Hints checking: Comment out if project type coverage is low; adopt incrementally
+  # Type Hints checking: not enabled yet; run it on demand with "make typecheck" (mypy src scripts),
+  # and enable it here or in CI once it reports no errors.
   # Note: mypy runs in an isolated pre-commit environment.
   # If importing typed third-party packages,
   # add their stub libraries (e.g., types-requests) to `additional_dependencies`.
