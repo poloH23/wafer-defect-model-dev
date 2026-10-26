@@ -11,3 +11,6 @@ pytest
 pytest-cov
 pip-tools
 pipreqs
+
+# Jupyter kernel, so that VS Code or JupyterLab can run notebooks/ in this environment
+ipykernel

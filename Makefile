@@ -27,9 +27,16 @@ BENCH_MODELS ?= resnet18 mobilenet_v3_small mobilenet_v3_large efficientnet_b0 s
 SEARCH_CONFIG ?= conf/search/slim_resnet_v1.yaml
 TRIALS ?=
 
-# Docker
-IMAGE ?= py-base
-CONTAINER ?= $(IMAGE)-container
+# Environment and dependencies
+# - ENV: conda environment name. Plain "=" rather than "?=", so that a shell variable that happens to be
+#   called ENV (POSIX shells use one) cannot replace it; "make conda-dev ENV=my-env" still overrides it.
+# - TORCH: PyTorch build, cuda (the lock file as it is) or cpu (CPU-only, a much smaller download)
+# - FORCE: FORCE=1 makes conda-dev remove the environment and rebuild it
+# - UPGRADE: packages whose pins "make requirements" releases, e.g. UPGRADE="mlflow mlflow-skinny"
+ENV = wafer-defect-model-dev
+TORCH ?= cuda
+FORCE ?=
+UPGRADE ?=
 
 # === 📘 Help ===
 .PHONY: help
@@ -41,54 +48,42 @@ help:  ## Show the commands by section
 	@printf "\nVariables and their defaults are listed at the top of the Makefile.\n"
 
 # === 🚀 Setup ===
-.PHONY: init pip-bootstrap conda-dev conda-custom conda-export git-init-hook
+.PHONY: conda-dev init pip-bootstrap git-init-hook
 
-init: pip-bootstrap  ## One-shot project initialization: install deps + pre-commit hook + baseline check
-	chmod +x shell/*.sh
-	bash shell/init_project.sh
+conda-dev:  ## Create (or reuse) the conda env and initialize the project in it (ENV=..., TORCH=cuda|cpu, FORCE=1)
+	ENV_NAME="$(ENV)" TORCH="$(TORCH)" FORCE="$(FORCE)" bash shell/setup_env.sh
+
+init:  ## Initialize the project in the active env: deps, editable install, pre-commit hook, baseline check (TORCH=cuda|cpu)
+	TORCH="$(TORCH)" bash shell/init_project.sh
 
 pip-bootstrap:  ## Install pip from its hash-pinned URL (requirements-pip.txt), safe even if TLS is intercepted
 	python -m pip install -r requirements-pip.txt
-
-conda-dev:  ## Create the conda env from bak/environment.yml, then initialize the project
-	bash shell/setup_env.sh
-
-conda-custom: ENV=myenv  ## Create a lightweight conda env and initialize the project (ENV=myenv)
-conda-custom:
-	conda create -y -n $(ENV) python=3.12
-	conda run -n $(ENV) python -m pip install -r requirements-pip.txt
-	conda run -n $(ENV) bash shell/init_project.sh
-	@echo "> Conda environment $(ENV) created and initialized"
-
-conda-export:  ## Export the conda env to bak/environment.yml (history only)
-	conda env export --from-history | grep -v "^prefix: " > bak/environment.yml
-	@echo "> Conda environment has been exported to ./bak/environment.yml (history-only, avoids pip/conda version clashes)"
 
 git-init-hook:  ## Install the pre-commit hooks, so that every commit is checked
 	pre-commit install
 	@echo "> pre-commit hooks initialized"
 
 # === 📦 Dependencies ===
-.PHONY: requirements requirements-bootstrap requirements-refresh
+.PHONY: requirements requirements-check
 
 requirements:  ## Recompile the lock files from the .in files (pip-compile); UPGRADE="pkg ..." releases those pins
 	bash shell/manage_requirements.sh compile $(foreach p,$(UPGRADE),--upgrade-package $(p))
 
-requirements-bootstrap:  ## Rescan source imports to refresh requirements.in (overwrites it)
-	bash shell/manage_requirements.sh bootstrap
-
-requirements-refresh:  ## Rescan imports and recompile the lock files in one step
-	bash shell/manage_requirements.sh refresh
+requirements-check:  ## Compare the code's imports with requirements.in (read-only: no file is changed)
+	bash shell/manage_requirements.sh check
 
 # === 🧼 Code quality, security and tests ===
-.PHONY: code-format lint audit test
+.PHONY: code-format lint typecheck audit test
 
 code-format:  ## Format code with ruff (lint fixes and formatting)
 	ruff check . --fix
 	ruff format .
 
-lint:  ## Run all pre-commit hooks (ruff, mypy, nbstripout, ...)
+lint:  ## Run all pre-commit hooks (ruff, nbstripout, ...)
 	pre-commit run --all-files --show-diff-on-failure
+
+typecheck:  ## Type-check src and scripts with mypy (not part of CI yet)
+	mypy src scripts
 
 audit:  ## Check the lock files against known vulnerabilities (pip-audit)
 	pip-audit --no-deps --disable-pip -r requirements.txt -r requirements-dev.txt
@@ -155,29 +150,6 @@ gradcam:  ## Grad-CAM analysis of a model on the validation split (RUN_ID=..., e
 
 export-onnx:  ## Export, verify and register the delivered model, and write its model card (RUN_ID=...)
 	python scripts/export_onnx.py --run-id $(RUN_ID)
-
-# === 🐳 Docker and demo ===
-.PHONY: docker-build docker-run docker-run-fastapi docker-run-flask demo-run
-
-docker-build:  ## Build the Docker image (IMAGE=py-base)
-	docker build -t $(IMAGE) .
-
-docker-run:  ## Run the Docker image (IMAGE=py-base)
-	docker run -it --name $(CONTAINER) $(IMAGE)
-
-docker-run-fastapi:  ## Run the Docker image with the port FastAPI needs (IMAGE=py-base)
-	#docker run -p 8000:8000 py-base uvicorn main.__init__:app --host 0.0.0.0 --port 8000
-	docker run -d --name $(CONTAINER) -p 8000:8000 $(IMAGE) \
-	uvicorn scripts.demo.main_demo:app --host 0.0.0.0 --port 8000
-
-docker-run-flask:  ## Run the Docker image with the port Flask needs (IMAGE=py-base)
-	#docker run -p 5000:5000 py-base flask --app main/__init__.py run --host=0.0.0.0
-	docker run -d --name $(CONTAINER) -p 5000:5000 $(IMAGE) \
-	flask --app scripts.demo.main_demo.py run --host=0.0.0.0
-
-demo-run: MODE=python  ## Run the example runner (MODE=python|fastapi|flask, NGROK=1)
-demo-run:
-	python scripts/demo/main_demo.py --mode $(MODE) $(if $(NGROK),--ngrok)
 
 # === 🧹 Maintenance ===
 .PHONY: clean clean-zone gitkeep-add gitkeep-clean system-info

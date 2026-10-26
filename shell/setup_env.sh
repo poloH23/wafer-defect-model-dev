@@ -1,39 +1,53 @@
-#!/bin/bash
+#!/usr/bin/env bash
+#
+# Create (or reuse) the project's conda environment, then initialize the project inside it
+# (shell/init_project.sh). Conda provides only Python and pip: every package comes from the pip lock
+# files (requirements.txt / requirements-dev.txt), so conda and pip never manage two copies of the
+# same package.
+#
+# Usage (through make; the variables are passed on as environment variables):
+#   make conda-dev                        # environment "wafer-defect-model-dev", CUDA build of PyTorch
+#   make conda-dev ENV=my-env TORCH=cpu   # another name; CPU-only PyTorch, a much smaller download
+#   make conda-dev FORCE=1                # remove the environment and rebuild it
+#
+# Python comes from conda-forge only (--override-channels), whatever channels the user has configured;
+# Anaconda's "defaults" channel has terms of service of its own.
+
 set -euo pipefail
 
-ENV_YML="./bak/environment.yml"
+ENV_NAME="${ENV_NAME:-wafer-defect-model-dev}"
+PYTHON_VERSION="3.12"  # keep in line with requires-python in pyproject.toml
+TORCH="${TORCH:-cuda}"
+FORCE="${FORCE:-}"
 
-# Get the environment name from .yml file
-ENV_NAME=$(grep "^name:" "$ENV_YML" | awk '{print $2}')
-
-# Check if conda exists
-if ! command -v conda &> /dev/null; then
-    echo ">>> Conda is not installed, please install Anaconda or Miniconda first!"
+if ! command -v conda >/dev/null 2>&1; then
+    echo "!! Conda is not installed: install Miniforge (or Miniconda / Anaconda) first" >&2
     exit 1
 fi
 
-# '--force' argument: rebuild environment
-if [[ "${1:-}" == "--force" ]]; then
-    echo ">>> Removing existing environment '$ENV_NAME' ..."
-    conda env remove -n "$ENV_NAME" -y
+# awk reads the whole list and decides at the end, so no early exit can upset "pipefail"
+env_exists() {
+    conda env list | awk -v name="$ENV_NAME" '$1 == name { found = 1 } END { exit !found }'
+}
+
+if [[ -n "$FORCE" ]] && env_exists; then
+    echo ">>> Removing the existing environment '$ENV_NAME' (FORCE=1) ..."
+    conda remove -y -n "$ENV_NAME" --all
 fi
 
-# Create the environment only if it does not exist.
-# Note: The environment.yml file now only pins the Python version and pip itself
-# The actual list of components is managed by requirements.txt / requirements-dev.txt
-# Avoid having conda and pip manage separate copies of the same package
-if conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
-    echo ">>> Conda environment '$ENV_NAME' already exists, skip creating it."
+if env_exists; then
+    echo ">>> Conda environment '$ENV_NAME' already exists: reusing it (FORCE=1 rebuilds it)"
 else
-    echo ">>> Create Conda environment '$ENV_NAME' ..."
-    conda env create -f "$ENV_YML"
+    echo ">>> Create conda environment '$ENV_NAME' (Python $PYTHON_VERSION from conda-forge) ..."
+    conda create -y -n "$ENV_NAME" --override-channels -c conda-forge "python=$PYTHON_VERSION" pip
 fi
 
-# Perform dependency installation, pre-commit hook installation, and baseline checks the newly created environment
-# Use 'conda run -n' to explicitly specify the execution environment
+# Install dependencies and pre-commit hooks, and run the baseline check, inside the environment.
+# "conda run -n" names the environment explicitly; --no-capture-output streams pip's progress
+# instead of printing everything at the end, which matters for a download of several GB.
 echo ""
-echo ">>> Installing dependencies and pre-commit hooks inside '$ENV_NAME' ..."
-conda run -n "$ENV_NAME" bash shell/init_project.sh
+echo ">>> Installing dependencies and pre-commit hooks inside '$ENV_NAME' (TORCH=$TORCH) ..."
+conda run --no-capture-output -n "$ENV_NAME" env TORCH="$TORCH" bash shell/init_project.sh
 
 echo ""
 echo ">>> Done! To activate, run:"
