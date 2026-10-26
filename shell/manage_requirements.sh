@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
 #
 # Requirement Management:
-# Centrally manage the re-scanning and re-locking of 'requirements.in' and 'requirements.txt' files.
+# Re-lock 'requirements.txt' and 'requirements-dev.txt' from the '.in' files, and compare the code's
+# imports with 'requirements.in' without changing it.
 #
 # Usage:
-#   bash shell/manage_requirements.sh bootstrap  # scan the source code for import statements and regenerate 'requirements.in'
-#   bash shell/manage_requirements.sh compile    # re-lock versions and generate .txt files based on .in files
-#   bash shell/manage_requirements.sh refresh    # Perform the two steps above in order
+#   bash shell/manage_requirements.sh compile  # re-lock versions and generate .txt files based on .in files
+#   bash shell/manage_requirements.sh check    # compare the imports of src/ and scripts/ with requirements.in (read-only)
 #
-# compile and refresh pass any further options to the requirements-dev.txt compile, e.g.
+# compile passes any further options to the requirements-dev.txt compile, e.g.
 #   bash shell/manage_requirements.sh compile --upgrade-package pillow
 # releases pillow's pin there; requirements.txt then follows through -c requirements-dev.txt.
+#
+# requirements.in is curated by hand (no versions, except deliberate pins such as torch, each with its
+# reason), so nothing here writes to it: an import scanner pins every package, maps some imports to the
+# wrong distribution (cv2) and picks up test-only imports (pytest).
 
 set -euo pipefail
 
@@ -23,11 +27,24 @@ ensure_dev_tools() {
     fi
 }
 
-bootstrap() {
+# One distribution name per line, lower-case with "-", so that "PyYAML" / "scikit_learn" match "pyyaml" / "scikit-learn"
+normalize() {
+    sed -E 's/[[:space:]]+//g' | tr 'A-Z_' 'a-z-' | sed '/^$/d' | sort -u
+}
+
+check() {
     ensure_dev_tools
-    echo ">>> Rescan the source code for imports and update requirements.in"
-    pipreqs . --savepath requirements.in --force
-    echo ">>> 'requirements.in' has been updated; please check the diff before committing"
+    echo ">>> Compare the third-party imports of src/ and scripts/ with requirements.in (no file is changed)"
+    local scanned declared
+    scanned="$(pipreqs . --print --mode no-pin --ignore tests,notebooks,.venv | normalize)"
+    declared="$(sed -E 's/#.*//; s/[[:space:]]*[<>=!~;[].*//' requirements.in | normalize)"
+    echo ""
+    echo ">>> Imported, but not declared in requirements.in (add the right distribution if it is a real dependency):"
+    comm -23 <(printf '%s\n' "$scanned") <(printf '%s\n' "$declared") | sed '/^$/d; s/^/    /'
+    echo ">>> Declared, but not imported directly (keep it if something needs it indirectly):"
+    comm -13 <(printf '%s\n' "$scanned") <(printf '%s\n' "$declared") | sed '/^$/d; s/^/    /'
+    echo ""
+    echo ">>> Import names are mapped to distributions by guesswork (e.g. cv2 is opencv-python-headless here): review the lists, do not copy them"
 }
 
 compile_lock() {
@@ -40,11 +57,10 @@ compile_lock() {
 }
 
 case "${1:-}" in
-    bootstrap) bootstrap ;;
     compile) shift; compile_lock "$@" ;;
-    refresh) shift; bootstrap; compile_lock "$@" ;;
+    check) check ;;
     *)
-        echo "Usage: $0 {bootstrap|compile|refresh}"
+        echo "Usage: $0 {compile|check}"
         exit 1
         ;;
 esac
