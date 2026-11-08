@@ -41,7 +41,7 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 source = ["."]
-omit = ["tests/*"]
+omit = ["tests/*", "tools/*"]
 
 [build-system]
 requires = ["setuptools>=68"]

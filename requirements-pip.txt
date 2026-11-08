@@ -1,9 +1,13 @@
 # pip itself, pinned by URL and SHA-256 rather than by version alone.
 #
-# pip 26.2.2 fixes the eMudhra / emSign CA incident: older pip trusts the compromised CA through its
-# vendored certifi, whatever the system trust store says. A hash-pinned direct URL installs safely
-# even if the TLS connection were intercepted: pip refuses a file whose hash does not match.
+# The pin exists for CA-trust integrity: pip trusts CAs through its own vendored certifi,
+# whatever the system trust store says, so the vendored certifi version is what matters here.
+# pip 26.2.2 vendors certifi 2026.10.19; pip 26.3 vendors certifi 2026.10.23 and
+# truststore 0.10.5. Background on the eMudhra / emSign CA incident:
 # https://discuss.python.org/t/information-for-python-users-regarding-emudhra-emsign-ca-certificate-security-incident/109576
 #
+# A hash-pinned direct URL installs safely even if the TLS connection were intercepted:
+# pip refuses a file whose hash does not match.
+#
 # Usage: python -m pip install -r requirements-pip.txt (make pip-bootstrap)
-pip @ https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70
+pip @ https://files.pythonhosted.org/packages/07/25/ee8c38ae72d66b844ce8eb9711ba905dba21ca1a8a0c960057c41cd23337/pip-26.3-py3-none-any.whl#sha256=f3b60b20ffaadd4415ed7957212a38ac63fa4c5fa375bd0f4a797777940fad13
