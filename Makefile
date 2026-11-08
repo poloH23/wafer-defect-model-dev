@@ -48,7 +48,7 @@ help:  ## Show the commands by section
 	@printf "\nVariables and their defaults are listed at the top of the Makefile.\n"
 
 # === 🚀 Setup ===
-.PHONY: conda-dev init pip-bootstrap git-init-hook
+.PHONY: conda-dev init pip-bootstrap git-init-hook check-env
 
 conda-dev:  ## Create (or reuse) the conda env and initialize the project in it (ENV=..., TORCH=cuda|cpu, FORCE=1)
 	ENV_NAME="$(ENV)" TORCH="$(TORCH)" FORCE="$(FORCE)" bash shell/setup_env.sh
@@ -63,10 +63,15 @@ git-init-hook:  ## Install the pre-commit hooks, so that every commit is checked
 	pre-commit install
 	@echo "> pre-commit hooks initialized"
 
+check-env:  ## Verify the active conda env matches ENV
+	@test "$${CONDA_DEFAULT_ENV}" = "$(ENV)" || { \
+	  printf '!! active conda env: %s\n!! expected:         %s\n   run: conda activate %s\n' \
+	    "$${CONDA_DEFAULT_ENV:-<none>}" "$(ENV)" "$(ENV)"; exit 1; }
+
 # === 📦 Dependencies ===
 .PHONY: requirements requirements-check
 
-requirements:  ## Recompile the lock files from the .in files (pip-compile); UPGRADE="pkg ..." releases those pins
+requirements: check-env  ## Recompile the lock files from the .in files (pip-compile); UPGRADE="pkg ..." releases those pins
 	bash shell/manage_requirements.sh compile $(foreach p,$(UPGRADE),--upgrade-package $(p))
 
 requirements-check:  ## Compare the code's imports with requirements.in (read-only: no file is changed)
@@ -88,7 +93,7 @@ typecheck:  ## Type-check src and scripts with mypy (not part of CI yet)
 audit:  ## Check the lock files against known vulnerabilities (pip-audit)
 	pip-audit --no-deps --disable-pip -r requirements.txt -r requirements-dev.txt
 
-test:  ## Run the test suite with coverage
+test: check-env  ## Run the test suite with coverage
 	pytest --cov=. --cov-report=term-missing
 
 # === 📊 Data ===
@@ -103,10 +108,10 @@ split:  ## Create a fixed train/val/test split (SPLIT_CONFIG=...)
 # === 🤖 Training ===
 .PHONY: sanity-check train train-seeds lr-grid
 
-sanity-check:  ## Overfit one batch to verify the training pipeline (TRAIN_CONFIG=...)
+sanity-check: check-env  ## Overfit one batch to verify the training pipeline (TRAIN_CONFIG=...)
 	python scripts/train.py --config $(TRAIN_CONFIG) --sanity-check
 
-train:  ## Train a model and record the run in MLflow (TRAIN_CONFIG=..., optional SEED=..., LR=...)
+train: check-env  ## Train a model and record the run in MLflow (TRAIN_CONFIG=..., optional SEED=..., LR=...)
 	python scripts/train.py --config $(TRAIN_CONFIG) $(if $(SEED),--seed $(SEED)) $(if $(LR),--learning-rate $(LR))
 
 train-seeds:  ## Train one config once per seed (TRAIN_CONFIG=..., SEEDS="0 1 2", optional LR=...)
@@ -148,7 +153,7 @@ evaluate-test:  ## The single evaluation on the test split (docs/model_selection
 gradcam:  ## Grad-CAM analysis of a model on the validation split (RUN_ID=..., e.g. the deliverable)
 	python scripts/explain_gradcam.py --run-id $(RUN_ID)
 
-export-onnx:  ## Export, verify and register the delivered model, and write its model card (RUN_ID=...)
+export-onnx: check-env  ## Export, verify and register the delivered model, and write its model card (RUN_ID=...)
 	python scripts/export_onnx.py --run-id $(RUN_ID)
 
 # === 🧹 Maintenance ===
