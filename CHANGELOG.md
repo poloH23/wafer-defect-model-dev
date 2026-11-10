@@ -13,6 +13,19 @@ decisions lives in `docs/`.
 
 ## [Unreleased]
 
+### Added
+
+- `scripts/plot_showcase_figure.py` and `make showcase-figure`: an
+  accuracy-versus-latency figure covering all ten candidate architectures, in
+  English and Traditional Chinese, drawn from the committed report tables.
+
+### Fixed
+
+- The dataset instructions pointed to the authors' repository, which documents
+  MixedWM38 but does not host `Wafer_Map_Datasets.npz`. They now point to Kaggle,
+  the source whose SHA-256 matches the committed split digests, and give the
+  citation and terms the dataset's authors state.
+
 ## [1.0.2] - 2026-11-08
 
 Remediation of the first findings raised by the scheduled dependency audit added
