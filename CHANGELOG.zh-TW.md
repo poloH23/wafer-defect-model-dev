@@ -12,6 +12,17 @@ English: [CHANGELOG.md](CHANGELOG.md)
 
 ## [未發布]
 
+### 新增
+
+- `scripts/plot_showcase_figure.py` 與 `make showcase-figure`：涵蓋全部十個候選架構的
+  準確度對延遲圖，中英文各一份，數據取自已提交的報告表格。
+
+### 修正
+
+- 資料集取得說明原先指向作者的 repo，該 repo 有 MixedWM38 的說明文件但並未提供
+  `Wafer_Map_Datasets.npz`。現已改指向 Kaggle —— 其 SHA-256 與已提交的切分摘要值相符 ——
+  並補上資料集作者提供的引用格式與使用條款。
+
 ## [1.0.2] - 2026-11-08
 
 處理 1.0.0 所建立的排程 dependency audit 首次回報的問題，並補上這次處理過程本身所

@@ -18,6 +18,10 @@
 - **一個模型同時滿足三種部署情境**，降低後續的維護成本
 - 輸出內容包含模型檔、使用規格、效能報告與完整的追溯資訊，部署端可以直接使用輸出結果
 
+![10 個候選架構的準確度—效率取捨](reports/figures/model_selection_zh.png)
+
+*MobileNetV3-Large 與選定模型重疊：完全正確率在雜訊範圍內相同，CPU 延遲也幾乎一樣。*
+
 **展示內容：**
 | 項目 | 具體表現 |
 |---|---|
@@ -26,12 +30,16 @@
 | 實驗設計與統計嚴謹度 | 多次重複實驗、量化雜訊、信賴區間、成對比較；選擇模型的規則在看到結果之前就已經記錄 |
 | 模型開發 | 比較五種現成架構、以 Optuna 進行多目標超參數搜尋、在 GPU 與 CPU 上實測速度 |
 | 可解釋性分析 | 以 Grad-CAM 檢驗模型的判斷依據，搭配對照組，並在分析前寫下所有可能的結果 |
-| MLOps 與工程品質 | MLflow 實驗追蹤與模型註冊、GitHub Actions 持續整合、超過 240 個自動化測試、可追溯的資料與程式版本、ONNX 匯出與驗證、model card |
+| MLOps 與工程品質 | MLflow 實驗追蹤與模型註冊、GitHub Actions 持續整合、超過 300 個自動化測試、可追溯的資料與程式版本、ONNX 匯出與驗證、model card |
 
 **專案缺陷：** 專案中有幾個沒有成功的嘗試與規則上的缺陷，例如自訂的精簡模型速度最快但不夠準確、閾值
 調整沒有改善結果，這些都照實記錄在報告中。
 
 **技術棧：** Python 3.12、PyTorch、torchvision、scikit-learn、Optuna、MLflow、ONNX、ONNX Runtime、pydantic、pytest、ruff、mypy、pre-commit、GitHub Actions、conda、pip-tools
+
+[![CI](https://github.com/poloH23/wafer-defect-model-dev/actions/workflows/ci.yml/badge.svg)](https://github.com/poloH23/wafer-defect-model-dev/actions/workflows/ci.yml)
+[![Dependency audit](https://github.com/poloH23/wafer-defect-model-dev/actions/workflows/audit.yml/badge.svg)](https://github.com/poloH23/wafer-defect-model-dev/actions/workflows/audit.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
 ## 資料品質發現
@@ -317,11 +325,23 @@ conda activate wafer-defect-model-dev
 第 2、3 步是 `shell/install_deps.sh`，CI 也執行同一支腳本（`TORCH=cpu`），所以每次 push 都會驗證這套安裝流程。
 已經在啟用中的環境裡時，`make init` 會執行第 2 到 5 步。
 
-**資料**：資料集不包含在本 repo 中。請從作者的 repo [Junliangwangdhu/WaferMap](https://github.com/Junliangwangdhu/WaferMap)
-下載 MixedWM38，解壓縮後把 `Wafer_Map_Datasets.npz` 放在 `data/raw/Wafer_Map_Datasets.npz`。固定的資料切分已提交在
-`data/splits/`，每次訓練都會比對資料檔的雜湊值。資料集出自 J. Wang 等人，〈Deformable Convolutional Networks for
-Efficient Mixed-Type Wafer Defect Pattern Recognition〉，*IEEE Transactions on Semiconductor Manufacturing*，2020，
-使用時須遵守作者的條款。
+### 資料
+
+**資料**：資料集不包含在本 repo 中。請從
+[Kaggle](https://www.kaggle.com/datasets/co1d7era/mixedtype-wafer-defect-datasets) 下載 **MixedWM38**
+的 `Wafer_Map_Datasets.npz`，放在 `data/raw/Wafer_Map_Datasets.npz`。固定的資料切分已提交在
+`data/splits/`，每次執行都會比對資料檔的雜湊值；上面 Kaggle 的那份副本就是這些雜湊值的來源。作者的
+repo [Junliangwangdhu/WaferMap](https://github.com/Junliangwangdhu/WaferMap) 有資料集的說明文件，
+但沒有提供 `Wafer_Map_Datasets.npz` 本身的下載。
+
+**引用**（資料集作者提供的格式）：
+
+> J. Wang, C. Xu, Z. Yang, J. Zhang and X. Li, "Deformable Convolutional Networks for Efficient
+> Mixed-type Wafer Defect Pattern Recognition," in *IEEE Transactions on Semiconductor
+> Manufacturing*, DOI: 10.1109/TSM.2020.3020985.
+
+**使用條款**：本資料集未載明授權條款。作者表示公開此資料集供研究者、學生與相關領域愛好者研究，
+並請求引用上述文獻。`reports/eda/` 下的晶圓圖樣本為文件用途，依此標註來源。
 
 確認環境：執行 `make test`；放好資料集後，`make sanity-check` 會以單一 batch 過擬合來檢查訓練流程。
 
@@ -358,7 +378,8 @@ Efficient Mixed-Type Wafer Defect Pattern Recognition〉，*IEEE Transactions on
 | [reports/final/](reports/final/) | 測試評估、Grad-CAM 分析與 model card 的原始報告（英文，由程式產生） |
 | [reports/experiments/](reports/experiments/) | 各階段實驗的比較表格與效能量測（英文，由程式產生） |
 
-中文文件是英文文件的翻譯；兩者若有出入，以英文為準。由程式產生的報告保留英文原樣，不另行翻譯，以確保報告中的
+`docs/zh-TW/` 底下的文件是英文版的翻譯，兩者若有出入，以英文版為準。本 README 的中英文版本
+則各自依讀者調整內容與編排，不是逐句對照的翻譯。由程式產生的報告保留英文原樣，確保報告中的
 數字與產生它們的程式完全一致。
 
 

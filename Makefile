@@ -38,6 +38,9 @@ TORCH ?= cuda
 FORCE ?=
 UPGRADE ?=
 
+# Reporting figures
+FIGURES_OUT ?= reports/figures
+
 # === 📘 Help ===
 .PHONY: help
 
@@ -145,7 +148,7 @@ export-trials:  ## Export search trials as configs for confirmation runs (SEARCH
 	python scripts/export_trial.py --config $(SEARCH_CONFIG) --trials $(TRIALS)
 
 # === 🏁 Final evaluation and delivery ===
-.PHONY: evaluate-test gradcam export-onnx
+.PHONY: evaluate-test gradcam export-onnx showcase-figure
 
 evaluate-test:  ## The single evaluation on the test split (docs/model_selection.md); refuses to run twice
 	python scripts/evaluate_test.py --config conf/evaluation/final_test.yaml
@@ -155,6 +158,10 @@ gradcam:  ## Grad-CAM analysis of a model on the validation split (RUN_ID=..., e
 
 export-onnx: check-env  ## Export, verify and register the delivered model, and write its model card (RUN_ID=...)
 	python scripts/export_onnx.py --run-id $(RUN_ID)
+
+showcase-figure: check-env  ## Draw the accuracy-vs-latency showcase figure, both languages (FIGURES_OUT=...)
+	python scripts/plot_showcase_figure.py --lang en --out $(FIGURES_OUT)
+	python scripts/plot_showcase_figure.py --lang zh --out $(FIGURES_OUT)
 
 # === 🧹 Maintenance ===
 .PHONY: clean clean-zone gitkeep-add gitkeep-clean system-info
