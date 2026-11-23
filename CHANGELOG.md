@@ -13,6 +13,29 @@ decisions lives in `docs/`.
 
 ## [Unreleased]
 
+### Security
+
+- Raise the floor for `soupsieve` to `>= 4.0.0` (2.9.2 -> 4.1.3), fixing
+  CVE-2026-126190 and CVE-2026-126191 (CVSS 3.1 7.5 each, High) and
+  CVE-2026-126192 and CVE-2026-126193 (Moderate): polynomial or exponential time
+  when parsing or matching CSS selectors, and unbounded recursion in the selector
+  parser. 4.0 is a major version; its breaking changes only touch selector
+  semantics. A development-only dependency, through `pipreqs` -> `nbconvert` ->
+  `beautifulsoup4`; the project parses no untrusted HTML or selectors.
+- Raise the floor for `tornado` to `>= 6.6.1` (6.6 -> 6.6.1), fixing
+  CVE-2026-126347 (CVSS 3.1 3.1, Low): the 6.6.0 fix for the `RedirectHandler`
+  open redirect missed URLs that start with three or more slashes, which browsers
+  and Python's `urllib` parse differently. Development only, through `ipykernel`
+  and `jupyter-client`; the project runs no Tornado web server.
+- Raise the floor for `opentelemetry-api` to `>= 1.45.2`, fixing CVE-2026-126360
+  (CVSS 3.1 5.3, Moderate): regular-expression denial of service when extracting
+  a crafted `traceparent` value. `opentelemetry-sdk`, `-proto` and
+  `-semantic-conventions` pin each other exactly, so all four were upgraded
+  together (1.45.1 -> 1.45.2, 0.66b1 -> 0.66b2). Transitive via MLflow; the
+  project extracts no trace context from untrusted input, so real exposure was low.
+- All three are recorded as floors in `constraints.txt`. Found by the scheduled
+  dependency audit of 2026-11-23.
+
 ### Added
 
 - `scripts/plot_showcase_figure.py` and `make showcase-figure`: an

@@ -12,6 +12,25 @@ English: [CHANGELOG.md](CHANGELOG.md)
 
 ## [未發布]
 
+### 資安
+
+- 將 `soupsieve` 的下限提高至 `>= 4.0.0`（2.9.2 → 4.1.3），修補 CVE-2026-126190 與
+  CVE-2026-126191（各 CVSS 3.1 7.5，High），以及 CVE-2026-126192 與 CVE-2026-126193
+  （Moderate）：解析或比對 CSS selector 時的多項式／指數級時間複雜度，以及 selector parser
+  沒有深度上限的遞迴。4.0 是 major 版本，其不相容變更只涉及 selector 的語意。這是僅用於
+  開發階段的依賴，經 `pipreqs` → `nbconvert` → `beautifulsoup4` 間接引入；本專案不解析
+  不可信的 HTML 或 selector。
+- 將 `tornado` 的下限提高至 `>= 6.6.1`（6.6 → 6.6.1），修補 CVE-2026-126347（CVSS 3.1
+  3.1，Low）：6.6.0 對 `RedirectHandler` open redirect 的修補並不完整，漏掉了以三個以上
+  斜線開頭、瀏覽器與 Python `urllib` 解析結果不同的 URL。僅用於開發階段，經 `ipykernel` 與
+  `jupyter-client` 引入；本專案不執行任何 Tornado 網頁伺服器。
+- 將 `opentelemetry-api` 的下限提高至 `>= 1.45.2`，修補 CVE-2026-126360（CVSS 3.1 5.3，
+  Moderate）：擷取特製的 `traceparent` 值時會發生正規表示式阻斷服務（ReDoS）。
+  `opentelemetry-sdk`、`-proto`、`-semantic-conventions` 彼此精確釘選版本，因此四個套件
+  一起升級（1.45.1 → 1.45.2、0.66b1 → 0.66b2）。經 MLflow 間接引入；本專案不從不可信的
+  輸入擷取 trace context，實際暴露風險低。
+- 三者皆以下限形式記錄於 `constraints.txt`。由 2026-11-23 的排程 dependency audit 發現。
+
 ### 新增
 
 - `scripts/plot_showcase_figure.py` 與 `make showcase-figure`：涵蓋全部十個候選架構的

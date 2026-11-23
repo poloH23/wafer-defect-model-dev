@@ -406,7 +406,7 @@ opencv-python-headless==5.0.0.93
     #   -c requirements-dev.txt
     #   -r requirements.in
     #   grad-cam
-opentelemetry-api==1.45.1
+opentelemetry-api==1.45.2
     # via
     #   -c constraints.txt
     #   -c requirements-dev.txt
@@ -414,17 +414,17 @@ opentelemetry-api==1.45.1
     #   mlflow-tracing
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
-opentelemetry-proto==1.45.1
+opentelemetry-proto==1.45.2
     # via
     #   -c requirements-dev.txt
     #   mlflow-skinny
     #   mlflow-tracing
-opentelemetry-sdk==1.45.1
+opentelemetry-sdk==1.45.2
     # via
     #   -c requirements-dev.txt
     #   mlflow-skinny
     #   mlflow-tracing
-opentelemetry-semantic-conventions==0.66b1
+opentelemetry-semantic-conventions==0.66b2
     # via
     #   -c requirements-dev.txt
     #   opentelemetry-sdk
